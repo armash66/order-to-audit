@@ -12,7 +12,7 @@
 | DEC-06 | Provisional output reconciliation: 6 damaged-output equivalents + 6 unexplained process-loss equivalents = 12 yield shortfall | This adopts the user's six-unexplained-packets interpretation; the PS only confirms 6 damaged pouches, not 6 damaged food packets. Keep the assumed output loss split explicitly provisional; never infer another material deduction from it. |
 | DEC-07 | Actual pouch issue = 188 used + 6 damaged = 194 | The explicit benchmark closing balance is 306; 200 is the plan, not actual issue. Damaged packaging is tracked separately from food loss. |
 | DEC-08 | Available FG = on hand − approved but undispatched reservations | Approval reserves atomically; invoicing retains reservation; dispatch reduces both physical stock and reservation, avoiding overselling. |
-| DEC-09 | B remains pending for stock; no partial approval, invoice or dispatch | 120 requested against 88 available shows shortage 32; after replenishment, admin may approve. Rejection remains a separate explicit admin action. |
+| DEC-09 | B remains `submitted` with a computed shortage flag; no partial approval, invoice or dispatch | 120 requested against 88 available shows shortage 32; after replenishment, admin may approve. ?Pending stock? is explanatory text, not a new lifecycle status. Rejection remains a separate explicit admin action. |
 | DEC-10 | Invoice creates receivable; dispatch alone moves FG | Documents have different accounting and physical effects; reports use commercial documents as well as stock movements. |
 | DEC-11 | Drafts editable with audit; posted events immutable | Invoice correction uses linked credit note; production uses linked reversal and replacement. A credit note alone does not restore physical stock. Reject reversal if dependent stock would become negative until dependencies are resolved. |
 | DEC-12 | Money totals in integer paise; quantities in integer g, ml or pieces | Preserve weighted-average unit rates as exact ratios/high-precision decimals: ₹43.125/kg cannot be rounded to paise/kg before multiplication. Round monetary postings half-up once, allocate any residual paise explicitly. |
@@ -23,7 +23,7 @@
 | DEC-17 | Invoice date is default due date; configurable customer credit days | Ageing uses as-of date minus due date, with current/1–30/31–60/61–90/91+ buckets. Fixture dates are 19 November 2026, so ₹3,875 is current on that date. |
 | DEC-18 | Tax calculated per invoice line, half-up to paise; FY April–March | Persist rounded line components and sum them; unique numbering allocated on posting, never reused. Benchmark tax split is exact. |
 | DEC-19 | No negative physical stock; reserve and post under transaction locking | Recheck at approval/dispatch/issue, including concurrent requests. Draft edits require renewed approval if they change an approved order. |
-| DEC-20 | Sole stretch: shortage-based production suggestion | Use ceil(total uncovered pending demand / BOM expected yield), deduct existing reservations once; B suggests 1 batch (200 expected), never an automatic production posting. |
+| DEC-20 | Sole stretch: shortage-based production suggestion | Use ceil(total uncovered pending demand / BOM expected yield), deduct existing reservations once; B suggests 1 batch (200 expected). Feasible full batches = floor(min(available input / standard per batch)) across raw and packaging inputs. Remaining stock allows 1 batch; 250 uncovered packets need 2, short by 0.5 L oil and 94 pouches. Show needs, stock and warning; never automatically post or reduce the demand-based suggestion. STR-4 is subject to the requirements cut line. |
 | DEC-21 | Product-specific carton conversion, separate carton material | A carton sale unit means 20 packets for this SKU; it is not a second automatic packaging-material deduction at dispatch. No mass-to-volume conversion without an explicit item rule. |
 | DEC-22 | Run-specific costing first; no month-wide overhead allocation or integrated general ledger | Satisfies the allowed per-run rule and keeps the benchmark explainable; purchase tax is unspecified and is not invented. |
 
@@ -79,7 +79,7 @@ I am preparing the Order-to-Audit prototype. Section 10 of my problem statement 
 
 1. Should we record exactly 9 cartons for the 188 good packets, noting that 8 packets remain loose and fully packing the output would need 10 cartons?
 2. Does “6 pouches damaged” also mean 6 food packets lost? Should the remaining 6 of the 12-packet yield shortfall be recorded as process wastage, or should all 12 remain unclassified food-output loss?
-3. For Distributor B's 120-packet order with 88 available, should we partially approve, backorder or reject? I currently plan to hold the whole order pending stock and flag the shortage of 32.
+3. For Distributor B's 120-packet order with 88 available, should we partially approve, backorder or reject? I currently plan to keep the whole order submitted with a computed shortage flag of 32.
 4. Should packaging issues be suggested from the BOM and confirmed as actual quantities at completion? I plan to deduct 194 pouches and 9 cartons, rather than the BOM's 200 and 10.
 
 Thank you.
@@ -89,3 +89,7 @@ Thank you.
 ## Later README outline
 
 Project purpose → setup/run command and role logins → stack rationale → requirement IDs and delivered tiers → linked design note → seed and benchmark reproduction → expected numbers and explained assumptions → known gaps and stretch status → demo link. At this session's end only planning documents exist; implementation and automated benchmark execution are future work.
+
+## Review additions
+
+Step 5 now has separate approval, invoice and dispatch checkpoints in the workbook. Synthetic seed identities are listed in Inputs; GSTIN-shaped strings and HSN are dummy placeholders, not verified tax identifiers or classifications. The independently reviewed golden values remain typed constants, not formulas. See the README for the carton alert and provisional loss interpretation.

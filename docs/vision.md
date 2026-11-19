@@ -2,4 +2,4 @@
 2. **Core principle:** Every transaction is a document; posting a stock-affecting document writes immutable movements. Screens and reports derive from those movements and linked commercial documents.
 3. **Two loops meeting at finished goods:** Sales (order → invoice → dispatch → receivables) and production (purchase → BOM issue → run → finished goods → variance and cost).
 4. **Success test:** The section 5 benchmark passes automatically, and every number traces to its source.
-5. **Non-goals:** Tally dependency, e-invoice, GPS and Tamil UI until the must-haves work; the one committed stretch is production suggestions from shortages.
+5. **Non-goals:** Tally dependency, e-invoice, GPS and Tamil UI until the must-haves work; the one selected stretch is production suggestions from shortages, subject to the documented cut line.
