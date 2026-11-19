@@ -54,6 +54,8 @@ def stock_summary():
         row = totals.get(item.id)
         result[item.code] = {"quantity": row["quantity"] if row else 0,
                              "value_paise": (row["value"] if row["rows"] == row["known"] else None) if row else 0}
+        if item.category == "finished":
+            result[item.code]["valuation_basis"] = "materials-only"
     return result
 
 
@@ -114,9 +116,13 @@ def post_receipt(*, kind, request_key, document_date, lines, actor, supplier=Non
 @transaction.atomic
 def reconcile_stock():
     FactoryControl.objects.select_for_update().get(pk=1)
+    from production.models import ProductionEvent
+
     expected = {item.code: {"quantity": 0, "value_paise": 0} for item in Item.objects.all()}
+    for item in Item.objects.filter(category="finished"):
+        expected[item.code]["valuation_basis"] = "materials-only"
     errors = []
-    for kind, header in (("opening", OpeningStock), ("purchase", PurchaseReceipt)):
+    for kind, header in (("opening", OpeningStock), ("purchase", PurchaseReceipt), ("production", ProductionEvent)):
         for source in header.objects.all():
             posting = Posting.objects.filter(**{kind: source}).first()
             if posting is None:
@@ -124,7 +130,9 @@ def reconcile_stock():
                 continue
             for line in source.lines.select_related("item"):
                 movement = StockMovement.objects.filter(**{kind + "_line": line}).first()
-                if movement is None or (movement.posting_id, movement.item_id, movement.quantity, movement.value_paise) != (posting.pk, line.item_id, line.quantity, line.value_paise):
+                if line.quantity == 0 and line.value_paise == 0 and movement is None:
+                    pass
+                elif movement is None or (movement.posting_id, movement.item_id, movement.quantity, movement.value_paise) != (posting.pk, line.item_id, line.quantity, line.value_paise):
                     errors.append(f"Source/movement mismatch: {kind} line {line.pk}")
                 total = expected[line.item.code]
                 total["quantity"] += line.quantity

@@ -28,6 +28,11 @@
 | DEC-22 | Run-specific costing first; no month-wide overhead allocation or integrated general ledger | Satisfies the allowed per-run rule and keeps the benchmark explainable; purchase tax is unspecified and is not invented. |
 | DEC-23 | Stock postings append in a server-assigned sequence, never into earlier valuation history | One factory-wide transaction lock serializes stock posting and sequence allocation; all lines of an event share the sequence. Document dates are metadata and cannot reorder valuation; no historical replay or back-insertion. Reversals append at the current sequence with original signed quantities/values negated. |
 
+| DEC-24 | Test-only 500 g SKU shares the raw recipe, not its packaging | One recipe expects 200 × 200 g packets or 80 × 500 g packets: 40 kg nominal packaged output, not a mass balance inferred from ingredients. The test uses a separate 500 g pouch and assumes a carton holds 20 larger packets. This SKU is not loaded by the benchmark seed. |
+| DEC-25 | Round the total issue value, retain the residual in remaining stock, consume all value on depletion | Value = ROUND_HALF_UP(remaining paise × issue base quantity / remaining base quantity), using an exact Fraction. A 3 g/10 paise balance issues 1 g at 3 paise, leaving 2 g/7 paise; another 1 g costs 4 paise, leaving 1 g/3 paise; depletion takes the final 3 paise. Never round the unit rate first. |
+| DEC-26 | Variance reports use the current tolerance retroactively | Store tolerance in integer basis points (300 = 3%); flag absolute exact variance strictly greater than tolerance. Changing to 200 flags historical −3% pouch usage without changing the run, movements or historical quantities. Settings changes record actor, time and old/new tolerance. |
+| DEC-27 | FG receipt value is materials-only; overhead stays in the run-cost report | Completion receives good output at actual raw plus packaging cost. Later immutable overhead documents update total run cost and cost per good packet without editing FG movements. Zero good output creates no FG receipt; run cost remains visible and unit cost is N/A. |
+
 ## One-page domain sketch
 
 | Group | Entities and meaning |
@@ -156,6 +161,16 @@ OpeningStock and PurchaseReceipt have separate tables and lines. Posting referen
 
 The only database trigger rejects movement UPDATE/DELETE. Posted source documents are frozen through the posting service: there is no edit/delete service, an identical request key returns the existing posting, and changed content is rejected. Raw ORM/SQL writes to source documents can bypass this boundary; reconciliation detects disagreement. Master data must not be edited through unrestricted interfaces once referenced; master-edit workflows are outside this chunk. Database owners can disable triggers and are not protected by this mechanism.
 
-Receipt entry accepts positive integer base quantities and nonnegative integer line totals in paise. Fraction represents weighted-average rates exactly; round_paise applies ROUND_HALF_UP only at a monetary boundary. Item conversions reject fractional base-unit results. This chunk implements receipts, not issue valuation, residual allocation on depletion, adjustments or production reversals.
+Receipt entry accepts positive integer base quantities and nonnegative integer line totals in paise. Fraction represents weighted-average rates exactly; round_paise applies ROUND_HALF_UP only at a monetary boundary. Item conversions reject fractional base-unit results. Production now implements weighted-average issues and depletion residual handling; adjustments and production reversals remain unimplemented.
+
+## Production implementation
+
+Recipe/RecipeLine contain versioned raw standards. Each SKU-specific BOM references a recipe version and holds packaging standards and expected packet yield. The existing raw BOM lines were migrated into recipe lines without touching receipt documents or ledger movements. RunStandard snapshots both groups, scaled by the positive integer batch count; ProductionRun snapshots expected yield, output item and version numbers. Current scope uses whole batches, while actual consumption is independently entered in integer base units.
+
+ProductionEvent is an explicit issue or completion source, with signed ProductionLine quantities/values. Posting and StockMovement reference those source records through foreign keys, retaining exactly-one-source constraints. Raw issue transitions draft → issued. Completion transitions issued → completed and records packaging consumption, good output and damaged packaging already included in actual issues. The unclassified yield shortfall never causes another deduction. Zero usage has a source line but no zero-quantity stock movement.
+
+Each transition locks FactoryControl, checks permissions/state/actual inputs, validates stock and valuation, then writes sources, sequence, movements and state atomically. Retries require the same run/event key, actor and payload and return the existing posting. Reconciliation includes production sources. There are no source edit services; database trigger protection remains limited to movement update/delete as agreed.
+
+Unknown input valuation blocks an issue; unknown opening FG valuation still makes aggregate FG valuation unknown even after a materials-valued receipt. Overhead has its own request key, actor and posting time; changing its amount on retry fails. Production reversal, draft editing, ingredient substitutions, fractional planned batches and screens are not built in this chunk.
 
 Seed_benchmark loads section 5 stock masters, SKU, BOM, supplier and customers, plus a disabled-password staff identity for audited seed posting. It posts opening stock only, never the step-1 purchase. Repeating the seed verifies existing fixture values without overwriting edits or resetting operations. Salesman logins and factory invoice identity are deferred to authentication/billing.

@@ -1,6 +1,6 @@
 # Order-to-Audit
 
-A document-led system connecting sales, production, inventory and receivables for a small food manufacturer. The local Django/PostgreSQL foundation is implemented; the stock core now supports masters, opening stock and purchase receipts. Production and sales workflows are not implemented yet.
+A document-led system connecting sales, production, inventory and receivables for a small food manufacturer. The local Django/PostgreSQL foundation is implemented; the stock core now supports masters, opening stock and purchase receipts. Production services are implemented; production screens and sales workflows are not implemented yet.
 
 ## Local setup
 
@@ -64,7 +64,7 @@ SAL-6 invoice sharing is Should. The selected stretch is STR-4, production sugge
 
 ## Next implementation session
 
-Design the ledger transaction boundaries, then add the first tested inventory service in a separately approved chunk. The opening seed and stock-core tests exist; role logins, full benchmark execution and production/sales screens are not implemented. Business logic will live in tested `services.py` functions. Organizer contact and questions-window dates remain unconfirmed because the supplied PDF contains placeholders; the questions email remains unsent.
+The stock core and production services are implemented; select the next workflow in a separately approved chunk. The opening seed and stock-core tests exist; role logins, full benchmark execution and production/sales screens are not implemented. Business logic will live in tested `services.py` functions. Organizer contact and questions-window dates remain unconfirmed because the supplied PDF contains placeholders; the questions email remains unsent.
 
 ## Posting and correction boundaries
 
@@ -96,6 +96,38 @@ The seed is repeatable: it does not reset stock, execute the purchase, overwrite
 | `inventory/tests.py` | Benchmark, exact arithmetic, retries, source/report mismatch, permissions, immutability and transaction tests. |
 | `inventory/**/__init__.py` | Python package markers only. |
 
-There is no editable balance or cached stock table. One factory row serializes all posting; this favors explainable correctness over throughput. Direct SQL/ORM editing of source documents bypasses service-level freezing, so production use would need tighter database privileges or source triggers. Movement immutability is enforced by PostgreSQL. Reconciliation checks internal consistency, not physical stock truth. Receipt valuation is implemented; issue costing and rounding-residual allocation remain for the production chunk.
+There is no editable balance or cached stock table. One factory row serializes all posting; this favors explainable correctness over throughput. Direct SQL/ORM editing of source documents bypasses service-level freezing, so production use would need tighter database privileges or source triggers. Movement immutability is enforced by PostgreSQL. Reconciliation checks internal consistency, not physical stock truth. Receipt and production issue valuation are implemented, including rounding residuals and full depletion; sales/dispatch valuation remains future work.
 
 Mutation verification: disabling the duplicate-return guard caused the retry test to error on the database unique constraint; disabling the immutable-movement trigger caused `DatabaseError not raised`. Both changes were container-only, independently tested, and restored. See `docs/stock-core-validation.md` for the validation record.
+
+## Production services
+
+```sh
+docker compose up --build -d --wait
+docker compose exec web python manage.py seed_benchmark
+docker compose exec web python manage.py test production inventory config -v 2
+```
+
+The seed still loads only section 5 masters and opening stock. Production tests execute steps 1-3 and 8 through services, with exact expected values from the golden workbook. They do not change the normal application database. Recipe data migration preserves the existing seed and stock history; no reseed/reset was needed.
+
+| File | Purpose |
+| --- | --- |
+| `inventory/models.py`, migrations `0003`-`0006` | Shared versioned raw recipes, data migration, tolerance setting and production source foreign keys/constraints. |
+| `inventory/seed.py`, `inventory/tests.py` | Seed and verify the split recipe/packaging masters without adding the 500 g SKU. |
+| `inventory/services.py` | Reconcile production source lines and label FG valuation materials-only. |
+| `production/models.py`, `production/migrations/` | Run snapshots, explicit issue/completion events and lines, overhead documents and tolerance-change audit records. |
+| `production/services.py` | Create/snapshot runs, post issues and completion, value consumption, add overhead, change tolerance and report variance/cost. |
+| `production/test_fixtures.py` | Test-only 500 g SKU, separate pouch and packaging BOM using the shared recipe. |
+| `production/tests.py` | Benchmark, residual/depletion, rollback, stock guards, retries, snapshots, tolerance and 500 g tests. |
+
+`create_run` snapshots standards; `issue_run` posts raw usage; `complete_run` posts actual packaging and good FG. `add_overhead` appends costs; `run_report` returns exact Fraction values and a separately rounded display amount in paise. The 12-packet shortfall remains unclassified; six damaged pouches are already part of the 194-pouch consumption.
+
+### Known gaps and deliberate policies
+
+- **Materials-only FG valuation:** receipt value includes raw materials and packaging, but not overhead. Late overhead updates run cost, not FG inventory value. This is not full absorption accounting or a COGS/profit statement. Opening FG cost remains unknown.
+- **Retroactive tolerance:** past runs are flagged using the current setting, with no per-run historical alert snapshot. Changing 3% to 2% flags the existing -3% pouch variance. Quantities, costs and ledger history remain unchanged.
+- **Rounding residual:** total issue value is rounded half-up to paise; the residual remains with stock. Full depletion consumes the remaining value. Split issues can allocate individual paise differently from one combined issue, while total value is conserved.
+- **500 g fixture:** shared recipe yields 80 packets under an explicit nominal-output assumption, with its own pouch and four cartons of 20 packets. It is never added to the standard benchmark seed.
+- **No production screens or reversal workflow yet.** Whole planned batches only; no substitute ingredients or retrospective valuation. Zero output keeps run cost visible but has no unit cost or FG receipt.
+
+See `docs/production-validation.md` for the mutation results and benchmark evidence.
