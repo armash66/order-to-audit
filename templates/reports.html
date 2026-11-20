@@ -3,6 +3,7 @@
 
 {% block content %}
 <h1>Reports</h1>
+{% if is_reports %}<p><a href="{% url 'tally_download' %}?start={{ table.start|date:'Y-m-d' }}&amp;end={{ table.end|date:'Y-m-d' }}">Download Tally accounting XML (ZIP)</a></p>{% endif %}
 <form class="card fields" method="get">
 <label>Report<select name="report">
 {% for key,label in reports.items %}

@@ -14,6 +14,7 @@ class ProductionRun(Source):
     output_item = models.ForeignKey(Item, on_delete=models.PROTECT)
     state = models.CharField(max_length=12, default="draft", choices=[(s, s) for s in ("draft", "issued", "completed", "reversed")])
     good_packets = models.PositiveIntegerField(null=True)
+    output_expiry = models.DateField(null=True)
 
 
 class RunStandard(models.Model):

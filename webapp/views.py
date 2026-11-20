@@ -13,14 +13,17 @@ from production.models import ProductionRun
 from production.services import create_run, issue_run, complete_run, add_overhead, run_report, edit_run_draft, set_tolerance
 from sales.models import Order, Invoice
 from sales.services import (submit_order, stock_check, approve_order, reject_order, invoice_order, dispatch_invoice,
-                            record_payment, outstanding, credit_invoice, order_for_actor, edit_order, edit_invoice_draft)
+                            record_payment, outstanding, credit_invoice, order_for_actor, edit_order, edit_invoice_draft,
+                            return_goods, dispatch_remaining)
 from .forms import money_input
 
 
 def context(request, **values):
+    if request.GET.get("lang") in ("en","ta"):
+        request.session["floor_language"]=request.GET["lang"]
     roles = set(request.user.groups.values_list("name", flat=True))
     staff = request.user.is_staff
-    return dict(values, is_admin=staff or "admin" in roles, is_production=staff or bool(roles & {"admin","production"}),
+    return dict(values, floor_language=request.session.get("floor_language","en"), is_admin=staff or "admin" in roles, is_production=staff or bool(roles & {"admin","production"}),
                 is_sales=staff or bool(roles & {"admin","salesman"}), is_reports=staff or bool(roles & {"admin","accountant","owner"}),
                 is_stock=staff or bool(roles & {"admin","production","accountant","owner"}), today=timezone.localdate(), request_key=str(uuid4()))
 
@@ -73,6 +76,12 @@ def order_detail(request,pk):
             elif action=="draft": invoice_order(order,request.user,day,draft=True)
             elif action=="edit_invoice": edit_invoice_draft(invoice,day,request.user)
             elif action=="dispatch": dispatch_invoice(invoice,request.user,day)
+            elif action=="partial_dispatch":
+                quantities={row["item_id"]:int(request.POST.get(f"ship_{row['item_id']}",0)) for row in dispatch_remaining(invoice)}
+                dispatch_invoice(invoice,request.user,day,quantities={key:value for key,value in quantities.items() if value},request_key=request.POST["request_key"])
+            elif action=="return":
+                quantities={row["item_id"]:int(request.POST.get(f"return_{row['item_id']}",0)) for row in dispatch_remaining(invoice)}
+                return_goods(invoice=invoice,quantities={key:value for key,value in quantities.items() if value},reason=request.POST["reason"],request_key=request.POST["request_key"],document_date=day,actor=request.user)
             elif action=="payment": record_payment(invoice=invoice,amount_paise=money_input(request.POST["amount"]),request_key=request.POST["request_key"],document_date=day,actor=request.user)
             elif action=="credit": credit_invoice(invoice,request.POST.get("reason",""),request.user,day)
             elif action=="edit": edit_order(order,{str(l.pk):[int(request.POST[f"qty_{l.pk}"]),money_input(request.POST[f"price_{l.pk}"])] for l in order.lines.all()},request.user)
@@ -88,7 +97,7 @@ def order_detail(request,pk):
         for line in order.lines.select_related("sku__item"):
             if BOM.objects.filter(sku=line.sku).exists():
                 suggestions.append(suggest_production(sku=line.sku,actor=request.user))
-    return render(request,"order.html",context(request,suggestions=suggestions,order=order,lines=order.lines.select_related("sku__item"),checks=stock_check(order,request.user),invoice=invoice,due=outstanding(invoice) if invoice else None))
+    return render(request,"order.html",context(request,suggestions=suggestions,order=order,lines=order.lines.select_related("sku__item"),checks=stock_check(order,request.user),invoice=invoice,due=outstanding(invoice) if invoice else None,fulfilment=dispatch_remaining(invoice) if invoice else []))
 
 
 @login_required
@@ -99,13 +108,15 @@ def production(request):
             action=request.POST["action"]
             day=date.fromisoformat(request.POST.get("date") or str(timezone.localdate()))
             if action=="create":
-                run=create_run(bom=get_object_or_404(BOM,pk=request.POST["bom"]),batches=int(request.POST["batches"]),request_key=request.POST["request_key"],document_date=day,actor=request.user)
+                expiry=date.fromisoformat(request.POST["output_expiry"]) if request.POST.get("output_expiry") else None
+                run=create_run(bom=get_object_or_404(BOM,pk=request.POST["bom"]),batches=int(request.POST["batches"]),request_key=request.POST["request_key"],document_date=day,actor=request.user,output_expiry=expiry)
                 return redirect("run",pk=run.pk)
             if action=="receipt":
                 item=get_object_or_404(Item,pk=request.POST["item"])
                 quantity=to_base_units(item,request.POST["unit"],Decimal(request.POST["quantity"]))
                 post_receipt(kind="purchase",request_key=request.POST["request_key"],document_date=day,actor=request.user,
-                    supplier=get_object_or_404(Supplier,pk=request.POST["supplier"]),lines=[(item,quantity,money_input(request.POST["value"]))])
+                    supplier=get_object_or_404(Supplier,pk=request.POST["supplier"]),lines=[(item,quantity,money_input(request.POST["value"]))],
+                    lot_details={item.code:{"code":request.POST.get("batch_code"),"expiry":request.POST.get("expiry")}} if request.POST.get("batch_code") or request.POST.get("expiry") else None)
                 messages.success(request,"Receipt posted.")
                 return redirect("production")
         except (ValidationError,ValueError,KeyError,InvalidOperation,ObjectDoesNotExist) as error: failure(request,error)
@@ -222,9 +233,11 @@ def offline_catalog(request):
     from django.http import JsonResponse
     from django.middleware.csrf import get_token
     from .templatetags.display import money
+    from sales.services import prices_for_customer
     require_role(request.user,["admin","salesman"])
     response=JsonResponse({"user_id":request.user.pk,"username":request.user.username,"csrf":get_token(request),
         "customers":list(Customer.objects.values("id","name")),
+        "customer_prices":{str(customer.pk):[{"id":row["sku_id"],"name":f'{row["name"]} INR {money(row["price_paise"])} · {row["label"]}'} for row in prices_for_customer(customer,request.user)] for customer in Customer.objects.all()},
         "skus":[{"id":sku.pk,"name":sku.item.name+" INR "+money(sku.price_paise)} for sku in SKU.objects.select_related("item")]})
     response["Cache-Control"]="no-store"
     return response

@@ -69,7 +69,7 @@ def weighted_average(item):
 
 # Create and post one immutable receipt under the single-factory transaction lock.
 @transaction.atomic
-def post_receipt(*, kind, request_key, document_date, lines, actor, supplier=None):
+def post_receipt(*, kind, request_key, document_date, lines, actor, supplier=None, lot_details=None):
     if not actor.is_active or not (actor.is_staff or actor.groups.filter(name__in=["admin", "production"]).exists()):
         raise PermissionDenied("Stock posting requires admin or production access.")
     if kind not in ("opening", "purchase") or not request_key or not lines:
@@ -88,6 +88,9 @@ def post_receipt(*, kind, request_key, document_date, lines, actor, supplier=Non
     if len({r[0] for r in normalized}) != len(normalized):
         raise ValidationError("Combine duplicate items into one document line.")
     normalized.sort(key=lambda r: r[0])
+    lot_details = lot_details or {}
+    if set(lot_details)-{item.code for item,_,_ in lines}:
+        raise ValidationError("Batch metadata must refer to receipt items.")
     control = FactoryControl.objects.select_for_update().get(pk=1)
     header, line_model = (OpeningStock, OpeningLine) if kind == "opening" else (PurchaseReceipt, PurchaseLine)
     existing = header.objects.filter(request_key=request_key).first()
@@ -95,10 +98,12 @@ def post_receipt(*, kind, request_key, document_date, lines, actor, supplier=Non
         previous = list(existing.lines.order_by("item_id").values_list("item_id", "quantity", "value_paise"))
         if previous != normalized or existing.document_date != document_date or existing.actor_id != actor.pk or (kind == "purchase" and existing.supplier_id != supplier.pk):
             raise ValidationError("Request key already used with different content.")
+        if existing.lot_details != lot_details:
+            raise ValidationError("Receipt retry changed batch or expiry details.")
         return Posting.objects.get(**{kind: existing})
     if kind == "opening" and Posting.objects.exists():
         raise ValidationError("Opening stock must precede operational postings.")
-    fields = {"request_key": request_key, "document_date": document_date, "actor": actor}
+    fields = {"request_key": request_key, "document_date": document_date, "actor": actor, "lot_details": lot_details}
     if supplier is not None:
         fields["supplier"] = supplier
     source = header.objects.create(**fields)
@@ -107,8 +112,9 @@ def post_receipt(*, kind, request_key, document_date, lines, actor, supplier=Non
     posting = Posting.objects.create(sequence=control.last_sequence, **{kind: source})
     for item_id, quantity, value in normalized:
         line = line_model.objects.create(document=source, item_id=item_id, quantity=quantity, value_paise=value)
-        StockMovement.objects.create(posting=posting, item_id=item_id, quantity=quantity,
-                                     value_paise=value, **{kind + "_line": line})
+        item=Item.objects.get(pk=item_id)
+        record_movement(posting=posting, item=item, quantity=quantity,
+                        value_paise=value, incoming_lot=lot_details.get(item.code), **{kind + "_line": line})
     return posting
 
 
@@ -143,6 +149,7 @@ def reconcile_stock():
         errors.append("Source totals differ from reported ledger balances.")
     if errors:
         raise ValidationError(errors)
+    reconcile_lots()
     return reported
 
 
@@ -159,9 +166,105 @@ def append_adjustment(control, source, lines):
     posting=Posting.objects.create(sequence=control.last_sequence,adjustment=source)
     for item,quantity,value in lines:
         line=AdjustmentLine.objects.create(document=source,item=item,quantity=quantity,value_paise=value)
-        StockMovement.objects.create(posting=posting,adjustment_line=line,item=item,quantity=quantity,value_paise=value)
+        allocations=None
+        if source.reversed_run_id:
+            from .models import LotAllocation
+            original=LotAllocation.objects.filter(movement__posting__production__run_id=source.reversed_run_id,movement__item=item)
+            combined={}
+            for allocation in original:
+                combined[allocation.lot_id]=combined.get(allocation.lot_id,0)-allocation.quantity
+            allocations=combined
+        incoming=None
+        if "invoice" in source.payload and "quantities" in source.payload and quantity>0:
+            from .models import LotAllocation
+            dates=LotAllocation.objects.filter(movement__dispatch_line__document__invoice_id=source.payload["invoice"],lot__item=item,lot__expiry_date__isnull=False).values_list("lot__expiry_date",flat=True)
+            expiry=min(dates,default=None)
+            incoming={"code":f"RETURN-{source.pk}","expiry":expiry.isoformat() if expiry else None}
+        record_movement(posting=posting,adjustment_line=line,item=item,quantity=quantity,value_paise=value,
+                        explicit_allocations=allocations,allow_expired=True,incoming_lot=incoming)
     audit(source.actor,"stock.adjust",source,{},source.payload)
     return posting
+
+
+# Quantities are derived from allocation entries, ordered by expiry with unknown dates last.
+def lot_balances(item=None):
+    from datetime import date
+    from django.db.models import Sum
+    from .models import StockLot
+    lots=StockLot.objects.select_related("item").annotate(on_hand=Sum("allocations__quantity"))
+    if item is not None: lots=lots.filter(item=item)
+    return sorted(lots,key=lambda lot:(lot.expiry_date is None,lot.expiry_date or date.max,lot.pk))
+
+
+# Called inside the factory transaction: one movement plus all FEFO allocations commit together.
+def record_movement(*, incoming_lot=None, explicit_allocations=None, allow_expired=False, **fields):
+    from datetime import date
+    from django.utils import timezone
+    from .models import StockLot, LotAllocation
+    item=fields.get("item") or Item.objects.get(pk=fields["item_id"])
+    quantity=fields["quantity"]
+    movement=StockMovement.objects.create(**fields)
+    selected={}
+    if explicit_allocations is not None:
+        if sum(explicit_allocations.values()) != quantity:
+            raise ValidationError("Correction allocations do not match movement quantity.")
+        selected=explicit_allocations
+    elif quantity>0:
+        metadata=incoming_lot or {}
+        code=metadata.get("code") or f"POST-{movement.posting.sequence}"
+        expiry=metadata.get("expiry")
+        try: expiry=date.fromisoformat(expiry) if expiry else None
+        except (TypeError,ValueError) as error: raise ValidationError("Invalid batch expiry date.") from error
+        if not isinstance(code,str) or len(code)>100: raise ValidationError("Batch code must be at most 100 characters.")
+        lot,created=StockLot.objects.get_or_create(item=item,code=code,defaults={"expiry_date":expiry})
+        if not created and lot.expiry_date!=expiry: raise ValidationError("An existing batch's expiry cannot be changed.")
+        selected={lot.pk:quantity}
+    else:
+        remaining=-quantity
+        for lot in lot_balances(item):
+            if not allow_expired and lot.expiry_date and lot.expiry_date<timezone.localdate(): continue
+            take=min(remaining,lot.on_hand or 0)
+            if take>0: selected[lot.pk]=-take; remaining-=take
+            if remaining==0: break
+        if remaining: raise ValidationError("Insufficient non-expired batch stock.")
+    current={lot.pk:lot.on_hand or 0 for lot in lot_balances(item)}
+    for lot_id,signed in selected.items():
+        if lot_id not in current or (signed<0 and current[lot_id]+signed<0):
+            raise ValidationError("Batch correction would make stock negative or use another item.")
+        if signed: LotAllocation.objects.create(movement=movement,lot_id=lot_id,quantity=signed)
+    return movement
+
+
+# Allocation totals must equal each immutable item movement, with no negative batch balance.
+def reconcile_lots():
+    from django.db.models import Sum
+    for movement in StockMovement.objects.annotate(allocated=Sum("allocations__quantity")):
+        if movement.allocated!=movement.quantity or movement.allocations.exclude(lot__item_id=movement.item_id).exists():
+            raise ValidationError("Batch allocations disagree with the stock ledger.")
+    if any((lot.on_hand or 0)<0 for lot in lot_balances()):
+        raise ValidationError("Negative batch stock.")
+
+
+@transaction.atomic
+def set_reorder_level(*, item, minimum_quantity, actor):
+    from .models import ReorderLevel
+    require_role(actor,["admin"])
+    require_integer(minimum_quantity)
+    if item.category!="raw": raise ValidationError("Reorder alerts are for raw materials.")
+    FactoryControl.objects.select_for_update().get(pk=1)
+    old=ReorderLevel.objects.filter(item=item).first()
+    before={"minimum":old.minimum_quantity} if old else {}
+    level,_=ReorderLevel.objects.update_or_create(item=item,defaults={"minimum_quantity":minimum_quantity})
+    audit(actor,"reorder.edit",level,before,{"minimum":minimum_quantity})
+    return level
+
+
+def reorder_alerts():
+    from .models import ReorderLevel
+    from sales.services import available_stock
+    balances=available_stock()
+    return [{"item":level.item,"available":balances[level.item.code]["available"],"minimum":level.minimum_quantity}
+            for level in ReorderLevel.objects.select_related("item") if balances[level.item.code]["available"]<=level.minimum_quantity]
 
 
 # Negative adjustments consume weighted-average value; positive ones need explicit cost.
@@ -181,7 +284,7 @@ def adjust_stock(*, item, quantity, value_paise, reason, request_key, document_d
     balance=available_stock()[item.code]
     if quantity<0:
         if value_paise is not None: raise ValidationError("Negative adjustments calculate their own value.")
-        if -quantity>balance["available"]: raise ValidationError("Adjustment would consume reserved or unavailable stock.")
+        if -quantity>balance["quantity"]-balance["reserved"]: raise ValidationError("Adjustment would consume reserved or unavailable stock.")
         value=None if balance["value_paise"] is None else -issue_value(-quantity,balance["quantity"],balance["value_paise"])
     else:
         require_integer(value_paise)

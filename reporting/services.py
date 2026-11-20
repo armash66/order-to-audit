@@ -1,6 +1,8 @@
 import csv
 from io import StringIO
 from datetime import date
+from fractions import Fraction
+from types import SimpleNamespace
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import transaction
 from django.template.loader import render_to_string
@@ -9,7 +11,7 @@ from access.services import require_role
 from inventory.models import FactoryControl, Item, StockMovement, PurchaseReceipt
 from production.models import ProductionRun
 from production.services import run_report
-from sales.models import Invoice, CreditNote, Payment, Order
+from sales.models import Invoice, CreditNote, Payment, Order, SalesReturn
 from sales.services import outstanding
 from webapp.templatetags.display import money, percent
 
@@ -18,6 +20,7 @@ REPORTS = {
     "gst": "GST summary", "purchases": "Purchase register", "stock": "Stock summary",
     "ledger": "Stock ledger", "production": "Production consumption and yield",
     "collections": "Payments and collections", "ageing": "Outstanding and ageing",
+    "customer_ageing": "Customer outstanding and ageing",
 }
 
 
@@ -30,6 +33,14 @@ def sales_events(start, end, actor):
     events = [(invoice.document_date, invoice, 1) for invoice in invoices.filter(document_date__range=(start,end))]
     for credit in CreditNote.objects.filter(invoice__in=invoices, document_date__range=(start,end)).select_related("invoice"):
         events.append((credit.document_date, credit.invoice, -1))
+    for note in SalesReturn.objects.filter(invoice__in=invoices,document_date__range=(start,end)).select_related("invoice__order"):
+        lines=[SimpleNamespace(description=line.invoice_line.description,quantity=line.quantity,taxable_paise=line.taxable_paise)
+               for line in note.lines.select_related("invoice_line")]
+        totals={field:sum(note.lines.values_list(field,flat=True)) for field in ("taxable_paise","cgst_paise","sgst_paise","igst_paise")}
+        snapshot=SimpleNamespace(pk=note.invoice_id,number=f"RETURN-{note.pk} / {note.invoice.number}",
+            customer_name=note.invoice.customer_name,customer_gstin=note.invoice.customer_gstin,
+            total_paise=note.amount_paise,order=note.invoice.order,lines=SimpleNamespace(all=lambda rows=lines:rows),**totals)
+        events.append((note.document_date,snapshot,-1))
     return sorted(events, key=lambda row: (row[0], row[1].pk, -row[2]))
 
 
@@ -104,14 +115,21 @@ def report_table(kind, start, end, actor):
             rows.append([str(payment.document_date),str(payment.pk),payment.invoice.number,payment.invoice.customer_name,money(payment.amount_paise)])
     else:
         headers = ["Customer","Invoice","Due date","Original INR","Outstanding INR","Current","1-30","31-60","61-90","91+"]
-        for invoice in Invoice.objects.exclude(status="draft").filter(document_date__lte=end):
+        customers = {}
+        for invoice in Invoice.objects.exclude(status="draft").filter(document_date__lte=end).select_related("order__customer"):
             due = outstanding(invoice,end)
             if not due: continue
             days = (end-invoice.document_date).days
-            index = 0 if days<=0 else 1 if days<=30 else 2 if days<=60 else 3 if days<=90 else 4
+            index = 0 if days<=0 or due<0 else 1 if days<=30 else 2 if days<=60 else 3 if days<=90 else 4
             buckets = [0]*5
             buckets[index] = due
             rows.append([invoice.customer_name,invoice.number,str(invoice.document_date),money(invoice.total_paise),money(due),*[money(value) for value in buckets]])
+            total = customers.setdefault(invoice.order.customer_id, {"code": invoice.order.customer.code, "name": invoice.order.customer.name, "due": 0, "buckets": [0]*5})
+            total["due"] += due
+            total["buckets"][index] += due
+        if kind == "customer_ageing":
+            headers = ["Customer code","Customer","Outstanding INR","Current","1-30","31-60","61-90","91+"]
+            rows = [[value["code"],value["name"],money(value["due"]),*[money(amount) for amount in value["buckets"]]] for value in customers.values()]
     return {"title": REPORTS[kind], "headers": headers, "rows": rows, "start": start, "end": end}
 
 
@@ -132,9 +150,87 @@ def table_pdf(table):
 def dashboard(actor, today):
     require_role(actor,["admin","owner","accountant"])
     FactoryControl.objects.select_for_update().get(pk=1)
-    from inventory.services import stock_summary
-    runs = [run_report(run) for run in ProductionRun.objects.filter(state="completed")]
+    from inventory.services import stock_summary, reorder_alerts
+    runs = []
+    products = {}
+    for run in ProductionRun.objects.filter(state="completed").select_related("bom__sku__item"):
+        report = run_report(run)
+        runs.append(report)
+        product = products.setdefault(run.bom.sku_id, {"name": run.output_item.name, "sku": run.bom.sku, "cost": 0, "good": 0})
+        product["cost"] += report["total_paise"]
+        product["good"] += run.good_packets
+    for product in products.values():
+        product["unit_cost"] = Fraction(product["cost"], product["good"]) if product["good"] else None
+        product["margin"] = product["sku"].price_paise - product["unit_cost"] if product["unit_cost"] is not None else None
     return {"orders_today":Order.objects.filter(document_date=today).count(),"stock":stock_summary(),
         "outstanding":sum(outstanding(invoice,today) for invoice in Invoice.objects.exclude(status="draft").filter(document_date__lte=today)),
         "flagged_runs":sum(any(value["flagged"] for value in report["consumption"].values()) or report["yield"]["flagged"] for report in runs),
-        "run_cost":sum(report["total_paise"] for report in runs)}
+        "run_cost":sum(report["total_paise"] for report in runs), "products": list(products.values()), "reorder_alerts":reorder_alerts()}
+
+
+# Tally accounting vouchers balance in paise; inventory remains in this application's ledger.
+@transaction.atomic
+def tally_export(start, end, actor):
+    from io import BytesIO
+    from zipfile import ZipFile
+    from xml.etree.ElementTree import Element, SubElement, tostring
+    from uuid import uuid5, NAMESPACE_URL
+    from inventory.models import Customer, Supplier, Adjustment
+    from production.models import Overhead
+    require_role(actor,["admin","accountant","owner"])
+    if start>end: raise ValidationError("Invalid export date range.")
+    FactoryControl.objects.select_for_update().get(pk=1)
+
+    def envelope(report):
+        root=Element("ENVELOPE")
+        SubElement(SubElement(root,"HEADER"),"TALLYREQUEST").text="Import Data"
+        data=SubElement(SubElement(root,"BODY"),"IMPORTDATA")
+        SubElement(SubElement(data,"REQUESTDESC"),"REPORTNAME").text=report
+        return root,SubElement(data,"REQUESTDATA")
+
+    masters,master_data=envelope("All Masters")
+    ledgers={"OTA Sales":"Sales Accounts","OTA Purchases":"Purchase Accounts","OTA Overheads":"Indirect Expenses",
+             "OTA Accrued Costs":"Current Liabilities","OTA Cash":"Cash-in-Hand",
+             **{f"OTA Output {tax}":"Duties & Taxes" for tax in ("CGST","SGST","IGST")}}
+    ledgers.update({f"Customer {customer.code}":"Sundry Debtors" for customer in Customer.objects.all()})
+    ledgers.update({f"Supplier {supplier.code}":"Sundry Creditors" for supplier in Supplier.objects.all()})
+    for name,parent in ledgers.items():
+        ledger=SubElement(SubElement(master_data,"TALLYMESSAGE"),"LEDGER",{"NAME":name,"ACTION":"Create"})
+        SubElement(ledger,"NAME").text=name
+        SubElement(ledger,"PARENT").text=parent
+    vouchers,voucher_data=envelope("Vouchers")
+
+    def voucher(day,kind,reference,entries):
+        if sum(amount for _,amount in entries)!=0: raise ValidationError("Unbalanced accounting voucher.")
+        identity=str(uuid5(NAMESPACE_URL,"order-to-audit/"+reference))
+        element=SubElement(SubElement(voucher_data,"TALLYMESSAGE"),"VOUCHER",{"VCHTYPE":kind,"ACTION":"Create","REMOTEID":identity})
+        for tag,value in {"DATE":day.strftime('%Y%m%d'),"GUID":identity,"VOUCHERTYPENAME":kind,"VOUCHERNUMBER":reference,
+                          "PERSISTEDVIEW":"Accounting Voucher View","ISINVOICE":"No","NARRATION":"Order-to-Audit fictional demonstration"}.items():
+            SubElement(element,tag).text=value
+        for name,amount in entries:
+            if not amount: continue
+            entry=SubElement(element,"ALLLEDGERENTRIES.LIST")
+            SubElement(entry,"LEDGERNAME").text=name
+            SubElement(entry,"ISDEEMEDPOSITIVE").text="Yes" if amount<0 else "No"
+            SubElement(entry,"AMOUNT").text=money(amount).replace(',','')
+
+    for day,invoice,sign in sales_events(start,end,actor):
+        entries=[(f"Customer {invoice.order.customer.code}",-sign*invoice.total_paise),("OTA Sales",sign*invoice.taxable_paise)]
+        entries.extend((f"OTA Output {tax}",sign*getattr(invoice,tax.lower()+"_paise")) for tax in ("CGST","SGST","IGST"))
+        voucher(day,"Sales" if sign==1 else "Credit Note",("SALE-" if sign==1 else "CREDIT-")+invoice.number,entries)
+    for receipt in PurchaseReceipt.objects.filter(document_date__range=(start,end)).select_related("supplier"):
+        amount=sum(receipt.lines.values_list("value_paise",flat=True))
+        voucher(receipt.document_date,"Purchase",f"PURCHASE-{receipt.pk}",[("OTA Purchases",-amount),(f"Supplier {receipt.supplier.code}",amount)])
+    for payment in Payment.objects.filter(document_date__range=(start,end)).select_related("invoice__order__customer"):
+        voucher(payment.document_date,"Receipt",f"PAYMENT-{payment.pk}",[("OTA Cash",-payment.amount_paise),(f"Customer {payment.invoice.order.customer.code}",payment.amount_paise)])
+    for overhead in Overhead.objects.filter(document_date__range=(start,end)):
+        voucher(overhead.document_date,"Journal",f"OVERHEAD-{overhead.pk}",[("OTA Overheads",-overhead.amount_paise),("OTA Accrued Costs",overhead.amount_paise)])
+    for reversal in Adjustment.objects.filter(reversed_run__isnull=False,document_date__range=(start,end)):
+        amount=sum(reversal.reversed_run.overheads.values_list('amount_paise',flat=True))
+        if amount: voucher(reversal.document_date,"Journal",f"REVERSE-COST-{reversal.pk}",[("OTA Overheads",amount),("OTA Accrued Costs",-amount)])
+    output=BytesIO()
+    with ZipFile(output,'w') as archive:
+        archive.writestr('masters.xml',tostring(masters,encoding='utf-8',xml_declaration=True))
+        archive.writestr('vouchers.xml',tostring(vouchers,encoding='utf-8',xml_declaration=True))
+        archive.writestr('README.txt','Import masters.xml then vouchers.xml into a separate demo Tally company. Accounting-only export; no input GST is invented. Check the import log before using totals. XML structure and balanced entries are tested; a real Tally import has not been run. Avoid importing overlapping ranges twice. Sources: https://help.tallysolutions.com/sample-xml/')
+    return output.getvalue()

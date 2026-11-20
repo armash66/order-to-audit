@@ -1,5 +1,6 @@
 const statusLine = document.getElementById('status');
 let catalog;
+let syncing = false;
 const queueKey = 'ota-offline-queue';
 const queue = () => JSON.parse(localStorage.getItem(queueKey) || '[]');
 function showQueue() {
@@ -20,7 +21,18 @@ function fillCatalog() {
     rows.forEach(row => select.add(new Option(row.name, row.id)));
   }
   document.getElementById('capture').disabled = false;
+  fillCustomerPrices();
 }
+function fillCustomerPrices() {
+  const rows = catalog?.customer_prices?.[document.getElementById('customer').value];
+  if (!rows) return;
+  const select = document.getElementById('sku');
+  const value = select.value;
+  select.replaceChildren();
+  rows.forEach(row => select.add(new Option(row.name, row.id)));
+  if ([...select.options].some(option => option.value === value)) select.value = value;
+}
+document.getElementById('customer').addEventListener('change', fillCustomerPrices);
 // Store before any network request, retaining the same key across lost responses and restarts.
 document.getElementById('offline-form').addEventListener('submit', event => {
   event.preventDefault();
@@ -37,9 +49,12 @@ document.getElementById('offline-form').addEventListener('submit', event => {
     localStorage.setItem(queueKey, JSON.stringify(orders));
     statusLine.textContent = 'Saved on this device. Sync when connected.';
     showQueue();
+    if (navigator.onLine) syncOrders();
   } catch (_) { statusLine.textContent = 'Device storage failed. Order was not saved.'; }
 });
-document.getElementById('sync').addEventListener('click', async () => {
+async function syncOrders() {
+  if (syncing || !navigator.onLine || queue().length === 0) return;
+  syncing = true;
   const button = document.getElementById('sync');
   button.disabled = true;
   try {
@@ -57,8 +72,10 @@ document.getElementById('sync').addEventListener('click', async () => {
     }
     statusLine.textContent = 'All orders synced. Open Orders to see their status.';
   } catch (error) { statusLine.textContent = error.message; }
-  finally { button.disabled = false; }
-});
+  finally { button.disabled = false; syncing = false; }
+}
+document.getElementById('sync').addEventListener('click', syncOrders);
+window.addEventListener('online', syncOrders);
 // The worker caches only this public shell and static assets, never authenticated screens.
 async function start() {
   if ('serviceWorker' in navigator) await navigator.serviceWorker.register('/service-worker.js');
@@ -73,5 +90,6 @@ async function start() {
     statusLine.textContent = 'Offline: using the catalog last loaded on this device.';
   }
   fillCatalog(); showQueue();
+  if (navigator.onLine) await syncOrders();
 }
 start();

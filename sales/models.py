@@ -14,6 +14,7 @@ class OrderLine(models.Model):
     sku = models.ForeignKey(SKU, on_delete=models.PROTECT)
     quantity = models.PositiveBigIntegerField()
     price_paise = models.PositiveBigIntegerField()
+    price_label = models.CharField(max_length=120, default="Price list")
 
     class Meta:
         constraints = [models.UniqueConstraint(fields=["order", "sku"], name="unique_order_sku")]
@@ -52,7 +53,7 @@ class InvoiceSequence(models.Model):
 
 
 class Dispatch(Source):
-    invoice = models.OneToOneField(Invoice, related_name="dispatch", on_delete=models.PROTECT)
+    invoice = models.ForeignKey(Invoice, related_name="dispatches", on_delete=models.PROTECT)
 
 
 class DispatchLine(models.Model):
@@ -71,3 +72,33 @@ class CreditNote(Source):
     invoice = models.OneToOneField(Invoice, related_name="credit_note", on_delete=models.PROTECT)
     reason = models.TextField()
     amount_paise = models.PositiveBigIntegerField()
+
+
+class CustomerPrice(models.Model):
+    customer = models.ForeignKey(Customer, on_delete=models.PROTECT)
+    sku = models.ForeignKey(SKU, on_delete=models.PROTECT)
+    price_paise = models.PositiveBigIntegerField()
+    label = models.CharField(max_length=120, default="Customer price")
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["customer", "sku"], name="unique_customer_price")]
+
+
+class SalesReturn(Source):
+    invoice = models.ForeignKey(Invoice, related_name="returns", on_delete=models.PROTECT)
+    adjustment = models.OneToOneField("inventory.Adjustment", on_delete=models.PROTECT)
+    reason = models.TextField()
+    payload = models.JSONField()
+    amount_paise = models.PositiveBigIntegerField()
+
+
+class ReturnLine(models.Model):
+    document = models.ForeignKey(SalesReturn, related_name="lines", on_delete=models.PROTECT)
+    invoice_line = models.ForeignKey(InvoiceLine, on_delete=models.PROTECT)
+    dispatch_line = models.ForeignKey(DispatchLine, null=True, on_delete=models.PROTECT)
+    stock_value_paise = models.BigIntegerField(null=True)
+    quantity = models.PositiveBigIntegerField()
+    taxable_paise = models.PositiveBigIntegerField()
+    cgst_paise = models.PositiveBigIntegerField()
+    sgst_paise = models.PositiveBigIntegerField()
+    igst_paise = models.PositiveBigIntegerField()

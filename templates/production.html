@@ -1,46 +1,48 @@
 
 {% extends 'base.html' %}
+{% load floor_language %}
 
 {% block content %}
-<h1>Production workspace</h1>
+<h1>{% ui "Production workspace" %}</h1>
 <div class="grid">
 <section class="card">
-<h2>Start a run</h2>
+<h2>{% ui "Start a run" %}</h2>
 <form method="post">
 {% csrf_token %}
 <input type="hidden" name="request_key" value="{{ request_key }}">
-<label>BOM<select name="bom">
+<label>{% ui "BOM" %}<select name="bom">
 {% for bom in boms %}
-<option value="{{ bom.pk }}">{{ bom.sku.item.name }} · v{{ bom.version }} · {{ bom.expected_packets }} packets</option>
+<option value="{{ bom.pk }}">{% ui bom.sku.item.name %} · v{{ bom.version }} · {{ bom.expected_packets }} {% ui "expected packets" %}</option>
 {% endfor %}
 </select>
 </label>
-<label>Batches<input type="number" name="batches" min="1" value="1" required>
+<label>{% ui "Batches" %}<input type="number" name="batches" min="1" value="1" required>
 </label>
-<button name="action" value="create">Create draft run</button>
+<label>{% ui "Finished-goods expiry (optional)" %}<input name="output_expiry" type="date"></label>
+<button name="action" value="create">{% ui "Create draft run" %}</button>
 </form>
 </section>
 <section class="card">
-<h2>Receive materials</h2>
+<h2>{% ui "Receive materials" %}</h2>
 <form method="post">
 {% csrf_token %}
 <input type="hidden" name="request_key" value="{{ request_key }}">
-<label>Supplier<select name="supplier">
+<label>{% ui "Supplier" %}<select name="supplier">
 {% for supplier in suppliers %}
 <option value="{{ supplier.pk }}">{{ supplier.name }}</option>
 {% endfor %}
 </select>
 </label>
-<label>Item<select name="item">
+<label>{% ui "Item" %}<select name="item">
 {% for item in items %}
-<option value="{{ item.pk }}">{{ item.name }} (base: {{ item.base_unit }})</option>
+<option value="{{ item.pk }}">{% ui item.name %} (base: {{ item.base_unit }})</option>
 {% endfor %}
 </select>
 </label>
 <div class="fields">
-<label>Quantity<input name="quantity" inputmode="decimal" required>
+<label>{% ui "Quantity" %}<input name="quantity" inputmode="decimal" required>
 </label>
-<label>Unit<select name="unit">
+<label>{% ui "Unit" %}<select name="unit">
 <option>kg</option>
 <option>g</option>
 <option>L</option>
@@ -48,21 +50,20 @@
 <option>piece</option>
 </select>
 </label>
-<label>Total material value INR<input name="value" inputmode="decimal" required>
+<label>{% ui "Total material value INR" %}<input name="value" inputmode="decimal" required>
 </label>
 </div>
-<button name="action" value="receipt">Post receipt</button>
+<label>{% ui "Supplier batch code (optional)" %}<input name="batch_code" maxlength="100"></label>
+<label>{% ui "Expiry date (optional)" %}<input name="expiry" type="date"></label>
+<button name="action" value="receipt">{% ui "Post receipt" %}</button>
 </form>
 </section>
 </div>
 <section class="card scroll">
-<h2>Runs</h2>
+<h2>{% ui "Runs" %}</h2>
 <table>
 <tr>
-<th>Run</th>
-<th>Product</th>
-<th>Expected</th>
-<th>State</th>
+<th>{% ui "Run" %}</th><th>{% ui "Product" %}</th><th>{% ui "Expected" %}</th><th>{% ui "State" %}</th>
 </tr>
 {% for run in runs %}
 <tr>
@@ -71,13 +72,13 @@
 {% url 'run' run.pk %}
 ">#{{ run.pk }}</a>
 </td>
-<td>{{ run.output_item.name }}</td>
+<td>{% ui run.output_item.name %}</td>
 <td>{{ run.expected_packets }}</td>
-<td>{{ run.state }}</td>
+<td>{% ui run.state %}</td>
 </tr>
 {% empty %}
 <tr>
-<td>No runs yet.</td>
+<td>{% ui "No runs yet." %}</td>
 </tr>
 {% endfor %}
 </table>

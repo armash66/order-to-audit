@@ -26,7 +26,7 @@
 <tr>
 <td>{{ line.sku.item.name }}</td>
 <td>{{ line.quantity }}</td>
-<td>₹{{ line.price_paise|money }}</td>
+<td>₹{{ line.price_paise|money }}<br><small>{{ line.price_label }}</small></td>
 </tr>
 {% endfor %}
 </table>
@@ -47,13 +47,7 @@ alert
 <h2>Fulfilment</h2>
 <form method="post">
 {% csrf_token %}
-<label>Document date<input type="date" name="date" value="
-{% if invoice %}
-{{ invoice.document_date|date:'Y-m-d' }}
-{% else %}
-{{ today|date:'Y-m-d' }}
-{% endif %}
-">
+<label>Document date<input type="date" name="date" value="{% if invoice %}{{ invoice.document_date|date:'Y-m-d' }}{% else %}{{ today|date:'Y-m-d' }}{% endif %}">
 </label>
 {% if order.status == 'submitted' %}
 <button name="action" value="approve">Approve & reserve</button>
@@ -109,6 +103,17 @@ alert
 {% if invoice %}
 <section class="card">
 <h2>Invoice {{ invoice.number }}</h2>
+{% if is_reports %}<p><a href="{% url 'mock_documents' invoice.pk %}">Mock e-Invoice / e-Way Bill</a></p>{% endif %}
+{% if is_admin and invoice.status == 'posted' %}
+<details><summary>Partial dispatch / sealed-goods return</summary>
+<p>Returned goods must be unopened and suitable for resale. Returns create a stock receipt and a financial credit; a negative outstanding amount is customer credit awaiting settlement.</p>
+<form method="post">{% csrf_token %}<input type="hidden" name="request_key" value="{{ request_key }}">
+<label>Date<input name="date" type="date" value="{{ today|date:'Y-m-d' }}" required></label>
+{% for row in fulfilment %}<p>{{ row.name }}: {{ row.shipped }} dispatched, {{ row.remaining }} remaining, {{ row.returnable }} returnable</p>
+<label>Dispatch packets<input name="ship_{{ row.item_id }}" type="number" min="0" max="{{ row.remaining }}" value="0"></label>
+<label>Return packets<input name="return_{{ row.item_id }}" type="number" min="0" max="{{ row.returnable }}" value="0"></label>{% endfor %}
+<label>Return reason<input name="reason"></label><button name="action" value="partial_dispatch">Post selected dispatch</button><button name="action" value="return">Accept sealed-goods return</button>
+</form></details>{% endif %}
 {% if invoice.status != 'draft' %}
 <p>
 <a href="

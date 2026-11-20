@@ -5,6 +5,7 @@
 
 {% block content %}
 <h1>Factory overview</h1>
+{% for alert in dashboard.reorder_alerts %}<p class="alert">Reorder {{ alert.item.name }}: {{ alert.available }} {{ alert.item.base_unit }} available; threshold {{ alert.minimum }}.</p>{% endfor %}
 <div class="grid">
 <section class="card">
 <h2>Today's orders</h2>
@@ -23,6 +24,14 @@
 <p class="metric">₹{{ dashboard.run_cost|money }}</p>
 </section>
 </div>
+<section class="card scroll">
+<h2>Product cost per packet</h2>
+<p>Completed-run costs, including overheads, divided by good output. Margin uses the current price list before GST.</p>
+<table><tr><th>Product</th><th>Good packets</th><th>Cost / packet</th><th>Margin / packet</th></tr>
+{% for product in dashboard.products %}
+<tr><td>{{ product.name }}</td><td>{{ product.good }}</td><td>₹{{ product.unit_cost|money }}</td><td>₹{{ product.margin|money }}</td></tr>
+{% empty %}<tr><td>No completed production yet.</td></tr>{% endfor %}
+</table></section>
 <section class="card">
 <h2>Stock in base units</h2>
 {% for code,balance in dashboard.stock.items %}

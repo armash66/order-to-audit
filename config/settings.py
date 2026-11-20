@@ -11,6 +11,7 @@ INSTALLED_APPS = [
     "production",
     "sales",
     "access",
+    "extensions",
     "webapp", "reporting",
     "django.contrib.messages",
     "django.contrib.auth",

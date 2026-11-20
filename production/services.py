@@ -5,7 +5,7 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import transaction
 
 from inventory.models import BOM, FactoryControl, Posting, StockMovement
-from inventory.services import require_integer, round_paise, stock_summary
+from inventory.services import require_integer, round_paise, stock_summary, record_movement
 from .models import ProductionRun, RunStandard, ProductionEvent, ProductionLine, Overhead, ToleranceChange
 
 
@@ -18,7 +18,7 @@ def authorize(actor, admin_only=False):
 
 # Snapshot scaled raw and packaging standards once; later BOM edits cannot change a run.
 @transaction.atomic
-def create_run(*, bom, batches, request_key, document_date, actor):
+def create_run(*, bom, batches, request_key, document_date, actor, output_expiry=None):
     authorize(actor)
     require_integer(batches, 1)
     if not request_key:
@@ -26,6 +26,8 @@ def create_run(*, bom, batches, request_key, document_date, actor):
     FactoryControl.objects.select_for_update().get(pk=1)
     existing = ProductionRun.objects.filter(request_key=request_key).first()
     if existing:
+        if existing.output_expiry != output_expiry:
+            raise ValidationError("Run retry changed output expiry.")
         if (existing.bom_id, existing.batches, existing.document_date, existing.actor_id) != (bom.pk, batches, document_date, actor.pk):
             raise ValidationError("Run request key reused with different content.")
         return existing
@@ -36,7 +38,7 @@ def create_run(*, bom, batches, request_key, document_date, actor):
     run = ProductionRun.objects.create(bom=bom, batches=batches, request_key=request_key,
         document_date=document_date, actor=actor, bom_version=bom.version,
         recipe_version=bom.recipe.version, expected_packets=bom.expected_packets * batches,
-        output_item=bom.sku.item)
+        output_item=bom.sku.item, output_expiry=output_expiry)
     if not bom.recipe.lines.exists():
         raise ValidationError("Recipe needs at least one raw ingredient.")
     for stage, lines in (("raw", bom.recipe.lines.all()), ("packaging", bom.lines.all())):
@@ -69,8 +71,9 @@ def issue_value(quantity, on_hand, value_paise):
 def append_line(event, posting, item, quantity, value):
     line = ProductionLine.objects.create(event=event, item=item, quantity=quantity, value_paise=value)
     if quantity:
-        StockMovement.objects.create(posting=posting, production_line=line, item=item,
-                                     quantity=quantity, value_paise=value)
+        metadata={"code":f"RUN-{event.run_id}","expiry":event.run.output_expiry.isoformat() if event.run.output_expiry else None} if quantity>0 else None
+        record_movement(posting=posting, production_line=line, item=item,
+                        quantity=quantity, value_paise=value, incoming_lot=metadata)
     return line
 
 
@@ -262,7 +265,7 @@ def suggest_production(*, sku, actor, uncovered=None):
     batches=(uncovered+bom.expected_packets-1)//bom.expected_packets
     rows=[]
     for line in [*bom.recipe.lines.select_related("item"),*bom.lines.select_related("item")]:
-        stock=balances[line.item.code]["quantity"]
+        stock=balances[line.item.code]["available"]
         rows.append({"item":line.item.code,"unit":line.item.base_unit,"stock":stock,"required":line.quantity*batches,
                      "shortage":max(0,line.quantity*batches-stock),"supported_batches":Fraction(stock,line.quantity),"feasible_batches":stock//line.quantity})
     feasible=min((row["feasible_batches"] for row in rows),default=0)

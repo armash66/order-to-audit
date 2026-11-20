@@ -34,6 +34,17 @@ class ReportTests(TestCase):
         record_payment(invoice=self.invoice,amount_paise=10000,request_key="future",document_date=date(2027,1,1),actor=self.actor)
         self.assertEqual(report_table('ageing',DAY,date(2026,12,20),self.actor)['rows'][0][4],'3,875.00')
 
+    def test_customer_totals_and_owner_unit_cost(self):
+        from fractions import Fraction
+        from production.models import ProductionRun
+        from production.services import add_overhead
+        add_overhead(run=ProductionRun.objects.first(),label='Overheads',amount_paise=180000,request_key='dashboard-overhead',document_date=DAY,actor=self.actor)
+        product=dashboard(self.actor,DAY)['products'][0]
+        self.assertEqual(product['unit_cost'],Fraction(585500,188))
+        self.assertEqual(product['margin'],5000-Fraction(585500,188))
+        table=report_table('customer_ageing',DAY,date(2026,12,20),self.actor)
+        self.assertEqual(table['rows'][0][2:6],['3,875.00','0.00','0.00','3,875.00'])
+
     def test_salesman_scope_and_csv_formula(self):
         other=User.objects.create_user('report-sales')
         other.groups.add(Group.objects.get_or_create(name='salesman')[0])

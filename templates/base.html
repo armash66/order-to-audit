@@ -1,7 +1,7 @@
 
-{% load static display %}
+{% load static display floor_language %}
 <!doctype html>
-<html lang="en">
+<html lang="{{ floor_language|default:'en' }}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -21,6 +21,8 @@ Order-to-Audit
 </strong>
 {% if user.is_authenticated %}
 <nav>
+{% if is_sales or is_reports %}<a href="{% url 'visits' %}">Visits</a>{% endif %}
+{% if is_admin %}<a href="{% url 'pricing' %}">Prices</a>{% endif %}
 {% if is_sales or is_reports %}
 <a href="
 {% url 'orders' %}
@@ -30,13 +32,15 @@ Order-to-Audit
 {% if is_production %}
 <a href="
 {% url 'production' %}
-">Production</a>
+">{% ui "Production" %}</a>
+<a href="?lang=ta" lang="ta">தமிழ்</a><a href="?lang=en">English</a>
 {% endif %}
 
 {% if is_stock %}
+<a href="{% url 'batches' %}">Batches & alerts</a>
 <a href="
 {% url 'stock' %}
-">Stock</a>
+">{% ui "Stock" %}</a>
 {% endif %}
 
 {% if is_reports or is_sales %}

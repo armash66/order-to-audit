@@ -1,0 +1,8 @@
+{% extends 'base.html' %}{% load static %}{% block content %}
+<h1>Routes and customer visits</h1>{% if is_sales %}<form method="post" class="card">{% csrf_token %}<input name="request_key" type="hidden" value="{{ request_key }}">
+<label>Customer<select name="customer">{% for customer in customers %}<option value="{{ customer.pk }}">{{ customer.name }}</option>{% endfor %}</select></label>
+<label>Route / area<input name="route" required maxlength="100"></label><label>Visit note<textarea name="note"></textarea></label>
+<label><input id="gps-consent" name="consent" type="checkbox"> I consent to recording this visit's location</label>
+<button type="button" id="capture-gps">Capture location</button><p id="gps-status" role="status">Location is optional.</p>
+<input name="latitude" id="latitude" type="hidden"><input name="longitude" id="longitude" type="hidden"><button>Record visit</button></form><script src="{% static 'visits.js' %}" defer></script>{% endif %}
+<section class="card scroll"><table><tr><th>Time</th><th>Salesman</th><th>Route</th><th>Customer</th><th>Note</th><th>GPS</th></tr>{% for visit in visits %}<tr><td>{{ visit.visited_at }}</td><td>{{ visit.actor.username }}</td><td>{{ visit.route }}</td><td>{{ visit.customer.name }}</td><td>{{ visit.note }}</td><td>{% if visit.latitude_microdegrees != None %}Recorded with consent{% else %}Not recorded{% endif %}</td></tr>{% endfor %}</table></section>{% endblock %}

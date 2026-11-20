@@ -13,6 +13,7 @@
 <th>Posted</th>
 <th>Signed quantity</th>
 <th>Signed value INR</th>
+<th>Batch allocations</th>
 </tr>
 {% for movement in movements %}
 <tr>
@@ -24,6 +25,7 @@
 <td>{{ movement.posting.posted_at }}</td>
 <td>{{ movement.quantity }}</td>
 <td>{{ movement.value_paise|money }}</td>
+<td>{% for allocation in movement.allocations.all %}{{ allocation.lot.code }}: {{ allocation.quantity }}<br>{% endfor %}</td>
 </tr>
 {% endfor %}
 </table>

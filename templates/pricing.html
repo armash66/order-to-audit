@@ -1,0 +1,7 @@
+{% extends 'base.html' %}{% load display %}{% block content %}
+<h1>Customer prices and schemes</h1><p>Set a fixed per-packet override with a scheme description. New orders snapshot this price; existing orders keep their price.</p>
+<form method="post" class="card">{% csrf_token %}
+<label>Customer<select name="customer">{% for customer in customers %}<option value="{{ customer.pk }}">{{ customer.name }}</option>{% endfor %}</select></label>
+<label>Product<select name="sku">{% for sku in skus %}<option value="{{ sku.pk }}">{{ sku.item.name }}</option>{% endfor %}</select></label>
+<label>Price INR<input name="price" inputmode="decimal" required></label><label>Scheme / price description<input name="label" required></label><button>Save customer price</button></form>
+<section class="card"><table><tr><th>Customer</th><th>Product</th><th>Price</th><th>Scheme</th></tr>{% for price in prices %}<tr><td>{{ price.customer.name }}</td><td>{{ price.sku.item.name }}</td><td>₹{{ price.price_paise|money }}</td><td>{{ price.label }}</td></tr>{% endfor %}</table></section>{% endblock %}

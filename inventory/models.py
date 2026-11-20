@@ -101,11 +101,12 @@ class Source(models.Model):
 
 
 class OpeningStock(Source):
-    pass
+    lot_details = models.JSONField(default=dict)
 
 
 class PurchaseReceipt(Source):
     supplier = models.ForeignKey(Supplier, on_delete=models.PROTECT)
+    lot_details = models.JSONField(default=dict)
 
 
 class SourceLine(models.Model):
@@ -180,3 +181,27 @@ class StockMovement(models.Model):
             models.CheckConstraint(condition=~Q(quantity=0), name="nonzero_movement"),
             models.CheckConstraint(condition=one_source(["opening_line","purchase_line","production_line","dispatch_line","adjustment_line"]), name="movement_one_source_line"),
         ]
+
+
+class StockLot(models.Model):
+    item = models.ForeignKey(Item, on_delete=models.PROTECT)
+    code = models.CharField(max_length=100)
+    expiry_date = models.DateField(null=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["item","code"],name="unique_item_lot")]
+
+
+class LotAllocation(models.Model):
+    movement = models.ForeignKey(StockMovement,related_name="allocations",on_delete=models.PROTECT)
+    lot = models.ForeignKey(StockLot,related_name="allocations",on_delete=models.PROTECT)
+    quantity = models.BigIntegerField()
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["movement","lot"],name="unique_movement_lot"),
+                       models.CheckConstraint(condition=~Q(quantity=0),name="nonzero_lot_quantity")]
+
+
+class ReorderLevel(models.Model):
+    item = models.OneToOneField(Item,on_delete=models.PROTECT)
+    minimum_quantity = models.PositiveBigIntegerField()
