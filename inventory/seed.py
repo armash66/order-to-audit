@@ -2,7 +2,7 @@ from datetime import date
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from .models import Item, UnitConversion, SKU, Supplier, Customer, BOM, BOMLine, FactoryControl
+from .models import Item, UnitConversion, SKU, Supplier, Customer, BOM, BOMLine, FactoryControl, Recipe, RecipeLine
 from .services import post_receipt
 
 
@@ -35,9 +35,13 @@ def seed_benchmark():
     for unit, factor in [("packet", 1), ("carton", 20)]:
         ensure(UnitConversion, {"item": items["MURUKKU200"], "unit": unit}, {"numerator": factor, "denominator": 1})
     sku = ensure(SKU, {"item": items["MURUKKU200"]}, {"pack_size_g": 200, "price_paise": 5000, "hsn": "99999999"})
-    bom = ensure(BOM, {"sku": sku, "version": 1}, {"expected_packets": 200})
+    recipe = ensure(Recipe, {"code": "MURUKKU200-RECIPE", "version": 1}, {})
+    bom = ensure(BOM, {"sku": sku, "version": 1}, {"expected_packets": 200, "recipe": recipe})
     for code, quantity in [("FLOUR", 40000), ("OIL", 10000), ("SPICE", 1200), ("POUCH", 200), ("CARTON", 10)]:
-        ensure(BOMLine, {"bom": bom, "item": items[code]}, {"quantity": quantity})
+        if items[code].category == "raw":
+            ensure(RecipeLine, {"recipe": recipe, "item": items[code]}, {"quantity": quantity})
+        else:
+            ensure(BOMLine, {"bom": bom, "item": items[code]}, {"quantity": quantity})
     ensure(Supplier, {"code": "FLOUR-SUPPLIER"}, {"name": "Demo Flour Supplier"})
     for code, name, state, gstin in [("A", "Demo Retailer A", "33", "33BBBBB0000B1Z0"), ("B", "Demo Distributor B", "29", "29CCCCC0000C1Z0")]:
         ensure(Customer, {"code": code}, {"name": name, "state_code": state, "gstin": gstin})

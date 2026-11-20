@@ -11,7 +11,7 @@ from django.db import DatabaseError, close_old_connections, connection, transact
 from django.test import TestCase, TransactionTestCase
 
 from .models import (FactoryControl, Item, OpeningStock, PurchaseReceipt, PurchaseLine,
-                     Posting, StockMovement, Supplier, BOMLine)
+                     Posting, StockMovement, Supplier, BOMLine, RecipeLine)
 from .seed import seed_benchmark
 from .services import (post_receipt, reconcile_stock, round_paise, stock_summary,
                        to_base_units, weighted_average, require_integer)
@@ -31,7 +31,8 @@ class StockTests(TestCase):
 
     def test_opening_and_purchase_benchmark(self):
         self.assertEqual(OpeningStock.objects.count(), 1)
-        self.assertEqual(BOMLine.objects.count(), 5)
+        self.assertEqual(BOMLine.objects.count(), 2)
+        self.assertEqual(RecipeLine.objects.count(), 3)
         self.assertEqual(stock_summary()["FLOUR"]["quantity"], 100000)
         post_receipt(**purchase_arguments())
         self.assertEqual({k: v["quantity"] for k, v in reconcile_stock().items()},

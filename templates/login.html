@@ -1,0 +1,14 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="card login">
+<p class="muted">FACTORY WORKSPACE</p>
+<h1>Welcome back</h1>
+<p>Sign in to your role's workspace.</p>
+<form method="post">
+{% csrf_token %}
+{{ form.as_p }}<button>Sign in</button>
+</form>
+</section>
+{% endblock %}

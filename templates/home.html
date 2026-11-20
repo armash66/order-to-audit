@@ -1,0 +1,35 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+<p class="muted">FACTORY WORKSPACE · {{ today }}</p>
+<h1>Hello, {{ user.username }}</h1>
+<p class="muted">Every order, batch and stock movement connected.</p>
+<div class="grid">
+{% if is_sales %}
+<a class="card" href="
+{% url 'orders' %}
+">
+<h2>Sales orders</h2>Capture demand and track fulfilment.</a>
+{% endif %}
+
+{% if is_production %}
+<a class="card" href="
+{% url 'production' %}
+">
+<h2>Production</h2>Receive materials and record runs.</a>
+{% endif %}
+
+{% if is_stock %}
+<a class="card" href="
+{% url 'stock' %}
+">
+<h2>Inventory</h2>Trace stock back to its documents.</a>
+{% endif %}
+
+{% if is_reports %}
+<a class="card" href="/reports/">
+<h2>Reports</h2>Review sales, stock and collections.</a>
+{% endif %}
+</div>
+{% endblock %}

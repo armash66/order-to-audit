@@ -117,12 +117,13 @@ def post_receipt(*, kind, request_key, document_date, lines, actor, supplier=Non
 def reconcile_stock():
     FactoryControl.objects.select_for_update().get(pk=1)
     from production.models import ProductionEvent
+    from sales.models import Dispatch
 
     expected = {item.code: {"quantity": 0, "value_paise": 0} for item in Item.objects.all()}
     for item in Item.objects.filter(category="finished"):
         expected[item.code]["valuation_basis"] = "materials-only"
     errors = []
-    for kind, header in (("opening", OpeningStock), ("purchase", PurchaseReceipt), ("production", ProductionEvent)):
+    for kind, header in (("opening", OpeningStock), ("purchase", PurchaseReceipt), ("production", ProductionEvent), ("dispatch", Dispatch), ("adjustment", Adjustment)):
         for source in header.objects.all():
             posting = Posting.objects.filter(**{kind: source}).first()
             if posting is None:
@@ -143,3 +144,86 @@ def reconcile_stock():
     if errors:
         raise ValidationError(errors)
     return reported
+
+
+from django.core.exceptions import ValidationError
+from django.db import transaction
+from access.services import require_role, audit
+from .models import Adjustment, AdjustmentLine, FactoryControl, Posting, StockMovement, Item
+
+
+# Internal writer used only after locked validation; inversion preserves original paise.
+def append_adjustment(control, source, lines):
+    control.last_sequence += 1
+    control.save(update_fields=["last_sequence"])
+    posting=Posting.objects.create(sequence=control.last_sequence,adjustment=source)
+    for item,quantity,value in lines:
+        line=AdjustmentLine.objects.create(document=source,item=item,quantity=quantity,value_paise=value)
+        StockMovement.objects.create(posting=posting,adjustment_line=line,item=item,quantity=quantity,value_paise=value)
+    audit(source.actor,"stock.adjust",source,{},source.payload)
+    return posting
+
+
+# Negative adjustments consume weighted-average value; positive ones need explicit cost.
+@transaction.atomic
+def adjust_stock(*, item, quantity, value_paise, reason, request_key, document_date, actor):
+    from production.services import issue_value
+    from sales.services import available_stock
+    require_role(actor,["admin"])
+    if type(quantity) is not int or quantity == 0 or not reason.strip() or not request_key:
+        raise ValidationError("Nonzero integer quantity, reason and request key required.")
+    payload={"item":item.pk,"quantity":quantity,"value_paise":value_paise,"reason":reason,"date":str(document_date)}
+    control=FactoryControl.objects.select_for_update().get(pk=1)
+    old=Adjustment.objects.filter(request_key=request_key).first()
+    if old:
+        if old.payload!=payload or old.actor_id!=actor.pk: raise ValidationError("Conflicting adjustment retry.")
+        return Posting.objects.get(adjustment=old)
+    balance=available_stock()[item.code]
+    if quantity<0:
+        if value_paise is not None: raise ValidationError("Negative adjustments calculate their own value.")
+        if -quantity>balance["available"]: raise ValidationError("Adjustment would consume reserved or unavailable stock.")
+        value=None if balance["value_paise"] is None else -issue_value(-quantity,balance["quantity"],balance["value_paise"])
+    else:
+        require_integer(value_paise)
+        value=value_paise
+    source=Adjustment.objects.create(reason=reason,payload=payload,request_key=request_key,document_date=document_date,actor=actor)
+    return append_adjustment(control,source,[(item,quantity,value)])
+
+
+# Reverse only untouched recorded runs, never dependent dispatches or physical production.
+@transaction.atomic
+def reverse_run(*, run, reason, request_key, document_date, actor):
+    from production.models import ProductionRun
+    from sales.services import available_stock
+    require_role(actor,["admin"])
+    if not reason.strip() or not request_key: raise ValidationError("Correction reason and request key required.")
+    control=FactoryControl.objects.select_for_update().get(pk=1)
+    run=ProductionRun.objects.get(pk=run.pk)
+    payload={"run":run.pk,"reason":reason,"date":str(document_date)}
+    old=Adjustment.objects.filter(request_key=request_key).first()
+    if old:
+        if old.payload!=payload or old.actor_id!=actor.pk: raise ValidationError("Conflicting reversal retry.")
+        return Posting.objects.get(adjustment=old)
+    if run.state not in ("issued","completed"): raise ValidationError("Only issued or completed runs can be reversed.")
+    movements=list(StockMovement.objects.filter(posting__production__run=run).select_related("item","posting"))
+    if not movements: raise ValidationError("Run has no stock postings.")
+    last=max(m.posting.sequence for m in movements)
+    items={m.item_id for m in movements}
+    if StockMovement.objects.filter(item_id__in=items,posting__sequence__gt=last).exists():
+        raise ValidationError("A later stock event touches this run; reversal is blocked.")
+    # Also exclude unrelated events between issue and completion affecting any input.
+    first=min(m.posting.sequence for m in movements)
+    if StockMovement.objects.filter(item_id__in=items,posting__sequence__gt=first).exclude(posting__production__run=run).exists():
+        raise ValidationError("An intervening stock event depends on this run.")
+    balances=available_stock()
+    lines=[]
+    for movement in movements:
+        if movement.quantity>0 and balances[movement.item.code]["available"]<movement.quantity:
+            raise ValidationError("Reversal would consume reserved or unavailable finished goods.")
+        lines.append((movement.item,-movement.quantity,-movement.value_paise))
+    source=Adjustment.objects.create(reversed_run=run,reason=reason,payload=payload,request_key=request_key,document_date=document_date,actor=actor)
+    posting=append_adjustment(control,source,lines)
+    audit(actor,"run.reverse",run,{"state":run.state},{"state":"reversed","reason":reason})
+    run.state="reversed"
+    run.save(update_fields=["state"])
+    return posting

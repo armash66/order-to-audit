@@ -1,4 +1,5 @@
 from fractions import Fraction
+from access.services import audit
 
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import transaction
@@ -44,6 +45,7 @@ def create_run(*, bom, batches, request_key, document_date, actor):
             if line.item.category != stage:
                 raise ValidationError("Recipe must contain raw inputs; BOM lines must contain packaging.")
             RunStandard.objects.create(run=run, item=line.item, stage=stage, quantity=line.quantity * batches)
+    audit(actor, "run.create", run, {}, {"batches": batches, "expected_packets": run.expected_packets})
     return run
 
 
@@ -128,6 +130,7 @@ def post_event(*, run, kind, actual, request_key, actor, good_packets=None, dama
         if good_packets:
             append_line(event, posting, run.output_item, good_packets, materials_value)
         run.good_packets = good_packets
+    audit(actor, "run." + kind, run, {"state": run.state}, payload)
     run.state = "issued" if kind == "issue" else "completed"
     run.save(update_fields=["state", "good_packets"])
     return posting
@@ -207,6 +210,8 @@ def run_report(run):
         consumption[standard.item.code] = {"planned": standard.quantity, "actual": quantity,
             **(variance(quantity, standard.quantity, control.tolerance_bps) if quantity is not None else {"ratio": None, "flagged": False})}
     overhead = sum(run.overheads.values_list("amount_paise", flat=True))
+    if run.state == "reversed":
+        materials = overhead = 0
     total = materials + overhead
     unit_cost = Fraction(total, run.good_packets) if run.good_packets else None
     return {"state": run.state, "consumption": consumption, "tolerance_bps": control.tolerance_bps,
@@ -215,5 +220,50 @@ def run_report(run):
         "unclassified_shortfall": max(0, run.expected_packets - run.good_packets) if run.good_packets is not None else None,
         "damaged_packaging": events["complete"].payload["damaged"] if "complete" in events else {},
         "materials_paise": materials, "overhead_paise": overhead, "total_paise": total,
+        "margin_paise": run.bom.sku.price_paise - unit_cost if unit_cost is not None else None,
         "cost_per_packet_paise": unit_cost, "display_cost_paise": round_paise(unit_cost) if unit_cost is not None else None,
         "fg_valuation_basis": "materials-only"}
+
+
+# Draft batch edits rescale snapshotted standards; posted inputs remain frozen.
+@transaction.atomic
+def edit_run_draft(run, batches, actor):
+    authorize(actor)
+    require_integer(batches, 1)
+    FactoryControl.objects.select_for_update().get(pk=1)
+    run = ProductionRun.objects.get(pk=run.pk)
+    if run.state != "draft":
+        raise ValidationError("Only draft runs can be edited.")
+    before = {"batches": run.batches, "expected_packets": run.expected_packets}
+    for standard in run.standards.all():
+        standard.quantity = standard.quantity // run.batches * batches
+        standard.save(update_fields=["quantity"])
+    run.expected_packets = run.expected_packets // run.batches * batches
+    run.batches = batches
+    run.save(update_fields=["expected_packets", "batches"])
+    audit(actor, "run.edit", run, before, {"batches": batches, "expected_packets": run.expected_packets})
+    return run
+
+
+# Pending demand is aggregated once per SKU; suggestions never reserve or post stock.
+@transaction.atomic
+def suggest_production(*, sku, actor, uncovered=None):
+    authorize(actor)
+    from sales.models import OrderLine
+    from sales.services import available_stock
+    FactoryControl.objects.select_for_update().get(pk=1)
+    balances=available_stock()
+    if uncovered is None:
+        demand=sum(OrderLine.objects.filter(sku=sku,order__status="submitted").values_list("quantity",flat=True))
+        uncovered=max(0,demand-balances[sku.item.code]["available"])
+    require_integer(uncovered)
+    bom=BOM.objects.filter(sku=sku).order_by("-version").first()
+    if bom is None: raise ValidationError("No BOM exists for this product.")
+    batches=(uncovered+bom.expected_packets-1)//bom.expected_packets
+    rows=[]
+    for line in [*bom.recipe.lines.select_related("item"),*bom.lines.select_related("item")]:
+        stock=balances[line.item.code]["quantity"]
+        rows.append({"item":line.item.code,"unit":line.item.base_unit,"stock":stock,"required":line.quantity*batches,
+                     "shortage":max(0,line.quantity*batches-stock),"supported_batches":Fraction(stock,line.quantity),"feasible_batches":stock//line.quantity})
+    feasible=min((row["feasible_batches"] for row in rows),default=0)
+    return {"uncovered":uncovered,"required_batches":batches,"feasible_batches":feasible,"blocked":batches>feasible,"inputs":rows}

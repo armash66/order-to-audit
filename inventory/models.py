@@ -42,7 +42,29 @@ class Customer(models.Model):
     gstin = models.CharField(max_length=15)
 
 
+class Recipe(models.Model):
+    code = models.CharField(max_length=40)
+    version = models.PositiveIntegerField(default=1)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["code", "version"], name="unique_recipe_version")]
+
+
+class RecipeLine(models.Model):
+    recipe = models.ForeignKey(Recipe, on_delete=models.PROTECT, related_name="lines")
+    item = models.ForeignKey(Item, on_delete=models.PROTECT)
+    quantity = models.PositiveBigIntegerField()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["recipe", "item"], name="unique_recipe_item"),
+            models.CheckConstraint(condition=Q(quantity__gt=0), name="positive_recipe_quantity"),
+        ]
+
+
 class BOM(models.Model):
+    recipe = models.ForeignKey(Recipe, on_delete=models.PROTECT)
+
     sku = models.ForeignKey(SKU, on_delete=models.PROTECT)
     version = models.PositiveIntegerField(default=1)
     expected_packets = models.PositiveIntegerField()
@@ -63,6 +85,7 @@ class BOMLine(models.Model):
 class FactoryControl(models.Model):
     id = models.PositiveSmallIntegerField(primary_key=True, default=1)
     last_sequence = models.PositiveBigIntegerField(default=0)
+    tolerance_bps = models.PositiveIntegerField(default=300)
 
     class Meta:
         constraints = [models.CheckConstraint(condition=Q(id=1), name="single_factory")]
@@ -108,17 +131,43 @@ class PurchaseLine(SourceLine):
         constraints = [models.CheckConstraint(condition=Q(quantity__gt=0, value_paise__isnull=False), name="purchase_quantity_value")]
 
 
+class Adjustment(Source):
+    reason = models.TextField()
+    reversed_run = models.OneToOneField("production.ProductionRun", null=True, on_delete=models.PROTECT)
+    payload = models.JSONField()
+
+
+class AdjustmentLine(SourceLine):
+    quantity = models.BigIntegerField()
+    value_paise = models.BigIntegerField(null=True)
+    document = models.ForeignKey(Adjustment, related_name="lines", on_delete=models.PROTECT)
+
+
+# Exactly one typed foreign key makes each ledger source structurally traceable.
+def one_source(names):
+    condition = Q()
+    for selected in names:
+        condition |= Q(**{name+"__isnull": name != selected for name in names})
+    return condition
+
+
 class Posting(models.Model):
+    adjustment = models.OneToOneField(Adjustment, null=True, on_delete=models.PROTECT)
+    dispatch = models.OneToOneField("sales.Dispatch", null=True, on_delete=models.PROTECT)
+    production = models.OneToOneField("production.ProductionEvent", null=True, on_delete=models.PROTECT)
     sequence = models.PositiveBigIntegerField(unique=True)
     posted_at = models.DateTimeField(auto_now_add=True)
     opening = models.OneToOneField(OpeningStock, null=True, on_delete=models.PROTECT)
     purchase = models.OneToOneField(PurchaseReceipt, null=True, on_delete=models.PROTECT)
 
     class Meta:
-        constraints = [models.CheckConstraint(condition=(Q(opening__isnull=False, purchase__isnull=True) | Q(opening__isnull=True, purchase__isnull=False)), name="posting_one_source")]
+        constraints = [models.CheckConstraint(condition=one_source(["opening","purchase","production","dispatch","adjustment"]), name="posting_one_source")]
 
 
 class StockMovement(models.Model):
+    adjustment_line = models.OneToOneField(AdjustmentLine, null=True, on_delete=models.PROTECT)
+    dispatch_line = models.OneToOneField("sales.DispatchLine", null=True, on_delete=models.PROTECT)
+    production_line = models.OneToOneField("production.ProductionLine", null=True, on_delete=models.PROTECT)
     posting = models.ForeignKey(Posting, on_delete=models.PROTECT, related_name="movements")
     item = models.ForeignKey(Item, on_delete=models.PROTECT)
     quantity = models.BigIntegerField()
@@ -129,5 +178,5 @@ class StockMovement(models.Model):
     class Meta:
         constraints = [
             models.CheckConstraint(condition=~Q(quantity=0), name="nonzero_movement"),
-            models.CheckConstraint(condition=(Q(opening_line__isnull=False, purchase_line__isnull=True) | Q(opening_line__isnull=True, purchase_line__isnull=False)), name="movement_one_source_line"),
+            models.CheckConstraint(condition=one_source(["opening_line","purchase_line","production_line","dispatch_line","adjustment_line"]), name="movement_one_source_line"),
         ]

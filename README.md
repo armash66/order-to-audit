@@ -1,133 +1,98 @@
 # Order-to-Audit
 
-A document-led system connecting sales, production, inventory and receivables for a small food manufacturer. The local Django/PostgreSQL foundation is implemented; the stock core now supports masters, opening stock and purchase receipts. Production services are implemented; production screens and sales workflows are not implemented yet.
+A local factory workflow for the CDI NIT Trichy internship exercise: order → approval → invoice → dispatch → collection, and purchase → raw issue → production → finished goods → variance/cost.
 
-## Local setup
+## Run locally
 
-Prerequisite: Docker Desktop running Linux containers with Docker Compose. From the repository root:
+Install Docker with Compose, then from this directory:
 
 ```sh
 docker compose up --build -d --wait
 ```
 
-Open http://localhost:8000. Startup waits for PostgreSQL, applies Django's built-in migrations and starts the local development server. No host Python installation or `.env` file is required. The first run needs internet access to download images, packages and fonts. PostgreSQL data persists in a named volume; ordinary restart does not reset it.
+Open **http://localhost:8000**. Startup migrates PostgreSQL, seeds the section 5 masters/opening stock and creates demo logins. No `.env` is required; `.env.example` documents optional overrides. `.env` is ignored and excluded from the image. Data persists in the project-specific Docker volume. Stop with `docker compose down`; do not delete the volume unless you intend to erase its data.
 
-Optional: copy `.env.example` to `.env` to override the local demo settings. `.env` is ignored by Git and excluded from the Docker build context. Only `.env.example` belongs in version control. Defaults are deliberately local demo credentials, not deployment secrets. Changing PostgreSQL initialization credentials after a volume exists does not change that database's existing credentials.
+All initial demo passwords: **`DemoPass123!`**. Change `DEMO_PASSWORD` before first startup to choose another; restarts never reset existing passwords.
 
-```sh
-docker compose exec web python manage.py check
-docker compose exec web python manage.py test -v 2
-docker compose logs web
-docker compose down
-```
-
-The tests check the startup page, a real PostgreSQL test database, and an in-memory one-line PDF containing ₹. No invoice PDF feature exists yet. `down` stops the containers while preserving the database volume. The app listens only on the host loopback interface; PostgreSQL has no published host port. This is a local development setup, not a hosted deployment.
-
-## Stack and files
-
-Django 5.2 supplies forms, templates, authentication foundations and migrations in one application; PostgreSQL will support transactional ledger posting. Server-rendered pages keep validation and workflow logic on the server. Docker Compose provides the same local runtime for development and evaluation; WeasyPrint's Linux libraries and a rupee-capable font are installed early to expose PDF dependency problems before invoicing work.
-
-| File | Purpose |
+| Login | Access |
 | --- | --- |
-| `.gitignore` | Excludes real environment files, virtual environments and Python/test artifacts; permits `.env.example`. |
-| `.dockerignore` | Excludes environment files, Git metadata, planning documents and local artifacts from the image. |
-| `.env.example` | Documents optional local configuration using dummy values. |
-| `requirements.txt` | Pins direct Python dependencies, including the PDF text reader used by the smoke test; transitive dependencies and image tags are not fully locked yet. |
-| `Dockerfile` | Builds Python with WeasyPrint libraries and DejaVu fonts, then runs as a non-root user. |
-| `compose.yaml` | Defines web/database services, health checks, local environment defaults and persistent database storage. |
-| `docker/entrypoint.sh` | Applies migrations, stops on failure and starts the requested process. |
-| `manage.py` | Runs Django management commands. |
-| `config/__init__.py` | Marks the configuration directory as a Python package. |
-| `config/settings.py` | Configures environment-based PostgreSQL access, templates, middleware and IST display timezone. |
-| `config/urls.py` | Routes the root URL to the startup template. |
-| `config/wsgi.py` | Exposes Django's WSGI application entry point. |
-| `config/tests.py` | Tests startup rendering, PostgreSQL connectivity and one-line ₹ PDF rendering/text extraction. |
-| `templates/startup.html` | Shows a minimal, mobile-width startup page without business workflows. |
+| `salesman_a`, `salesman_b` | Capture orders; see only own orders and own customer sales; PDF/share |
+| `admin` | Approve/reject, invoice, dispatch, payments, corrections and production |
+| `production` | Receipts, run issue/completion, variance and stock |
+| `accountant` | Read-only orders, stock and report exports |
+| `owner` | Read-only dashboard, orders, stock and reports |
 
-## Planning documents
+These are fictional demo identities. This Compose configuration binds localhost and uses Django's development server; it is not a public hosting configuration.
 
-- [Vision](docs/vision.md)
-- [Requirements and acceptance checks](docs/requirements.md)
-- [Decisions and domain sketch](docs/assumptions.md)
-- [Benchmark golden workbook](docs/benchmark.xlsx)
-
-## Benchmark expectations and deliberate interpretations
-
-Materials cost ₹4,055; run cost with overhead ₹5,855; cost per good packet ₹31.14; margin before tax ₹18.86. Retailer A invoice is ₹7,875 and outstanding is ₹3,875. These are verified planning values, not application test results.
-
-- **Carton alert:** actual 9 versus standard 10 gives −10%, so the uniform absolute-variance rule flags cartons as well as yield (−6%) and oil (+5%). The PS's named expected alerts list only yield and oil; this additional alert preserves the given nine-carton consumption. Eight packets remain loose under DEC-05.
-- **Unclassified output shortfall (DEC-06):** 200 expected minus 188 good gives 12 unclassified packet-equivalents. Six damaged pouches are recorded separately; the PS does not establish damaged food quantities or a cause. No assumed 6 + 6 split or additional stock deduction.
-
-## Scope and cut line
-
-SAL-6 invoice sharing is Should. The selected stretch is STR-4, production suggestions with input-feasibility warnings. If time runs short, defer in this order: DASH-1 owner dashboard, AUTH-2 auditor/owner access, RPT-2 report PDFs, then STR-4. No cuts have been activated. Invoice PDF, all Must features and benchmark CSV reports/calculations remain required. Report PDFs will share one generic table renderer; deferral must be disclosed as a section 4.6 gap.
-
-## Next implementation session
-
-The stock core and production services are implemented; select the next workflow in a separately approved chunk. The opening seed and stock-core tests exist; role logins, full benchmark execution and production/sales screens are not implemented. Business logic will live in tested `services.py` functions. Organizer contact and questions-window dates remain unconfirmed because the supplied PDF contains placeholders; the questions email remains unsent.
-
-## Posting and correction boundaries
-
-Stock events append in server-assigned posting sequence; document dates cannot reorder valuation or insert earlier movements. Explicit rejection is a terminal order outcome with a reason; shortage alone leaves an order submitted. See the [allowed-transition tables](docs/assumptions.md#allowed-transitions-implementation-contract). Full invoice credit is supported only before payment or dispatch; full run reversal is blocked by later stock postings on affected items or insufficient unreserved FG. These are deliberate prototype limits.
-
-Delivery is local-only with one-command reproducibility first. Target submission: 27 November 2026, 14:00 IST; user-reported application close: 17:00 IST. Task-specific deadline/contact confirmation is pending. Hosted delivery is reconsidered on 26 November only if core work is complete.
-
-## Stock core
-
-After startup, load the section 5 masters and opening stock with:
+## Verify
 
 ```sh
-docker compose exec web python manage.py seed_benchmark
+docker compose exec web python manage.py test -v 1
+docker compose exec web python manage.py benchmark
 docker compose exec web python manage.py reconcile_stock
-docker compose exec web python manage.py test inventory config -v 2
+docker compose exec web python manage.py makemigrations --check --dry-run
 ```
 
-The seed is repeatable: it does not reset stock, execute the purchase, overwrite changed fixtures or create usable user passwords. The step-1 purchase is exercised through `post_receipt` in tests; there is no purchase screen yet. Expected flour after that receipt: 160,000 g, value 690,000 paise, weighted average 69/16 paise per gram (43.125 INR/kg). Opening finished-goods cost remains unknown.
+`benchmark` runs all nine steps through real services, prints 48 expected/actual checks and rolls its scenario back. It requires opening-only stock data. Use `benchmark --persist` once on a fresh instance to keep the full scenario for inspecting screens. A database with operational stock postings is rejected, never reset. For an independent rehearsal instance use a new Compose project name and `WEB_PORT=8001` in an external environment file. The test suite uses its own temporary database, also checks the golden workbook's decimal XML directly, and never deletes application data.
 
-| File | Purpose |
+## Stack and rationale
+
+Django with server-rendered forms keeps validation, permissions and business rules in one understandable Python codebase; a React/API split would add state and build tooling without improving the benchmark. PostgreSQL supplies real transactions, row locks and immutable-movement triggers; SQLite would not exercise the same concurrency guarantees. Docker Compose packages PostgreSQL and WeasyPrint's native libraries and fonts into a reproducible local run.
+
+## Scope status
+
+| Section 6 tier | Delivered |
 | --- | --- |
-| `inventory/models.py` | Masters, explicit opening/purchase documents, posting sequence and movement relationships/constraints. |
-| `inventory/migrations/0001_initial.py` | Creates the stock-core schema. |
-| `inventory/migrations/0002_posting_guards.py` | Creates the factory lock row and movement update/delete rejection trigger. |
-| `inventory/services.py` | Exact conversion/rounding, atomic authorized posting, weighted average, ledger summary and independent source reconciliation. |
-| `inventory/seed.py` | Loads and verifies benchmark fixtures in one transaction, then posts opening through the service. |
-| `inventory/management/commands/seed_benchmark.py` | Thin command wrapper for the seed. |
-| `inventory/management/commands/reconcile_stock.py` | Thin command wrapper for reconciliation. |
-| `inventory/tests.py` | Benchmark, exact arithmetic, retries, source/report mismatch, permissions, immutability and transaction tests. |
-| `inventory/**/__init__.py` | Python package markers only. |
+| Must | Five role groups; seeded masters/conversions/versioned BOMs; mobile ordering and admin approval; GST PDF; two-stage production; consumption/yield variance; ledger/summary; CSV sales and stock reports |
+| Should | Suppliers/purchases; allocations/outstanding/ageing; exact cost with overheads; GST summary; configurable strict tolerance alerts; owner dashboard |
+| Additional section 4 | Customer/product sales, purchase, production, collections and ageing reports; inclusive dates; CSV/PDF via one renderer; native PDF sharing with desktop attachment fallback |
+| Selected stretch | Shortage-based batch suggestion with raw/packaging feasibility; offline capture surviving restart and idempotent sync |
+| Other stretch | Batch/expiry/FEFO, reorder levels, routes/GPS, Tally, e-invoice and Tamil are not built |
 
-There is no editable balance or cached stock table. One factory row serializes all posting; this favors explainable correctness over throughput. Direct SQL/ORM editing of source documents bypasses service-level freezing, so production use would need tighter database privileges or source triggers. Movement immutability is enforced by PostgreSQL. Reconciliation checks internal consistency, not physical stock truth. Receipt and production issue valuation are implemented, including rounding residuals and full depletion; sales/dispatch valuation remains future work.
+See [compliance evidence](docs/compliance.md), [requirements](docs/requirements.md), [decisions](docs/assumptions.md), [design note](docs/design.md), [golden workbook](docs/benchmark.xlsx), [validation](docs/delivery-validation.md) and [demo walkthrough](docs/demo.md).
 
-Mutation verification: disabling the duplicate-return guard caused the retry test to error on the database unique constraint; disabling the immutable-movement trigger caused `DatabaseError not raised`. Both changes were container-only, independently tested, and restored. See `docs/stock-core-validation.md` for the validation record.
+## Benchmark results
 
-## Production services
-
-```sh
-docker compose up --build -d --wait
-docker compose exec web python manage.py seed_benchmark
-docker compose exec web python manage.py test production inventory config -v 2
-```
-
-The seed still loads only section 5 masters and opening stock. Production tests execute steps 1-3 and 8 through services, with exact expected values from the golden workbook. They do not change the normal application database. Recipe data migration preserves the existing seed and stock history; no reseed/reset was needed.
-
-| File | Purpose |
+| Check | Result |
 | --- | --- |
-| `inventory/models.py`, migrations `0003`-`0006` | Shared versioned raw recipes, data migration, tolerance setting and production source foreign keys/constraints. |
-| `inventory/seed.py`, `inventory/tests.py` | Seed and verify the split recipe/packaging masters without adding the 500 g SKU. |
-| `inventory/services.py` | Reconcile production source lines and label FG valuation materials-only. |
-| `production/models.py`, `production/migrations/` | Run snapshots, explicit issue/completion events and lines, overhead documents and tolerance-change audit records. |
-| `production/services.py` | Create/snapshot runs, post issues and completion, value consumption, add overhead, change tolerance and report variance/cost. |
-| `production/test_fixtures.py` | Test-only 500 g SKU, separate pouch and packaging BOM using the shared recipe. |
-| `production/tests.py` | Benchmark, residual/depletion, rollback, stock guards, retries, snapshots, tolerance and 500 g tests. |
+| Flour / oil / spice closing | 120 kg / 19.5 L / 3.8 kg |
+| Pouches / cartons | 306 / 21 |
+| FG after run / after dispatch | 238 / 88 packets |
+| Approval and invoice: on-hand / reserved / available | 238 / 150 / 88 |
+| Dispatch: on-hand / reserved / available | 88 / 0 / 88 |
+| Yield / oil / cartons / pouches variance | −6% flagged / +5% flagged / −10% flagged / −3% not flagged |
+| A invoice | ₹7,500 + ₹187.50 CGST + ₹187.50 SGST = ₹7,875 |
+| A collected / outstanding | ₹4,000 / ₹3,875 |
+| B | Submitted, shortage 32; no invoice or reservation |
+| Weighted flour / materials / total cost | ₹43.125/kg / ₹4,055 / ₹5,855 |
+| Cost and margin per good packet | Exact ₹5,855/188; displayed ₹31.14; margin ₹18.86 |
 
-`create_run` snapshots standards; `issue_run` posts raw usage; `complete_run` posts actual packaging and good FG. `add_overhead` appends costs; `run_report` returns exact Fraction values and a separately rounded display amount in paise. The 12-packet shortfall remains unclassified; six damaged pouches are already part of the 194-pouch consumption.
+**Deliberate interpretations:** the uniform tolerance rule also flags cartons (−10%), beyond the PS's named yield/oil alerts. Nine cartons are recorded as given, with eight packets loose. The 12 packet-equivalents of output shortfall are **unclassified**; six damaged pouches are separate packaging damage already included in the 194 issued. No assumed 6 + 6 food-loss split and no additional stock deduction. No benchmark quantity or money result differs from the golden file.
 
-### Known gaps and deliberate policies
+## Boundaries and known gaps
 
-- **Materials-only FG valuation:** receipt value includes raw materials and packaging, but not overhead. Late overhead updates run cost, not FG inventory value. This is not full absorption accounting or a COGS/profit statement. Opening FG cost remains unknown.
-- **Retroactive tolerance:** past runs are flagged using the current setting, with no per-run historical alert snapshot. Changing 3% to 2% flags the existing -3% pouch variance. Quantities, costs and ledger history remain unchanged.
-- **Rounding residual:** total issue value is rounded half-up to paise; the residual remains with stock. Full depletion consumes the remaining value. Split issues can allocate individual paise differently from one combined issue, while total value is conserved.
-- **500 g fixture:** shared recipe yields 80 packets under an explicit nominal-output assumption, with its own pouch and four cartons of 20 packets. It is never added to the standard benchmark seed.
-- **No production screens or reversal workflow yet.** Whole planned batches only; no substitute ingredients or retrospective valuation. Zero output keeps run cost visible but has no unit cost or FG receipt.
+- FG valuation is materials-only. Opening FG value is unknown, so aggregate FG value and COGS remain unknown. Late overhead changes run cost, not past FG movements.
+- Tolerance changes apply retroactively to displayed alerts. Production reports select runs by document date and show their currently recorded costs. Stock reports use posting date/sequence; commercial registers use document dates. Ageing is due-date based, due on invoice date, and ignores its range start.
+- Payments are allocated in full to one invoice; several payments per invoice are supported. Credit is full, unpaid and undispatched only. No partial dispatch, partial credit, refunds or physical returns.
+- Run reversals correct recording errors, not physical production. Later or intervening affected-item stock events and reserved FG block reversal. No cascading revaluation, fractional planned batches or ingredient substitution.
+- Posted sources are frozen by services; privileged ORM/SQL can bypass this. The database trigger protects movement update/delete only. Reconciliation detects source/ledger disagreement. Direct database owners are trusted.
+- Native file sharing depends on the device. Desktop fallback requires downloading and attaching the PDF manually. The app does not send email or WhatsApp messages. Localhost links are not public customer links.
+- Offline capture is one SKU per queued order, supports a private demo device, and confirms server pricing at sync. Cached dummy catalog/queued data remains on that device across sign-out; sync requires the original account. No background sync or multi-device conflict resolution.
+- GST is the exercise's fixed 5%, with per-line component rounding. GSTR labels are explanatory mappings, not filing-ready payloads. GSTINs and HSN are fictional. Master data is seeded; no generic master-maintenance UI.
+- Images/transitive dependencies are not fully digest-locked. No hosted demo, production webserver or public deployment hardening. The video/public repository submission and organizer deadline/contact verification remain human delivery tasks.
 
-See `docs/production-validation.md` for the mutation results and benchmark evidence.
+## Where the code lives
+
+| Files | Purpose |
+| --- | --- |
+| `inventory/models.py`, `services.py`, migrations | Masters, typed sources, ledger, receipt/adjustment/reversal posting and reconciliation |
+| `production/models.py`, `services.py` | Snapshotted runs, exact issues, completion, late overhead, variance and suggestions |
+| `sales/models.py`, `services.py` | Orders/reservations, immutable invoice snapshots, FY sequence, dispatch, payments, credits |
+| `access/models.py`, `services.py`, `seed.py` | Audit events, role gates and demo identities |
+| `reporting/services.py`, `benchmark.py` | Shared report tables/exports/dashboard and the nine-step service orchestrator |
+| `webapp/views.py`, `forms.py`, `services.py` | HTTP adaptation, exact entry parsing, PDF and offline sync boundaries |
+| `templates/`, `static/` | Server-rendered screens, shared styling, native file share and offline shell/queue |
+| `config/`, `Dockerfile`, `compose.yaml`, `docker/` | Django runtime, container libraries, startup/migrations/seed |
+| App `tests.py` and `test_*.py` | Arithmetic, posting/retry/concurrency, rollback, permissions, reports, golden benchmark and corrections |
+
+No Git commits or pushes are made by the coding agent. See [NEXT_STEPS](NEXT_STEPS.md) for the handoff and suggested commit batches.

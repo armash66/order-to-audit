@@ -1,0 +1,70 @@
+
+{% load static display %}
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>
+{% block title %}
+Order-to-Audit
+{% endblock %}
+</title>
+<link rel="stylesheet" href="
+{% static 'app.css' %}
+">
+</head>
+<body>
+<header>
+<strong>
+<a href="/">Order-to-Audit</a>
+</strong>
+{% if user.is_authenticated %}
+<nav>
+{% if is_sales or is_reports %}
+<a href="
+{% url 'orders' %}
+">Orders</a>
+{% endif %}
+
+{% if is_production %}
+<a href="
+{% url 'production' %}
+">Production</a>
+{% endif %}
+
+{% if is_stock %}
+<a href="
+{% url 'stock' %}
+">Stock</a>
+{% endif %}
+
+{% if is_reports or is_sales %}
+<a href="/reports/">Reports</a>
+{% endif %}
+</nav>
+<form method="post" action="
+{% url 'logout' %}
+">
+{% csrf_token %}
+<button class="secondary">Sign out</button>
+</form>
+{% endif %}
+</header>
+<main>
+{% for message in messages %}
+<p class="
+{% if message.tags == 'error' %}
+alert
+{% else %}
+success
+{% endif %}
+" role="status">{{ message }}</p>
+{% endfor %}
+
+{% block content %}
+
+{% endblock %}
+</main>
+</body>
+</html>

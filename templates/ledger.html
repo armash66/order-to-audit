@@ -1,0 +1,31 @@
+
+{% extends 'base.html' %}
+
+{% load display %}
+
+{% block content %}
+<h1>{{ item.name }} ledger</h1>
+<p>Base unit: {{ item.base_unit }}</p>
+<section class="card scroll">
+<table>
+<tr>
+<th>Sequence / source</th>
+<th>Posted</th>
+<th>Signed quantity</th>
+<th>Signed value INR</th>
+</tr>
+{% for movement in movements %}
+<tr>
+<td>
+<a href="
+{% url 'source' movement.posting_id %}
+">{{ movement.posting.sequence }} · source document</a>
+</td>
+<td>{{ movement.posting.posted_at }}</td>
+<td>{{ movement.quantity }}</td>
+<td>{{ movement.value_paise|money }}</td>
+</tr>
+{% endfor %}
+</table>
+</section>
+{% endblock %}

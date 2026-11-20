@@ -1,0 +1,26 @@
+
+{% extends 'base.html' %}
+
+{% load display %}
+
+{% block content %}
+<h1>Posting #{{ posting.sequence }}</h1>
+<p>Document #{{ source.pk }} · {{ source.document_date }} · {{ source.actor.username }}</p>
+<p class="muted">Reference: {{ source.request_key }}</p>
+<section class="card scroll">
+<table>
+<tr>
+<th>Item</th>
+<th>Source quantity (base units)</th>
+<th>Source value INR</th>
+</tr>
+{% for line in lines %}
+<tr>
+<td>{{ line.item.name }}</td>
+<td>{{ line.quantity }}</td>
+<td>{{ line.value_paise|money }}</td>
+</tr>
+{% endfor %}
+</table>
+</section>
+{% endblock %}

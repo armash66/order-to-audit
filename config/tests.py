@@ -8,9 +8,9 @@ from weasyprint import HTML
 
 class StartupTests(SimpleTestCase):
     def test_startup_page(self):
-        response = self.client.get("/")
+        response = self.client.get("/login/")
         self.assertContains(response, "Order-to-Audit")
-        self.assertContains(response, "Business workflows are not implemented yet.")
+        self.assertContains(response, "Sign in")
 
 
 class DatabaseTests(TestCase):

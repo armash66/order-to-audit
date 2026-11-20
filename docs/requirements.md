@@ -67,3 +67,7 @@ Build order: masters/access/ledger → production → sales/invoice/dispatch →
 Defer in this order: **DASH-1 → AUTH-2 → RPT-2 report PDFs → STR-4**. Record any actual cuts in the README; none are cut yet. Invoice PDF (SAL-2), all Must requirements, all section 4.6 CSV reports and benchmark calculations remain in scope. Report PDFs use one generic table-to-PDF renderer, not seven bespoke layouts. Deferring them is an explicit gap against section 4.6, even though section 6 minimum exports are covered by CSV. SAL-6 is Should because section 6 does not list invoice sharing among the Must features.
 
 Allowed state transitions and correction limits are defined in [assumptions.md](assumptions.md#allowed-transitions-implementation-contract). Paid/dispatched invoice correction and reversal of runs with subsequent affected-item stock postings are explicitly unsupported; failures must leave no writes. These limits keep AUD-1 implementable without refunds, returns or retroactive valuation.
+
+## Delivery update ? 20 November 2026
+
+The latest scope instruction supersedes the earlier cut line: all Must and Should features are implemented; STR-4 and STR-1 are also included. No cut has been taken. The table remains the original acceptance contract; see compliance.md for test/screen evidence and README for bounded prototype limitations. An under-one-minute real-user usability trial, final video and public submission still require the applicant.

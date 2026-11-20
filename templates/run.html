@@ -1,0 +1,138 @@
+
+{% extends 'base.html' %}
+
+{% load display %}
+
+{% block content %}
+<h1>Run #{{ run.pk }} · {{ run.output_item.name }}</h1>
+<p>
+<span class="badge">{{ run.state }}</span> · {{ run.expected_packets }} expected packets</p>
+{% if run.state == 'draft' %}
+<section class="card">
+<h2>Issue raw materials</h2>
+<form method="post">
+{% csrf_token %}
+<input type="hidden" name="request_key" value="{{ request_key }}">
+{% for standard in raw %}
+<label>{{ standard.item.name }} ({{ standard.item.base_unit }})<input name="actual_{{ standard.item_id }}" type="number" min="0" value="{{ standard.quantity }}" required>
+</label>
+{% endfor %}
+<button name="action" value="issue">Post raw issue</button>
+</form>
+<form method="post">
+{% csrf_token %}
+<label>Change draft batch count<input name="batches" type="number" min="1" value="{{ run.batches }}">
+</label>
+<button class="secondary" name="action" value="edit">Update draft</button>
+</form>
+</section>
+{% endif %}
+
+{% if run.state == 'issued' %}
+<section class="card">
+<h2>Complete run</h2>
+<p>Enter total packaging issued, including damaged packaging.</p>
+<form method="post">
+{% csrf_token %}
+<input type="hidden" name="request_key" value="{{ request_key }}">
+{% for standard in packaging %}
+<div class="fields">
+<label>{{ standard.item.name }} issued (pieces)<input type="number" min="0" name="actual_{{ standard.item_id }}" value="{{ standard.quantity }}" required>
+</label>
+<label>Damaged, included above<input type="number" min="0" name="damage_{{ standard.item_id }}" value="0" required>
+</label>
+</div>
+{% endfor %}
+<label>Good packets<input name="good_packets" type="number" min="0" required>
+</label>
+<button name="action" value="complete">Post packaging and receive FG</button>
+</form>
+</section>
+{% endif %}
+<section class="card scroll">
+<h2>Planned versus actual</h2>
+<table>
+<tr>
+<th>Item</th>
+<th>Standard (base units)</th>
+<th>Actual</th>
+<th>Variance</th>
+</tr>
+{% for item,row in report.consumption.items %}
+<tr>
+<td>{{ item }}</td>
+<td>{{ row.planned }}</td>
+<td>{{ row.actual|default_if_none:'Not recorded' }}</td>
+<td class="
+{% if row.flagged %}
+alert
+{% endif %}
+">{{ row.ratio|percent }}
+{% if row.flagged %}
+ · flagged
+{% endif %}
+</td>
+</tr>
+{% endfor %}
+</table>
+<p class="
+{% if report.yield.flagged %}
+alert
+{% endif %}
+">Yield: {{ report.good_packets|default_if_none:'Not recorded' }} / {{ report.expected_packets }} · {{ report.yield.ratio|percent }}</p>
+<p>Unclassified output shortfall: {{ report.unclassified_shortfall|default_if_none:'Not recorded' }}</p>
+<p>Materials ₹{{ report.materials_paise|money }} · Overhead ₹{{ report.overhead_paise|money }} · Total ₹{{ report.total_paise|money }}</p>
+<p class="metric">
+{% if report.display_cost_paise != None %}
+₹{{ report.display_cost_paise|money }} / good packet
+{% else %}
+Unit cost N/A
+{% endif %}
+</p>
+<p>Margin at current list price: {{ report.margin_paise|money }} INR / packet (before GST)</p>
+<p>Damaged packaging (already issued): {{ report.damaged_packaging }}</p>
+<p class="muted">FG stock valuation is materials-only. Late overhead changes run cost, not stock history.</p>
+</section>
+{% if is_admin %}
+<section class="card">
+<h2>Run costs and tolerance</h2>
+{% if run.state == 'completed' %}
+<form method="post">
+{% csrf_token %}
+<input type="hidden" name="request_key" value="{{ request_key }}">
+<label>Overhead description<input name="label" required>
+</label>
+<label>Amount INR<input name="amount" inputmode="decimal" required>
+</label>
+<button name="action" value="overhead">Add overhead</button>
+</form>
+{% endif %}
+<form method="post">
+{% csrf_token %}
+<label>Variance tolerance %<input type="number" name="tolerance" min="0" max="100" step="0.01" value="3" required>
+</label>
+<p class="muted">Changing tolerance re-evaluates past reports.</p>
+<button class="secondary" name="action" value="tolerance">Update tolerance</button>
+</form>
+</section>
+{% endif %}
+
+{% if is_admin %}
+
+{% if run.state == 'issued' or run.state == 'completed' %}
+<details class="card">
+<summary>Reverse a recording error</summary>
+<p>Only possible before dependent stock events. This reverses bookkeeping, not physical production.</p>
+<form method="post">
+{% csrf_token %}
+<input type="hidden" name="request_key" value="{{ request_key }}">
+<label>Correction reason<input name="reason" required>
+</label>
+<button name="action" value="reverse" class="danger">Reverse whole run</button>
+</form>
+</details>
+{% endif %}
+
+{% endif %}
+
+{% endblock %}

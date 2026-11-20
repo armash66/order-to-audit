@@ -1,0 +1,50 @@
+
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Offline orders · Order-to-Audit</title>
+<link rel="stylesheet" href="
+{% static 'app.css' %}
+">
+<script src="
+{% static 'offline.js' %}
+" defer>
+</script>
+</head>
+<body>
+<header>
+<strong>Order-to-Audit</strong>
+<a href="/orders/">Orders</a>
+<a href="/login/">Sign in</a>
+</header>
+<main>
+<h1>Offline order capture</h1>
+<p id="identity">
+</p>
+<p id="status" role="status">Loading catalog…</p>
+<section class="card">
+<form id="offline-form">
+<label>Customer<select id="customer" required>
+</select>
+</label>
+<label>Product<select id="sku" required>
+</select>
+</label>
+<label>Packets<input id="quantity" type="number" min="1" step="1" value="1" required>
+</label>
+<button id="capture" disabled>Save on device</button>
+</form>
+</section>
+<section class="card">
+<h2>Awaiting sync</h2>
+<ul id="queue">
+</ul>
+<button id="sync">Sync now</button>
+</section>
+<p>Use a private device: cached dummy customer data and queued orders remain here across sign-out and restart. Do not clear browser storage before syncing. One product per offline order; online orders support multiple products. Sync requires the original user's login.</p>
+</main>
+</body>
+</html>

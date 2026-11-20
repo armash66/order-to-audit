@@ -1,0 +1,30 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>@page{size:A4 landscape;margin:12mm}body{font:9px 'DejaVu Sans'}table{width:100%;border-collapse:collapse}td,th{padding:5px;border:1px solid #ccc;overflow-wrap:anywhere}thead{display:table-header-group}tr{break-inside:avoid}</style>
+</head>
+<body>
+<h1>{{ title }}</h1>
+<p>{{ start }} through {{ end }} (inclusive)</p>
+<table>
+<thead>
+<tr>
+{% for header in headers %}
+<th>{{ header }}</th>
+{% endfor %}
+</tr>
+</thead>
+<tbody>
+{% for row in rows %}
+<tr>
+{% for cell in row %}
+<td>{{ cell }}</td>
+{% endfor %}
+</tr>
+{% endfor %}
+</tbody>
+</table>
+<p>Exercise summary, not a GST filing. Stock uses posting dates; ageing uses the end date and includes all earlier invoices. Production costs include all recorded overheads.</p>
+</body>
+</html>

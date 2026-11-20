@@ -161,7 +161,7 @@ OpeningStock and PurchaseReceipt have separate tables and lines. Posting referen
 
 The only database trigger rejects movement UPDATE/DELETE. Posted source documents are frozen through the posting service: there is no edit/delete service, an identical request key returns the existing posting, and changed content is rejected. Raw ORM/SQL writes to source documents can bypass this boundary; reconciliation detects disagreement. Master data must not be edited through unrestricted interfaces once referenced; master-edit workflows are outside this chunk. Database owners can disable triggers and are not protected by this mechanism.
 
-Receipt entry accepts positive integer base quantities and nonnegative integer line totals in paise. Fraction represents weighted-average rates exactly; round_paise applies ROUND_HALF_UP only at a monetary boundary. Item conversions reject fractional base-unit results. Production now implements weighted-average issues and depletion residual handling; adjustments and production reversals remain unimplemented.
+Receipt entry accepts positive integer base quantities and nonnegative integer line totals in paise. Fraction represents weighted-average rates exactly; round_paise applies ROUND_HALF_UP only at a monetary boundary. Item conversions reject fractional base-unit results. Production now implements weighted-average issues and depletion residual handling; adjustments and guarded production reversals are implemented in the delivery phase.
 
 ## Production implementation
 
@@ -171,6 +171,24 @@ ProductionEvent is an explicit issue or completion source, with signed Productio
 
 Each transition locks FactoryControl, checks permissions/state/actual inputs, validates stock and valuation, then writes sources, sequence, movements and state atomically. Retries require the same run/event key, actor and payload and return the existing posting. Reconciliation includes production sources. There are no source edit services; database trigger protection remains limited to movement update/delete as agreed.
 
-Unknown input valuation blocks an issue; unknown opening FG valuation still makes aggregate FG valuation unknown even after a materials-valued receipt. Overhead has its own request key, actor and posting time; changing its amount on retry fails. Production reversal, draft editing, ingredient substitutions, fractional planned batches and screens are not built in this chunk.
+Unknown input valuation blocks an issue; unknown opening FG valuation still makes aggregate FG valuation unknown even after a materials-valued receipt. Overhead has its own request key, actor and posting time; changing its amount on retry fails. Draft editing, guarded reversal and screens were added in delivery; substitutions and fractional planned batches remain deferred.
 
-Seed_benchmark loads section 5 stock masters, SKU, BOM, supplier and customers, plus a disabled-password staff identity for audited seed posting. It posts opening stock only, never the step-1 purchase. Repeating the seed verifies existing fixture values without overwriting edits or resetting operations. Salesman logins and factory invoice identity are deferred to authentication/billing.
+Seed_benchmark loads section 5 stock masters, SKU, BOM, supplier and customers, plus a disabled-password staff identity for audited seed posting. It posts opening stock only, never the step-1 purchase. Repeating the seed verifies existing fixture values without overwriting edits or resetting operations. Demo role logins and the workbook factory identity are now supplied by authentication/billing.
+
+## Autonomous delivery decisions
+
+- DEC-28: Approved and invoiced order lines are the reservation source; availability subtracts their quantities under the factory lock. Dispatch/credit/rejection releases reservation by changing the order state atomically, without a second mutable counter.
+- DEC-29: A payment is fully allocated to one invoice in this prototype; multiple receipts per invoice are supported. Credits are full, unpaid and undispatched only. GST uses the exercise's 5% rate and per-line half-up component rounding.
+- DEC-30: Dispatch records unknown value when aggregate FG valuation is unknown; it still posts exact negative quantities. No invented COGS is introduced.
+
+- DEC-31: Staff accounts are trusted operators; ordinary demo users receive one of five groups. User-facing views and mutation services enforce roles; pure arithmetic and internal ledger-query helpers are called behind those checks. Salesmen only read their own orders.
+- DEC-32: Invoice drafts snapshot approved lines; the editable draft metadata is document date. Drafts use temporary identifiers and consume an FY invoice number only when posted. Posted documents cannot be edited.
+
+- DEC-33: Invoice PDFs use frozen invoice fields and workbook factory identity. Native file sharing is used where supported; desktop fallback downloads the PDF for manual attachment. No email is sent by the application.
+- DEC-34: Commercial reports use inclusive document dates; stock uses posting dates. Ageing includes every invoice through the end date, ignoring the range start. GST output maps exercise totals to GSTR-1 categories and GSTR-3B 3.1(a), not a filing schema. Production reports show current recorded costs for runs selected by run date.
+
+- DEC-35: Benchmark defaults to an atomic dry run on opening-only data; --persist retains the scenario for demonstration. Existing operational data is never reset. All nine steps use the same posting services as screens.
+- DEC-36: Signed adjustments require admin and a reason. Negative adjustments use current weighted-average value and preserve reservations; positive adjustments require explicit line cost. Whole-run reversals append exact inverse source values, reject intervening/dependent stock events and exclude reversed cost from current totals.
+
+- DEC-37: Production suggestions aggregate all submitted demand for each SKU, subtract available stock once, and use the latest BOM. Whole batches are rounded upward; feasibility uses all raw and packaging inputs. Suggestions never post or reserve.
+- DEC-38: Offline mode caches only a public shell and a dummy catalog on the private demo device. Queued single-product orders survive browser restart, retain one request key and require their original user to sync. The server confirms list prices at sync. Online entry supports multiple products; local data persists across sign-out until synced or browser storage is cleared.

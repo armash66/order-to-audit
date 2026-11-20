@@ -1,0 +1,75 @@
+
+{% extends 'base.html' %}
+
+{% load display %}
+
+{% block content %}
+<h1>Orders</h1>
+<p class="muted">Capture once. Track through dispatch.</p>
+{% if is_sales %}
+<section class="card">
+<h2>New order</h2>
+<p>
+<a href="/offline/">Offline capture and sync</a>
+</p>
+<form method="post" id="order-form">
+{% csrf_token %}
+<input type="hidden" name="request_key" value="{{ request_key }}">
+<label>Customer<select name="customer" required>
+{% for customer in customers %}
+<option value="{{ customer.pk }}">{{ customer.name }}</option>
+{% endfor %}
+</select>
+</label>
+<div id="order-lines">
+<div class="order-line">
+<label>Product<select name="sku" required>
+{% for sku in skus %}
+<option value="{{ sku.pk }}">{{ sku.item.name }} · ₹{{ sku.price_paise|money }}</option>
+{% endfor %}
+</select>
+</label>
+<label>Packets<input name="quantity" type="number" min="1" step="1" value="1" required>
+</label>
+</div>
+</div>
+<button type="button" class="secondary" id="add-line">Add product</button>
+<button>Submit order</button>
+</form>
+</section>
+<script>document.getElementById('add-line').onclick=()=>{const row=document.querySelector('.order-line').cloneNode(true);row.querySelector('input').value='1';document.getElementById('order-lines').appendChild(row)};</script>
+{% endif %}
+<section class="card scroll">
+<h2>Order history</h2>
+<table>
+<thead>
+<tr>
+<th>Order</th>
+<th>Customer</th>
+<th>Date</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+{% for order in orders %}
+<tr>
+<td>
+<a href="
+{% url 'order' order.pk %}
+">#{{ order.pk }}</a>
+</td>
+<td>{{ order.customer.name }}</td>
+<td>{{ order.document_date }}</td>
+<td>
+<span class="badge">{{ order.status }}</span>
+</td>
+</tr>
+{% empty %}
+<tr>
+<td colspan="4">No orders yet.</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</section>
+{% endblock %}

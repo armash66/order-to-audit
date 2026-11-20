@@ -1,0 +1,46 @@
+
+{% load display %}
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>@page{size:A4;margin:18mm}body{font:12px 'DejaVu Sans';color:#18263b}h1{color:#126a65}table{width:100%;border-collapse:collapse}td,th{padding:10px;border-bottom:1px solid #ddd;text-align:left}.total{font-size:20px}</style>
+</head>
+<body>
+<h1>Tax invoice {{ invoice.number }}</h1>
+<p>Demo Snack Factory · Tamil Nadu (33)<br>Supplier GSTIN: 33AAAAA0000A1Z0 (dummy identity)</p>
+<p>Date: {{ invoice.document_date }} · Status: {{ invoice.status }}</p>
+<h2>{{ invoice.customer_name }}</h2>
+<p>GSTIN: {{ invoice.customer_gstin|default:'Unregistered' }}<br>Place of supply: {{ invoice.supply_state }}</p>
+<table>
+<thead>
+<tr>
+<th>Product / HSN</th>
+<th>Qty</th>
+<th>Rate ₹</th>
+<th>Taxable ₹</th>
+<th>CGST ₹</th>
+<th>SGST ₹</th>
+<th>IGST ₹</th>
+</tr>
+</thead>
+<tbody>
+{% for line in invoice.lines.all %}
+<tr>
+<td>{{ line.description }}<br>{{ line.hsn }}</td>
+<td>{{ line.quantity }}</td>
+<td>{{ line.price_paise|money }}</td>
+<td>{{ line.taxable_paise|money }}</td>
+<td>{{ line.cgst_paise|money }}</td>
+<td>{{ line.sgst_paise|money }}</td>
+<td>{{ line.igst_paise|money }}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+<p>GST rate: 5% (intrastate 2.5% CGST + 2.5% SGST; interstate 5% IGST).</p>
+<p>Taxable ₹{{ invoice.taxable_paise|money }} · CGST ₹{{ invoice.cgst_paise|money }} · SGST ₹{{ invoice.sgst_paise|money }} · IGST ₹{{ invoice.igst_paise|money }}</p>
+<p class="total">Total ₹{{ invoice.total_paise|money }}</p>
+<p>Internship demonstration. All business identities and HSN data are fictional.</p>
+</body>
+</html>

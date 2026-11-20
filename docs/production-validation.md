@@ -54,3 +54,5 @@ After that foundation, the 500 g scenario needed **16 lines in `production/test_
 ## Limits
 
 The single factory lock serializes posting, favouring simplicity over throughput. This chunk adds no further concurrency tests beyond the stock core's duplicate-request test; production rollback is directly tested. Source freezing remains service-level; privileged ORM/SQL edits can bypass it. Production reversals, draft edit workflows, substitute ingredients, fractional planned batches and screens remain unimplemented. This is a run-cost prototype, not complete inventory absorption accounting.
+
+Delivery update: draft editing, guarded reversals, sales and screens were subsequently implemented. See delivery-validation.md for the integrated 53-test suite and repeated production mutation checks. The earlier results above describe the original production-only checkpoint.

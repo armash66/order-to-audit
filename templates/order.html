@@ -1,0 +1,171 @@
+
+{% extends 'base.html' %}
+
+{% load display static %}
+
+{% block content %}
+<p>
+<a href="
+{% url 'orders' %}
+">Orders</a>
+</p>
+<h1>Order #{{ order.pk }}</h1>
+<p>{{ order.customer.name }} · <span class="badge">{{ order.status }}</span>
+</p>
+{% if order.rejection_reason %}
+<p class="alert">{{ order.rejection_reason }}</p>
+{% endif %}
+<section class="card scroll">
+<table>
+<tr>
+<th>Product</th>
+<th>Packets</th>
+<th>Unit price</th>
+</tr>
+{% for line in lines %}
+<tr>
+<td>{{ line.sku.item.name }}</td>
+<td>{{ line.quantity }}</td>
+<td>₹{{ line.price_paise|money }}</td>
+</tr>
+{% endfor %}
+</table>
+{% if order.status == 'submitted' %}
+
+{% for row in checks %}
+<p class="
+{% if row.shortage %}
+alert
+{% endif %}
+">{{ row.item }}: {{ row.available }} available · {{ row.shortage }} short</p>
+{% endfor %}
+
+{% endif %}
+</section>
+{% if is_admin %}
+<section class="card">
+<h2>Fulfilment</h2>
+<form method="post">
+{% csrf_token %}
+<label>Document date<input type="date" name="date" value="
+{% if invoice %}
+{{ invoice.document_date|date:'Y-m-d' }}
+{% else %}
+{{ today|date:'Y-m-d' }}
+{% endif %}
+">
+</label>
+{% if order.status == 'submitted' %}
+<button name="action" value="approve">Approve & reserve</button>
+{% endif %}
+
+{% if order.status == 'approved' %}
+
+{% if not invoice %}
+<button name="action" value="draft" class="secondary">Create invoice draft</button>
+{% endif %}
+<button name="action" value="invoice">Post invoice</button>
+{% if invoice.status == 'draft' %}
+<button name="action" value="edit_invoice" class="secondary">Update draft date</button>
+{% endif %}
+
+{% endif %}
+
+{% if order.status == 'invoiced' %}
+<button name="action" value="dispatch">Dispatch full order</button>
+{% endif %}
+<label>Reason (required for rejection or credit)<input name="reason">
+</label>
+{% if order.status == 'submitted' or order.status == 'approved' %}
+<button name="action" value="reject" class="danger">Reject order</button>
+{% endif %}
+
+{% if invoice.status == 'posted' and order.status == 'invoiced' %}
+<button name="action" value="credit" class="danger">Full credit note</button>
+{% endif %}
+</form>
+</section>
+{% if not invoice %}
+<details class="card">
+<summary>Edit before invoicing</summary>
+<form method="post">
+{% csrf_token %}
+
+{% for line in lines %}
+<div class="fields">
+<label>{{ line.sku.item.name }} quantity<input name="qty_{{ line.pk }}" value="{{ line.quantity }}" type="number" min="1">
+</label>
+<label>Price ₹<input name="price_{{ line.pk }}" value="{{ line.price_paise|money }}">
+</label>
+</div>
+{% endfor %}
+<button name="action" value="edit">Save and require approval again</button>
+</form>
+</details>
+{% endif %}
+
+{% endif %}
+
+{% if invoice %}
+<section class="card">
+<h2>Invoice {{ invoice.number }}</h2>
+{% if invoice.status != 'draft' %}
+<p>
+<a href="
+{% url 'invoice_pdf' invoice.pk %}
+">Download PDF</a> <button type="button" data-share-pdf="
+{% url 'invoice_pdf' invoice.pk %}
+">Share PDF</button>
+</p>
+<p id="share-help" hidden>Download the PDF above, then attach it in your email or WhatsApp conversation. <a href="mailto:?subject=Tax%20invoice">Open email</a> / <a href="https://wa.me/?text=Your%20tax%20invoice" rel="noreferrer">Open WhatsApp</a>
+</p>
+<script src="
+{% static 'share.js' %}
+" defer>
+</script>
+{% endif %}
+<p>Taxable ₹{{ invoice.taxable_paise|money }} · CGST ₹{{ invoice.cgst_paise|money }} · SGST ₹{{ invoice.sgst_paise|money }} · IGST ₹{{ invoice.igst_paise|money }}</p>
+<p class="metric">₹{{ invoice.total_paise|money }}</p>
+<p>Outstanding: ₹{{ due|money }}</p>
+{% if is_admin and invoice.status == 'posted' %}
+<form method="post">
+{% csrf_token %}
+<input type="hidden" name="request_key" value="{{ request_key }}">
+<label>Payment amount ₹<input name="amount" inputmode="decimal" required>
+</label>
+<label>Payment date<input name="date" type="date" value="{{ today|date:'Y-m-d' }}" required>
+</label>
+<button name="action" value="payment">Record payment</button>
+</form>
+{% endif %}
+</section>
+{% endif %}
+
+{% for suggestion in suggestions %}
+<section class="card scroll">
+<h2>Production suggestion</h2>
+<p>All submitted demand for this SKU: {{ suggestion.uncovered }} uncovered packets; {{ suggestion.required_batches }} batches needed, {{ suggestion.feasible_batches }} feasible from inputs.</p>
+{% if suggestion.blocked %}
+<p class="alert">Raw/packaging stock cannot cover all required batches.</p>
+{% endif %}
+<table>
+<tr>
+<th>Input</th>
+<th>Stock</th>
+<th>Required</th>
+<th>Shortage</th>
+</tr>
+{% for row in suggestion.inputs %}
+<tr>
+<td>{{ row.item }} ({{ row.unit }})</td>
+<td>{{ row.stock }}</td>
+<td>{{ row.required }}</td>
+<td>{{ row.shortage }}</td>
+</tr>
+{% endfor %}
+</table>
+<p>Suggestion only. No stock posted or reserved.</p>
+</section>
+{% endfor %}
+
+{% endblock %}

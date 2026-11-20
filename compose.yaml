@@ -15,11 +15,12 @@ services:
   web:
     build: .
     ports:
-      - "127.0.0.1:8000:8000"
+      - "127.0.0.1:${WEB_PORT:-8000}:8000"
     environment:
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-local-demo-only-not-for-deployment}
       DJANGO_DEBUG: ${DJANGO_DEBUG:-1}
       DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1,[::1]}
+      DEMO_PASSWORD: ${DEMO_PASSWORD:-DemoPass123!}
       POSTGRES_DB: ${POSTGRES_DB:-order_to_audit}
       POSTGRES_USER: ${POSTGRES_USER:-order_to_audit}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-local-demo-password}
@@ -29,7 +30,7 @@ services:
       db:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/', timeout=3)"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/login/', timeout=3)"]
       interval: 5s
       timeout: 5s
       retries: 20

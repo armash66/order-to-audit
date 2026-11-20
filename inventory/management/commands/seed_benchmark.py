@@ -7,4 +7,6 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         posting = seed_benchmark()
+        from access.seed import seed_logins
+        seed_logins()
         self.stdout.write(self.style.SUCCESS(f"Opening stock posting sequence: {posting.sequence}"))
