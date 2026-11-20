@@ -19,7 +19,10 @@ erDiagram
   Order ||--|{ OrderLine : contains
   Order ||--o| Invoice : bills
   Invoice ||--|{ InvoiceLine : snapshots
-  Invoice ||--o| Dispatch : releases
+  Invoice ||--o{ Dispatch : releases
+  Invoice ||--o{ SalesReturn : credits
+  StockMovement ||--|{ LotAllocation : allocates
+  StockLot ||--o{ LotAllocation : tracks
   Invoice ||--o{ Payment : allocates
   Invoice ||--o| CreditNote : corrects
   Supplier ||--o{ PurchaseReceipt : supplies
@@ -33,7 +36,9 @@ Each posting references exactly one opening, purchase, production event, dispatc
 
 Services enforce permissions, begin a PostgreSQL transaction and lock the singleton FactoryControl row. They validate request keys, state, availability and exact arithmetic before committing source lines, one posting sequence and movements together. Retrying the same payload returns the existing document; changed content fails. The single factory lock serializes writers, including reservations and invoice numbering. It is simple to explain and test, but unsuitable for high-throughput multi-factory operation without redesign.
 
-Orders move submitted → approved → invoiced → dispatched. Submitted/approved orders may be rejected with a reason before an invoice exists. Approved/invoiced lines are reservations; available FG equals ledger on-hand minus those lines. Posting an invoice keeps the reservation; dispatch atomically removes stock and releases it. Full credit is limited to unpaid, undispatched posted invoices. Invoice drafts receive an FY number only at posting.
+Orders move submitted → approved → invoiced → dispatched. Rejection releases pre-invoice reservations. Availability subtracts unshipped reservations and expired lots from on-hand. Partial dispatch retains invoiced status until fulfilled. Full cancellation credit is unpaid/undispatched only; resalable returns separately restore stock and credit original tax/value with cumulative rounding. Invoice drafts receive an FY number only at posting.
+
+Lot allocations partition movements, consuming earliest non-expired batches before unknown-expiry stock; valuation remains item-level weighted average. Reconciliation checks lot sums and nonnegative balances. Legacy lots never invent expiry dates. Customer prices snapshot at submission. Visits and mock fiscal responses are independent append-only records.
 
 Runs move draft → issued → completed. Standards and recipe/BOM versions are snapshotted at creation. Raw issues happen once; completion issues packaging once and receives actual good output. Each SKU has its own expected packet count and packaging BOM while sharing a raw recipe. A 500 g fixture uses 80 expected packets; no special production branch is needed.
 

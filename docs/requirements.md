@@ -68,6 +68,6 @@ Defer in this order: **DASH-1 → AUTH-2 → RPT-2 report PDFs → STR-4**. Reco
 
 Allowed state transitions and correction limits are defined in [assumptions.md](assumptions.md#allowed-transitions-implementation-contract). Paid/dispatched invoice correction and reversal of runs with subsequent affected-item stock postings are explicitly unsupported; failures must leave no writes. These limits keep AUD-1 implementable without refunds, returns or retroactive valuation.
 
-## Delivery update ? 20 November 2026
+## Delivery update — 20 November 2026
 
-The latest scope instruction supersedes the earlier cut line: all Must and Should features are implemented; STR-4 and STR-1 are also included. No cut has been taken. The table remains the original acceptance contract; see compliance.md for test/screen evidence and README for bounded prototype limitations. An under-one-minute real-user usability trial, final video and public submission still require the applicant.
+The latest scope instruction supersedes the earlier cut line and deferred labels: all Must/Should features, SAL-9, SAL-10 and STR-1 through STR-8 are implemented as bounded prototypes. No cut has been taken. DEC-41 supersedes the earlier physical-return/partial-dispatch restriction; full cancellation credit remains unpaid/undispatched only. INV-3 remains an explicit modeling choice: issued-run costs are retained on production documents, without a separate WIP stock account. See compliance.md for test/screen evidence and extended-features.md for exact optional behavior and external validation limits. A real-user timing trial, final video and public submission still require the applicant.

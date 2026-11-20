@@ -12,7 +12,7 @@ Use a fresh Compose project with opening stock only. Do not run `benchmark --per
 | 3:50–4:20 | Admin records A payment4000, shows due3875. |
 | 4:20–5:10 | Admin opens run → labour1200, gas/power600. Show cost5855/188, ₹31.14 display, margin₹18.86; explain materials-only FG valuation. |
 | 5:10–6:20 | Reports: November sales/GST/purchases/production/stock/collections; download CSV and generic PDF. Ageing as of19Dec and20Dec shows 1–30 then31–60. Stock uses actual posting date; select a range including today. |
-| 6:20–7:15 | Owner dashboard; briefly show offline capture with network disabled, restart/reload, online sync once. Mention other stretches are deferred. |
+| 6:20–7:15 | Owner dashboard; briefly show offline capture, restart/reload and automatic reconnect sync. Show Batch alerts, Visits, Tamil toggle and mock/export links briefly; explain Tally import and native-speaker review remain unverified. Keep core evidence within the eight-minute cap. |
 | 7:15–7:50 | Explain immutable ledger, factory lock, atomic services, audit/reversal restrictions and passing tests. Show design note and disclosed assumptions. |
 
 If recording at another date, the fixed benchmark command still uses 19 November 2026; manual screen transactions default to today. Choose the report dates accordingly. The fixed ageing boundary assertions are automated independently.

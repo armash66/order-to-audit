@@ -55,3 +55,15 @@ Both changes were temporary, with restoration in `finally` before final validati
 Each targeted test exited1 with an assertion failure. The tests detect the intended numerical defects rather than merely import/setup errors. Earlier duplicate-post guard and immutable-trigger mutation results remain in `stock-core-validation.md`.
 
 Final restoration check: rebuilt the working image, both Compose services became healthy, all 53 tests passed again, and migration drift/diff whitespace checks passed. No production mutation remains.
+
+## Expanded-scope validation — 20 November 2026
+
+The earlier 53-test/48-check results describe the original delivery. Current expanded scope passes **63 tests** and **49 benchmark checks**, including customer-level ageing. The original nine-step balances, taxes and costs are unchanged. `makemigrations --check --dry-run` reports no changes; main-instance reconciliation reports six reconciled items. Existing data migrated successfully and the main app is healthy on port 8000.
+
+A separate `ota-expanded-check` Compose project started from a fresh volume on port 8002 using the current source. The dry-run benchmark passed before browser transactions. `scripts/browser_check.py` then passed all nine screen steps, 360 px ordering, invoice PDF, report CSV downloads and owner totals. Artifacts: `C:/Users/ARMASH~1/AppData/Local/Temp/ota-ui-hf73nc9n`.
+
+`scripts/extended_browser_check.py` passed pricing/batch/visit page access, Tamil rendering, mock JSON download, consented fictional GPS, automatic reconnect while the offline page remains active, and queue persistence across browser restart followed by online page reopen. Artifacts: `C:/Users/ARMASH~1/AppData/Local/Temp/ota-extensions-rxawjmn1`. The full restart test explicitly reloads online; it does not claim closed-browser background sync.
+
+Failures were surfaced and corrected: the first browser selector missed whitespace-wrapped order URLs, so it now checks resolved URLs. Mock download originally omitted the clearly labelled response; it now wraps exact request JSON and MOCK response together, with regression assertions. A combined restart/reconnect check failed to fetch; separate checks now verify active-page reconnect and restarted-page reopen without clicking Sync. The complete 63-test suite passed after the download fix.
+
+Real Tally import, native-speaker Tamil review, human under-one-minute usability timing and narrated submission video remain external/manual checks. No commits, pushes or messages were sent. Optional-feature evidence and limitations are in `extended-features.md`; the full section 5/6 matrix is in `compliance.md`.

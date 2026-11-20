@@ -9,7 +9,9 @@ Done: phase 5 reports/dashboard (41 tests).
 Done: phase 6 benchmark/logins and adjustments/reversals (46 tests).
 Done: phase 7 suggestions/offline (48 tests; browser offline restart/sync verified).
 Done: phase 8 delivery and clean source-copy validation (53 tests; 48 benchmark checks; full browser walkthrough).
-In progress: none.
+Done: expanded reporting/offline gaps (54 tests), customer pricing/partial dispatch/returns (57 tests), batch/expiry/FEFO/reorder (59 tests).
+Done: all eight stretch categories implemented; 63 tests pass, original benchmark passes 49 checks, migrations/reconciliation pass and the nine-step browser walkthrough passes on an isolated fresh Compose database.
+Done: extension browser validation (Tamil, mock download, consented GPS, active-page automatic reconnect, offline restart followed by online reopen) and expanded delivery documentation.
 Next (applicant): review/commit changes, repeat from the committed clone, timed rehearsal, narrated video/upload, confirm task deadline/contact and submit by 27 Nov 14:00 IST.
 No git staging, commits or pushes authorized. Run full suite after each phase. Target feature complete 25 Nov; submission 27 Nov 14:00 IST.
 
@@ -29,3 +31,14 @@ Shared files span phases; keep dependent migrations, app registrations and servi
 | 8 delivery | README.md, docs/, NEXT_STEPS.md, scripts/browser_check.py, .dockerignore, .env.example, compose.yaml, final sales/web regression fixes | chore: validate local delivery and document compliance |
 
 Validation detail: docs/delivery-validation.md. Compliance matrix: docs/compliance.md. Six interview questions and weak spots: docs/demo.md. Full runtime suite passed after restoring both production mutations and rebuilding the final image.
+
+## Expanded-scope commit batches
+
+Shared files now span all optional features. Prefer these two dependency-complete commits rather than staging an incomplete intermediate migration graph:
+
+| Files | Suggested message |
+| --- | --- |
+| config/settings.py; inventory/, production/, sales/, reporting/, extensions/; webapp/; templates/; static/ | feat: complete optional sales and all eight stretch workflows |
+| README.md; NEXT_STEPS.md; docs/vision.md, requirements.md, assumptions.md, compliance.md, design.md, demo.md, delivery-validation.md, extended-features.md; scripts/extended_browser_check.py | docs: record expanded scope evidence and demo boundaries |
+
+All initial demo accounts retain password `DemoPass123!`: admin, production, salesman_a, salesman_b, accountant, owner. Main instance is http://localhost:8000; isolated expanded rehearsal is http://localhost:8002. The rehearsal contains demo workflow transactions and must not be treated as a fresh benchmark seed.

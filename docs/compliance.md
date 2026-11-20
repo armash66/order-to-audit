@@ -1,6 +1,6 @@
 # Compliance evidence
 
-Implementation evidence is automated unless marked browser/manual. Commands: `python manage.py test`, `python manage.py benchmark`. The benchmark command prints 48 expected/actual checks; the automated scenario also reads the golden workbook directly. This is local verification, not an organizer acceptance result.
+Implementation evidence is automated unless marked browser/manual. Commands: `python manage.py test`, `python manage.py benchmark`. The expanded suite has 63 passing tests; the benchmark prints 49 expected/actual checks and also reads the golden workbook directly. This is local verification, not an organizer acceptance result.
 
 ## Section 5
 
@@ -17,7 +17,7 @@ Implementation evidence is automated unless marked browser/manual. Commands: `py
 | 6: B asks 120, shortage 32, remains submitted | Pass | Step 6 rejects approval; order screen; independent interstate/FY test confirms IGST |
 | 7: collection ₹4,000; due ₹3,875 | Pass | Step 7; payment allocation/idempotency; collections/ageing reports |
 | 8: labour ₹1,200, power ₹600; run ₹5,855; exact unit cost ₹5,855/188, display ₹31.14 | Pass | Step 8; append-only overhead test; run cost/margin screen |
-| 9: month's section 4.6 reports | Pass | Step 9 renders all ten report tables to CSV and PDF; date/credit tests; ageing 30/31-day boundaries |
+| 9: month's section 4.6 reports | Pass | Step 9 renders eleven report tables to CSV and PDF, including customer ageing; date/credit tests; ageing 30/31-day boundaries |
 
 ## Section 6
 
@@ -39,7 +39,14 @@ Implementation evidence is automated unless marked browser/manual. Commands: `py
 | Should: owner dashboard | Pass | `/` as owner; `dashboard` totals and read-only checks |
 | Selected stretch: planning from shortages | Pass | Order detail; `SuggestionTests`: 32 → 1 batch; 250 → 2 needed/1 feasible |
 | Selected stretch: offline capture/sync | Pass | `/offline/`; server ownership/retry/CSRF tests; browser offline restart and sync |
-| Other stretches | Deferred | No FEFO, reorder thresholds, routes/GPS, Tally, e-invoice or Tamil |
+| Stretch: batch/expiry/FEFO | Pass with optional expiry | Batch screen/ledger; `inventory/test_batches.py`; expired issue rollback and lot reconciliation |
+| Stretch: reorder alerts | Pass | Batch thresholds and owner dashboard; available-stock threshold test |
+| Stretch: routes/GPS | Pass | Visits screen; consent, ownership and retry tests |
+| Stretch: Tally export | Implemented; real import unverified | Reports ZIP; XML structure/balance/date tests; documented accounting-only format |
+| Stretch: mock e-invoice/e-way bill | Pass as local mock | Order mock screen; exact JSON, both formats, deterministic MOCK responses and role tests |
+| Stretch: Tamil | Implemented; native-speaker review pending | Production/receipt/run/variance labels; session tests |
+| Optional: customer pricing/schemes | Pass for fixed prices | Prices screen; override/snapshot/catalogue test |
+| Optional: partial dispatch/returns | Pass for resalable goods | Order screen; exact reservations, retry, over-dispatch/return and cumulative tax/value tests |
 
 ## Additional contract and delivery
 
