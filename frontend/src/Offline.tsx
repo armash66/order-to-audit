@@ -171,6 +171,13 @@ export function Offline({ catalog, token }: Props) {
       <button disabled={!token || busy} onClick={sync}>
         Confirm and sync orders
       </button>
+      <button type="button" className="link" onClick={() => {
+        if (!window.confirm("Remove the cached customer list and all unsynced orders from this device?")) return;
+        localStorage.removeItem(queueKey);
+        localStorage.removeItem("ota-react-catalog");
+        setQueue([]);
+        window.location.reload();
+      }}>Clear this device</button>
       {!token && (
         <p>
           <a href="/">Sign in online to sync</a>. After a browser restart, open

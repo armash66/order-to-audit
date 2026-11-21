@@ -18,4 +18,6 @@ Offline: open Offline online once, then capture without network. Add product lin
 
 Operational add-ons for a separate walkthrough: open B's order to see the batch count, BOM input gaps and receipt/run action; open Batches to hold/release a finished lot with a reason and trace an input lot to affected dispatches; add a loss explanation on a completed run; add a collection follow-up on an unpaid invoice and check the Dashboard when its contact date is due. These actions leave the nine-step benchmark figures unchanged unless a quality hold intentionally blocks dispatch.
 
+Setup demonstration (outside the eight-minute benchmark video if time is tight): admin opens **Setup**, creates a fictional staff account and customer, then signs in as that staff member to replace the temporary password. Materials and products can also be created there; a new BOM version affects future runs only. Never use a real company or customer record for this internship submission.
+
 Keep the narrated benchmark under eight minutes. Explain FastAPI services, SQLAlchemy Core transactions, the PostgreSQL factory lock and immutable ledger, and Alembic's schema-preserving adoption. Django remains only in the separate regression test image, not the running application.

@@ -1,8 +1,24 @@
 .tabs {
   display: flex;
+  gap: 10px;
+  flex-direction: column;
+  margin: 20px 0 28px;
+}
+.nav-group {
+  display: flex;
+  align-items: center;
   gap: 8px;
   flex-wrap: wrap;
-  margin: 20px 0;
+}
+.nav-group > span {
+  width: 96px;
+  color: #61727b;
+  font-size: 12px;
+  font-weight: 700;
+}
+.setup-tabs {
+  flex-direction: row;
+  flex-wrap: wrap;
 }
 .tabs button {
   background: #e5edeb;
@@ -105,7 +121,10 @@ small {
     font-size: 25px;
   }
   .tabs {
-    gap: 4px;
+    gap: 8px;
+  }
+  .nav-group > span {
+    width: 100%;
   }
   .tabs button {
     padding: 8px;

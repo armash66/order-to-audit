@@ -84,3 +84,14 @@ These solve operational gaps beyond the PS benchmark without changing its expect
 | OPS-4 | Completed-run loss explanation | Additional | Append-only reason and note appear on the run, idempotent retry adds one note, stock/cost/variance stay unchanged |
 | OPS-5 | Multi-SKU offline review | Additional | One offline order contains two SKU quantities, survives restart, shows both lines for review and syncs once on explicit confirmation |
 | OPS-6 | Collection follow-up | Additional | Admin records note and next-contact date for an unpaid invoice; retry is idempotent and outstanding stays unchanged |
+
+## Operator setup and local-demo hardening — 21 November 2026
+
+| ID | Requirement | Tier | Acceptance check |
+| --- | --- | --- | --- |
+| SET-1 | Admin manages named accounts | Additional | Admin creates one account with one role, can disable it or reset its temporary password; disabled and old-token requests fail; non-admin cannot manage accounts |
+| SET-2 | First-use password change | Additional | New/reset account can only change its temporary password before opening work screens; changing it invalidates the old token |
+| SET-3 | Maintain operational masters | Additional | Admin creates customer, supplier, item, SKU and versioned BOM/recipe from the workspace; invalid units, GSTIN shape, duplicate codes and mixed-category BOM lines fail without partial writes |
+| SET-4 | Operator-first screens | Additional | Visible pages use business tasks and role names, not framework/database names; admin setup is discoverable; 360 px order and production paths remain usable |
+| SEC-1 | Local access hardening | Additional | Failed sign-in attempts are throttled, errors do not reveal whether an account exists, security headers block framing/sniffing, and no API business response is cached |
+| SEC-2 | Private-device offline data control | Additional | Offline screen can clear its cached customer catalogue and queued orders after explicit confirmation; failed sync never discards orders |

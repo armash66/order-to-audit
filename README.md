@@ -28,6 +28,8 @@ All initial demo passwords: **`DemoPass123!`**. Change `DEMO_PASSWORD` before fi
 
 These are fictional demo identities. Compose binds localhost; nginx serves React and proxies FastAPI/Uvicorn. This is a local demonstration configuration.
 
+To work with your own **invented or authorized** records, sign in as `admin` and open **Setup**. Create staff accounts, customers, suppliers, materials, sellable products and versioned BOMs there; receipts and production then create stock through documents. New staff receive a temporary password that they must replace on first sign-in. Admins can disable accounts or reset passwords; each person can change their own password. The seeded benchmark parties remain fictional and unchanged.
+
 ## Verify
 
 ```sh
@@ -39,7 +41,7 @@ docker compose exec api python -m alembic current
 docker compose exec api python -m pytest api/test_api.py -q -p no:cacheprovider
 ```
 
-`python -m api.cli benchmark` runs all nine steps through native services, prints 49 expected/actual checks and rolls its scenario back. It requires opening-only stock data. Add `--persist` once on a fresh instance to keep the scenario for screen inspection. Operational stock postings are rejected, never reset. For an independent rehearsal use a new Compose project name and a different `WEB_PORT`. The 77-test regression/API suite uses a temporary test database and includes the golden workbook's decimal XML checks. On a fresh opening-only instance, run `python -m pytest api/test_api.py api/test_native.py -q -p no:cacheprovider` inside the API container for native runtime, benchmark, schema, seed, trigger and mutation checks.
+`python -m api.cli benchmark` runs all nine steps through native services, prints 49 expected/actual checks and rolls its scenario back. It requires opening-only stock data. Add `--persist` once on a fresh instance to keep the scenario for screen inspection. Operational stock postings are rejected, never reset. For an independent rehearsal use a new Compose project name and a different `WEB_PORT`. The 86-test regression/API suite uses a temporary test database and includes the golden workbook's decimal XML checks. On a fresh opening-only instance, run `python -m pytest api/test_api.py api/test_native.py -q -p no:cacheprovider` inside the API container for native runtime, benchmark, schema, seed, trigger and mutation checks.
 
 ## Stack and rationale
 
@@ -55,6 +57,7 @@ React/TypeScript and FastAPI match the applicant's preferred tools and separate 
 | Optional sales | Customer-specific fixed prices/scheme labels, partial dispatch and resalable returns with exact credit allocation |
 | All eight stretch categories | Shortage planning; offline capture/review/sync; batches/expiry/FEFO; reorder alerts; visits/consented GPS; Tally XML export; local e-invoice/e-way-bill mocks; Tamil production labels |
 | Factory workflow additions | Shortage-to-BOM input guidance; reasoned finished-lot quality hold/release; batch-to-customer recall trace; immutable run-loss notes; reviewed multi-SKU offline queue; collection follow-up dates |
+| Operator setup | Admin-managed staff accounts and first-use password changes; customer/supplier/material/product creation; versioned BOM setup; local sign-in throttling and browser security headers |
 
 See [extended feature guide](docs/extended-features.md) for screens, tests and external-validation boundaries. Tally import and human Tamil review remain unverified; government integrations are explicitly local mocks.
 
@@ -86,12 +89,12 @@ See [compliance evidence](docs/compliance.md), [requirements](docs/requirements.
 - Run reversals correct recording errors, not physical production. Later or intervening affected-item stock events and reserved FG block reversal. No cascading revaluation, fractional planned batches or ingredient substitution.
 - Posted sources are frozen by services; privileged ORM/SQL can bypass this. The database trigger protects movement update/delete only. Reconciliation detects source/ledger disagreement. Direct database owners are trusted.
 - Native file sharing depends on the device. Desktop fallback requires downloading and attaching the PDF manually. The app does not send email or WhatsApp messages. Localhost links are not public customer links.
-- Offline capture accepts multiple SKU lines, supports a private demo device, and confirms server pricing at explicit sync after queue review. Cached dummy catalog/queued data remains on that device across sign-out; sync requires the original account. No background sync or multi-device conflict resolution.
-- GST is the exercise's fixed 5%, with per-line component rounding. GSTR labels are explanatory mappings, not filing-ready payloads. GSTINs and HSN are fictional. Master data is seeded; no generic master-maintenance UI.
+- Offline capture accepts multiple SKU lines, supports a private device, and confirms server pricing at explicit sync after queue review. Cached catalogue/queued data remains across sign-out; **Clear this device** removes both after confirmation. Sync requires the original account. No background sync or multi-device conflict resolution.
+- GST is the exercise's fixed 5%, with per-line component rounding. GSTR labels are explanatory mappings, not filing-ready payloads. GSTINs and HSN are fictional. Setup creates new masters but does not edit historical master records or import large customer lists.
 - Expiry is optional: migrated stock has labelled LEGACY lots with unknown expiry. FEFO excludes expired stock and uses unknown-expiry lots last; valuation stays item-level weighted average. Returned batches use the earliest known original expiry conservatively. Lot allocations are service-frozen and reconciled, not protected by additional database triggers.
 - Quality holds cover finished lots only. A recall trace uses recorded allocations and can identify dispatched customers, but does not send notifications or infer pre-opening provenance. Holds and loss/follow-up notes are audited service decisions, without extra stock movements.
 - Customer schemes are fixed price overrides, not a promotion engine. Tally XML has structure/balance tests but has not been imported into Tally. Mock government documents are not valid fiscal documents. Tamil covers production labels, with English validation messages and fallback product names; native-speaker review is pending.
-- Images/transitive dependencies are not fully digest-locked. No hosted demo or public deployment hardening. The video/public repository submission and organizer deadline/contact verification remain human delivery tasks.
+- Demo credentials and default secrets are suitable only for localhost. The database-backed login limit, role checks and browser headers improve this local build; public hosting still needs HTTPS, unique secrets, changed demo passwords and a deployment security review. Images/transitive dependencies are not fully digest-locked. The video/public repository submission and organizer deadline/contact verification remain human delivery tasks.
 
 ## Where the code lives
 
@@ -101,6 +104,7 @@ See [compliance evidence](docs/compliance.md), [requirements](docs/requirements.
 | `api/native.py`, `database.py`, `inventory/`, `reconciliation.py` | Factory transactions, exact valuation, receipts, immutable ledger, lots, corrections and source reconciliation |
 | `api/production/services.py`, `api/sales/services.py` | Run snapshots/cost/variance and orders/reservations/invoices/dispatch/payments/returns |
 | `api/factory_actions.py`, `api/migrations/versions/0002_factory_actions.py` | Quality holds, immutable loss/follow-up notes and their additive tables |
+| `api/accounts/services.py`, `api/masters/services.py`, `api/security/services.py`, `api/migrations/versions/0003_operator_setup.py` | Account lifecycle, master setup, sign-in throttling and additive setup tables |
 | `api/extensions.py` | Customer prices, reorder settings, visits/GPS and local government-document mocks |
 | `api/reporting.py`, `pdf.py`, `benchmark.py` | Auditor reports, CSV/PDF/Tally, dashboard and nine-step service orchestrator |
 | `api/seed.py`, `cli.py`, `migrations/`, `alembic.ini` | Native accounts/masters/opening seed, CLI and schema adoption/migrations |

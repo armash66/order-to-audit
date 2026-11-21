@@ -7,13 +7,14 @@ import "./workspace.css";
 
 type Session = {
   access_token: string;
-  user: { username: string; roles: string[]; is_staff: boolean };
+  user: { username: string; roles: string[]; is_staff: boolean; must_change_password: boolean };
 };
 
 function App() {
   const [session, setSession] = useState<Session | null>(null),
     [busy, setBusy] = useState(false),
-    [error, setError] = useState("");
+    [error, setError] = useState(""),
+    [passwordOpen, setPasswordOpen] = useState(false);
   useEffect(() => {
     if ("serviceWorker" in navigator)
       navigator.serviceWorker
@@ -70,7 +71,7 @@ function App() {
       <main className="login">
         <p className="eyebrow">ORDER-TO-AUDIT</p>
         <h1>Sign in</h1>
-        <p>Your factory workspace</p>
+        <p>Orders, production and accounts in one place.</p>
         {error && <p role="alert">{error}</p>}
         <form
           onSubmit={async (event) => {
@@ -113,25 +114,72 @@ function App() {
         </form>
       </main>
     );
+  if (session.user.must_change_password)
+    return <main className="login">
+      <p className="eyebrow">ORDER-TO-AUDIT</p>
+      <h1>Set your password</h1>
+      <p>Replace the temporary password before opening your workspace.</p>
+      {error && <p role="alert">{error}</p>}
+      <form onSubmit={async (event) => {
+        event.preventDefault(); setBusy(true); setError("");
+        const values = new FormData(event.currentTarget);
+        if (values.get("new_password") !== values.get("confirm")) {
+          setError("New passwords do not match."); setBusy(false); return;
+        }
+        try {
+          setSession(await request("/change-password", session.access_token, {
+            method: "POST", body: JSON.stringify({old_password: values.get("old_password"),
+              new_password: values.get("new_password")})}));
+        } catch (e) { setError((e as Error).message); }
+        finally { setBusy(false); }
+      }}>
+        <label>Temporary password<input name="old_password" type="password" autoComplete="current-password" required /></label>
+        <label>New password (at least 12 characters)<input name="new_password" type="password" minLength={12} autoComplete="new-password" required /></label>
+        <label>Confirm new password<input name="confirm" type="password" minLength={12} autoComplete="new-password" required /></label>
+        <button disabled={busy}>Set password</button>
+      </form>
+      <button className="link" onClick={() => setSession(null)}>Sign out</button>
+    </main>;
   return (
     <div className="workspace">
       <aside>
         <strong>Order-to-Audit</strong>
-        <p>Factory workspace</p>
-        <small>
-          React · FastAPI
-          <br />
-          PostgreSQL ledger
-        </small>
+        <p>Factory operations</p>
       </aside>
       <section className="body">
         <header>
           <span>
             {session.user.username} · {session.user.roles.join(", ")}
           </span>
-          <button onClick={() => setSession(null)}>Sign out</button>
+          <div>
+            <button onClick={() => {setPasswordOpen(!passwordOpen); setError("");}}>Change password</button>
+            <button onClick={() => setSession(null)}>Sign out</button>
+          </div>
         </header>
         <main>
+          {passwordOpen && <section className="card">
+            <h2>Change password</h2>
+            {error && <p role="alert">{error}</p>}
+            <form onSubmit={async (event) => {
+              event.preventDefault(); setBusy(true); setError("");
+              const values = new FormData(event.currentTarget);
+              if (values.get("new_password") !== values.get("confirm")) {
+                setError("New passwords do not match."); setBusy(false); return;
+              }
+              try {
+                setSession(await request("/change-password", session.access_token, {
+                  method:"POST",body:JSON.stringify({old_password:values.get("old_password"),
+                    new_password:values.get("new_password")})}));
+                setPasswordOpen(false);
+              } catch (e) { setError((e as Error).message); }
+              finally { setBusy(false); }
+            }}>
+              <label>Current password<input name="old_password" type="password" autoComplete="current-password" required /></label>
+              <label>New password (at least 12 characters)<input name="new_password" type="password" minLength={12} autoComplete="new-password" required /></label>
+              <label>Confirm new password<input name="confirm" type="password" minLength={12} autoComplete="new-password" required /></label>
+              <button disabled={busy}>Save password</button>
+            </form>
+          </section>}
           <Workspace
             token={session.access_token}
             user={session.user}

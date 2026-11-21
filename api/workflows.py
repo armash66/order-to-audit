@@ -9,6 +9,7 @@ from functools import wraps
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import Response
 from pydantic import BaseModel, Field
+from sqlalchemy.exc import IntegrityError
 from api import reporting as reports
 from api.native import now, required_integer
 from .main import current_user
@@ -54,6 +55,8 @@ def domain(function):
             return function(*args, **kwargs)
         except (ValueError, KeyError, TypeError) as error:
             raise HTTPException(400, str(error))
+        except IntegrityError:
+            raise HTTPException(409, "Record conflicts with an existing entry.")
 
     return wrapped
 
@@ -78,6 +81,13 @@ def offline_sync(payload: dict, user=Depends(current_user)):
 @domain
 def catalog(user=Depends(current_user)):
     return wire({**queries.read("catalog", user), "reports": reports.REPORTS})
+
+
+@router.get("/accounts")
+@domain
+def accounts(user=Depends(current_user)):
+    from api.accounts.services import accounts as list_accounts
+    return wire(list_accounts(user))
 
 
 @router.get("/dashboard")
@@ -256,4 +266,18 @@ def command(body: Command, user=Depends(current_user)):
                    "collection.followup": factory_actions.followup}[action]
         identifier = service(d, user) if action == "quality" else service(d, user, key)
         return {"ok": True, "id": str(identifier)}
+    if action in ("account.create", "account.active", "account.reset"):
+        from api.accounts import services as account_services
+        service = {"account.create": account_services.create,
+                   "account.active": account_services.set_active,
+                   "account.reset": account_services.reset}[action]
+        return {"ok": True, "id": str(service(d, user))}
+    if action in ("master.item", "master.customer", "master.supplier", "master.product", "master.bom"):
+        from api.masters import services as master_services
+        service = {"master.item": master_services.item,
+                   "master.customer": master_services.customer,
+                   "master.supplier": master_services.supplier,
+                   "master.product": master_services.product,
+                   "master.bom": master_services.bom}[action]
+        return {"ok": True, "id": str(service(d, user))}
     raise ValueError("Unknown action.")

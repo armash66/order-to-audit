@@ -29,6 +29,13 @@ class APIWorkflowTests(TransactionTestCase):
             with database.engine.begin() as conn:
                 with Operations.context(MigrationContext.configure(conn)):
                     import_module('api.migrations.versions.0002_factory_actions').upgrade()
+        if not inspect(database.engine).has_table('factory_accountsecurity'):
+            from alembic.migration import MigrationContext
+            from alembic.operations import Operations
+            from importlib import import_module
+            with database.engine.begin() as conn:
+                with Operations.context(MigrationContext.configure(conn)):
+                    import_module('api.migrations.versions.0003_operator_setup').upgrade()
         FactoryControl.objects.get_or_create(pk=1)
         seed_benchmark()
         seed_logins()
@@ -60,6 +67,7 @@ class APIWorkflowTests(TransactionTestCase):
         from importlib import import_module
         with self.database.engine.begin() as conn:
             with Operations.context(MigrationContext.configure(conn)):
+                import_module('api.migrations.versions.0003_operator_setup').downgrade()
                 import_module('api.migrations.versions.0002_factory_actions').downgrade()
         self.client.close()
         self.database.engine.dispose()
@@ -911,3 +919,71 @@ class APIWorkflowTests(TransactionTestCase):
         self.command("collection.followup", due, key="follow-2")
         self.assertEqual(self.get("/dashboard")["due_followups"][0]["customer"], "Demo Retailer A")
         self.command("collection.followup", followup, "salesman_a", status=403)
+
+    def test_admin_account_lifecycle_and_first_password_change(self):
+        self.assertEqual(self.client.get("/api/workspace/accounts", headers=self.headers["salesman_a"]).status_code, 403)
+        created = self.command("account.create", {"username": "field_03", "name": "Field Representative",
+            "role": "salesman", "temporary_password": "FirstSecret!2026"})["id"]
+        self.command("account.create", {"username": "intruder", "name": "No", "role": "owner",
+            "temporary_password": "FirstSecret!2026"}, "salesman_a", status=403)
+        self.command("account.create", {"username": None, "name": "No", "role": "salesman",
+            "temporary_password": "FirstSecret!2026"}, status=400)
+        login = self.client.post("/api/login", json={"username": "field_03", "password": "FirstSecret!2026"})
+        self.assertEqual(login.status_code, 200, login.text)
+        self.assertTrue(login.json()["user"]["must_change_password"])
+        old = {"Authorization": "Bearer " + login.json()["access_token"]}
+        self.assertEqual(self.client.get("/api/workspace/catalog", headers=old).status_code, 403)
+        changed = self.client.post("/api/change-password", headers=old,
+            json={"old_password": "FirstSecret!2026", "new_password": "OwnUniqueSecret!2026"})
+        self.assertEqual(changed.status_code, 200, changed.text)
+        self.assertFalse(changed.json()["user"]["must_change_password"])
+        fresh = {"Authorization": "Bearer " + changed.json()["access_token"]}
+        self.assertEqual(self.client.get("/api/workspace/catalog", headers=fresh).status_code, 200)
+        self.assertEqual(self.client.get("/api/workspace/catalog", headers=old).status_code, 401)
+        self.command("account.active", {"id": created, "active": False})
+        self.assertEqual(self.client.get("/api/workspace/catalog", headers=fresh).status_code, 401)
+        self.command("account.active", {"id": created, "active": True})
+        self.command("account.reset", {"id": created, "temporary_password": "AnotherSecret!2026"})
+        self.assertEqual(self.client.get("/api/workspace/catalog", headers=fresh).status_code, 401)
+        reset_login = self.client.post("/api/login", json={"username": "field_03", "password": "AnotherSecret!2026"})
+        self.assertTrue(reset_login.json()["user"]["must_change_password"])
+
+    def test_login_throttle_uses_generic_failure(self):
+        attempts = [self.client.post("/api/login", json={"username": "admin", "password": "wrong"})
+                    for _ in range(5)]
+        self.assertTrue(all(response.status_code == 401 for response in attempts))
+        self.assertEqual(len({response.text for response in attempts}), 1)
+        locked = self.client.post("/api/login", json={"username": "admin",
+            "password": os.environ.get("DEMO_PASSWORD", "DemoPass123!")})
+        unknown = self.client.post("/api/login", json={"username": "missing", "password": "wrong"})
+        self.assertEqual(locked.text, unknown.text)
+        self.assertEqual(locked.status_code, 401)
+
+    def test_admin_creates_parties_product_and_versioned_bom(self):
+        from inventory.models import StockMovement
+        before = StockMovement.objects.count()
+        self.command("master.customer", {"code": "C", "name": "Demo Corner Shop",
+            "state_code": "33", "gstin": "33DDDDD0000D1Z0"})
+        self.command("master.supplier", {"code": "OIL-SUP", "name": "Demo Oil Supplier"})
+        raw = self.command("master.item", {"code": "RICE", "name": "Rice flour",
+            "category": "raw", "base_unit": "g"})["id"]
+        packaging = self.command("master.item", {"code": "POUCH500", "name": "500 g pouch",
+            "category": "packaging", "base_unit": "piece"})["id"]
+        sku = self.command("master.product", {"code": "MURUKKU500", "name": "Murukku 500 g",
+            "pack_size_g": "500", "price_paise": "12500", "carton_size": "20", "hsn": "99999999"})["id"]
+        recipe = self.get("/catalog")["recipes"][0]["id"]
+        bom = self.command("master.bom", {"sku": sku, "expected_packets": "80",
+            "recipe": recipe, "packaging": {packaging: "80", str(Item.objects.get(code="CARTON").pk): "4"}})["id"]
+        self.assertEqual(self.get("/catalog")["boms"][-1]["id"], bom)
+        self.assertEqual(StockMovement.objects.count(), before)
+        self.command("master.bom", {"sku": sku, "expected_packets": "80",
+            "raw": {packaging: "1"}, "packaging": {packaging: "80"}}, status=400)
+        self.command("master.item", {"code": "RICE", "name": "Duplicate",
+            "category": "raw", "base_unit": "g"}, status=400)
+        self.command("master.customer", {"code": "BAD", "name": "Bad state",
+            "state_code": "29", "gstin": "33DDDDD0000D1Z0"}, status=400)
+        self.command("master.item", {"code": "OTHER", "name": "Denied",
+            "category": "raw", "base_unit": "g"}, "salesman_a", status=403)
+        self.command("master.item", {"code": "INVALID", "name": None,
+            "category": "raw", "base_unit": "g"}, status=400)
+        self.assertEqual(StockMovement.objects.count(), before)

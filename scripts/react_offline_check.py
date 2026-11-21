@@ -25,10 +25,18 @@ def main():
         context.set_offline(True)
         page.get_by_label('Packets',exact=True).fill('2')
         page.get_by_role('button',name='Add another product').click()
+        second_product = page.get_by_label('Another product')
+        has_second_sku = second_product.locator('option').count() > 1
+        if has_second_sku:
+            second_product.select_option(index=1)
         page.get_by_label('Packets',exact=True).nth(1).fill('3')
         page.get_by_role('button',name='Save offline order').click()
         expect(page.get_by_text('1 queued orders',exact=True)).to_be_visible()
-        expect(page.get_by_text('5 packets',exact=False)).to_be_visible()
+        if has_second_sku:
+            expect(page.get_by_text('2 packets',exact=False)).to_be_visible()
+            expect(page.get_by_text('3 packets',exact=False)).to_be_visible()
+        else:
+            expect(page.get_by_text('5 packets',exact=False)).to_be_visible()
         context.set_offline(False)
         expect(page.get_by_text('1 queued orders',exact=True)).to_be_visible()
         page.get_by_role('button',name='Confirm and sync orders').click()
@@ -47,8 +55,13 @@ def main():
         expect(page.get_by_text('1 queued orders',exact=True)).to_be_visible()
         page.get_by_role('button',name='Confirm and sync orders').click()
         expect(page.get_by_text('0 queued orders',exact=True)).to_be_visible(timeout=15000)
+        page.once('dialog',lambda dialog:dialog.accept())
+        page.get_by_role('button',name='Clear this device').click()
+        page.wait_for_load_state()
+        assert page.evaluate("localStorage.getItem('ota-react-catalog')") is None
+        assert page.evaluate("localStorage.getItem('ota-react-orders-v1')") is None
         context.close()
-    print('PASS: React multi-line offline capture, review, browser restart and original-user sync')
+    print('PASS: React multi-line offline capture, review, restart, sync and device clear')
 
 
 if __name__=='__main__':main()

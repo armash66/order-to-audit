@@ -1,5 +1,9 @@
 # Execution status
 
+## Operator setup and local security — complete, 21 November
+
+Done: admin Setup for accounts, customers, suppliers, materials, products and versioned BOMs; first-use and self-service password changes; immediate token invalidation on disable/reset/change; durable sign-in throttling; confirmed offline device clear; grouped operator navigation with implementation labels removed; browser/API security headers. The benchmark seed is untouched and only fictional data is included. Validation: 86 regression/API tests, 10 native tests, all 49 benchmark checks on a clean database, and 360 px browser flows for staff/customer/product/shared BOM plus distinct-SKU offline review/sync/clear pass. Next: user review/commit and demo rehearsal. Suggested commit: `feat: add operator setup and local access hardening`. No Git staging, commits or pushes.
+
 ## Operational gap workflows — complete, 21 November
 
 Done: shortage-to-BOM actions, finished-lot quality hold/release, lot-to-customer recall, completed-run loss explanations, reviewed multi-SKU offline queue and collection follow-ups with due dashboard reminders. Additive Alembic revision 0002 and role-scoped FastAPI endpoints preserve benchmark balances. Validation: 83 regression/API tests, 10 native tests, all 49 benchmark checks, React build, offline restart/review browser check and 360 px factory hold/recall/shortage browser check pass on isolated Compose. Next: user commits, records/reviews the eight-minute demo and submits. No Git staging or commits performed.

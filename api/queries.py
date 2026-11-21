@@ -270,7 +270,7 @@ def read(kind, user, identifier=None):
                 ),
                 "skus": rows(
                     conn,
-                    "SELECT s.id,s.item_id,i.name AS item__name,s.price_paise FROM inventory_sku s JOIN inventory_item i ON i.id=s.item_id ORDER BY s.id",
+                    "SELECT s.id,s.item_id,i.name AS item__name,s.pack_size_g,s.price_paise,s.hsn FROM inventory_sku s JOIN inventory_item i ON i.id=s.item_id ORDER BY s.id",
                 ),
                 "boms": (
                     rows(
@@ -279,6 +279,10 @@ def read(kind, user, identifier=None):
                     )
                     if factory
                     else []
+                ),
+                "recipes": (
+                    rows(conn, "SELECT id,code,version FROM inventory_recipe ORDER BY code,version")
+                    if factory else []
                 ),
             }
         if kind == "orders":

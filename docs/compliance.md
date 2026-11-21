@@ -73,4 +73,15 @@ Implementation evidence is automated unless marked browser/manual. Commands: `do
 | OPS-5 | Offline screen queues multiple product lines for review before explicit sync; browser restart test and API two-SKU test |
 | OPS-6 | Invoice follow-up note and next-contact date; API test checks retry, permissions and no payment posting |
 
+## Operator setup and local access
+
+| ID | Evidence / boundary |
+| --- | --- |
+| SET-1 | Admin Setup lists named accounts and role; API lifecycle test covers create, disable, enable and reset; salesman denied |
+| SET-2 | First-use password screen and self-service change; tests prove work endpoints denied until change and old tokens invalidated |
+| SET-3 | Setup creates fictional customer, supplier, material, product and versioned shared-recipe BOM; API checks duplicate/invalid inputs and unchanged ledger; 360 px browser creates a second pack size and shared BOM; no bulk import |
+| SET-4 | Business-only visible chrome; grouped daily/setup navigation; 360 px Playwright setup flow |
+| SEC-1 | Durable username/address login attempt limit and generic failure test; served CSP, framing, MIME and API no-store headers verified locally |
+| SEC-2 | Offline queue survives failed sync and restart; explicit device clear removes both queue and cached catalogue in browser test |
+
 Known limitations and deliberate PS interpretations are listed in README; no Must/Should item was removed under the earlier cut line.

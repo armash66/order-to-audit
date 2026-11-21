@@ -216,9 +216,11 @@ export function Workspace({
     [page, setPage] = useState("orders"),
     [data, setData] = useState<any>(null),
     [error, setError] = useState(""),
+    [notice, setNotice] = useState(""),
     [selected, setSelected] = useState<string | null>(null),
     [sourceDetail, setSourceDetail] = useState<Row | null>(null),
     [recallDetail, setRecallDetail] = useState<Row | null>(null),
+    [setupTab, setSetupTab] = useState("staff"),
     [revision, setRevision] = useState(0);
   const [kind, setKind] = useState("sales"),
     [start, setStart] = useState("2026-11-01"),
@@ -255,7 +257,7 @@ export function Workspace({
     setSourceDetail(null);
     setRecallDetail(null);
     let route =
-      page === "reports"
+      page === "setup" ? "/accounts" : page === "reports"
         ? `/reports/${kind}?start=${start}&end=${end}`
         : `/${page}${selected ? "/" + selected : ""}`;
     if (page === "stock") {
@@ -276,6 +278,8 @@ export function Workspace({
       method: "POST",
       body: JSON.stringify({ action, request_key: key, data: values }),
     });
+    setNotice("Saved successfully.");
+    if (action.startsWith("master.")) setCatalog(await load("/catalog"));
     setRevision((r) => r + 1);
   }
   async function download(path: string, name: string) {
@@ -319,6 +323,7 @@ export function Workspace({
     setData(null);
     setSourceDetail(null);
     setRecallDetail(null);
+    setNotice("");
     setPage(next);
     setSelected(null);
   }
@@ -365,7 +370,10 @@ export function Workspace({
     ...(sales || reports ? ["reports", "visits"] : []),
     ...(sales ? ["offline"] : []),
     ...(admin ? ["prices"] : []),
+    ...(admin ? ["setup"] : []),
   ];
+  const dailyMenu = menu.filter((name) => ["dashboard", "orders", "production", "stock", "reports"].includes(name));
+  const toolsMenu = menu.filter((name) => !dailyMenu.includes(name));
   const translate = (label: string) => translations[language]?.[label] || label;
   return (
     <LanguageContext.Provider value={translations[language] || {}}>
@@ -386,15 +394,14 @@ export function Workspace({
         </select>
       </label>
       <nav className="tabs" aria-label="Workspace">
-        {menu.map((name) => (
-          <button
-            key={name}
-            aria-current={page === name ? "page" : undefined}
-            onClick={() => navigate(name)}
-          >
-            {translate(name[0].toUpperCase() + name.slice(1))}
-          </button>
-        ))}
+        {[{heading:'Daily work',names:dailyMenu},{heading:'Tools & setup',names:toolsMenu}].map((group) =>
+          <div className="nav-group" key={group.heading}>
+            <span>{group.heading}</span>
+            {group.names.map((name) => <button key={name}
+              aria-current={page === name ? "page" : undefined}
+              onClick={() => navigate(name)}>
+              {translate(name[0].toUpperCase() + name.slice(1))}</button>)}
+          </div>)}
       </nav>
       <h1>
         {translate(page[0].toUpperCase() + page.slice(1))}
@@ -404,6 +411,7 @@ export function Workspace({
         <button onClick={() => setSelected(null)}>← Back to list</button>
       )}
       {error && <p role="alert">{error}</p>}
+      {notice && <p role="status" className="notice">{notice}</p>}
       {page === "orders" && !selected && (
         <>
           {sales &&
@@ -879,6 +887,86 @@ export function Workspace({
           <Table rows={data} />
         </section>
       )}
+      {page === "setup" && admin && Array.isArray(data) && <>
+        <p>Set up staff, trading partners and products before taking orders or recording production.</p>
+        <nav className="tabs setup-tabs" aria-label="Setup areas">
+          {[['staff','Staff'],['parties','Customers & suppliers'],['items','Materials & products'],['recipes','Recipes']].map(([value,label]) =>
+            <button key={value} aria-current={setupTab===value?'page':undefined}
+              onClick={() => setSetupTab(value)}>{label}</button>)}
+        </nav>
+        {setupTab === "staff" && <>
+          <h2>Staff access</h2>
+          <p>Give each person their own account. Share temporary passwords privately; they must replace them on first sign-in.</p>
+          <Table rows={data.map((row: Row) => ({username: row.username, name: row.first_name,
+            role: row.role, access: row.is_active ? 'Active' : 'Disabled',
+            password: row.must_change_password ? 'Change required' : 'Set'}))} />
+          {form("Create staff account", "account.create", [
+            field("name", "Full name"), field("username", "Username"),
+            choice("role", "Role", [
+              {value:"salesman",label:"Salesperson"}, {value:"admin",label:"Factory admin"},
+              {value:"production",label:"Production supervisor"}, {value:"accountant",label:"Accountant (read only)"},
+              {value:"owner",label:"Owner"}]),
+            field("temporary_password", "Temporary password (12+ characters)", "", "password"),
+          ])}
+          {form("Enable or disable account", "account.active", [
+            choice("id", "Account", data.filter((r: Row) => r.id !== catalog.user_id)
+              .map((r: Row) => ({value:r.id,label:r.username + " · " + r.role}))),
+            choice("active", "Access", [{value:"true",label:"Enable"},{value:"false",label:"Disable"}]),
+          ], {}, (d) => ({id:d.id,active:d.active === "true"}))}
+          {form("Reset temporary password", "account.reset", [
+            choice("id", "Account", data.filter((r: Row) => r.id !== catalog.user_id)
+              .map((r: Row) => ({value:r.id,label:r.username}))),
+            field("temporary_password", "New temporary password", "", "password"),
+          ])}
+        </>}
+        {setupTab === "parties" && <>
+          <h2>Customers</h2><Table rows={catalog.customers.map((r: Row) =>
+            ({code:r.code,name:r.name,state:r.state_code,gstin:r.gstin}))} />
+          {form("Add customer", "master.customer", [field("code","Short code"),
+            field("name","Customer name"),field("state_code","Two-digit GST state code"),
+            field("gstin","GSTIN (15 characters)")])}
+          <h2>Suppliers</h2><Table rows={catalog.suppliers.map((r: Row) =>
+            ({code:r.code,name:r.name}))} />
+          {form("Add supplier", "master.supplier", [field("code","Short code"),
+            field("name","Supplier name")])}
+        </>}
+        {setupTab === "items" && <>
+          <h2>Materials</h2>
+          <p>Quantities are stored in g, ml or pieces. Receipts add stock after an item is created.</p>
+          <Table rows={catalog.items.filter((r: Row) => r.category !== "finished")
+            .map((r: Row) => ({code:r.code,name:r.name,type:r.category,unit:r.base_unit}))} />
+          {form("Add material", "master.item", [field("code","Short code"),
+            field("name","Material name"), choice("category","Type",[
+              {value:"raw",label:"Ingredient"},{value:"packaging",label:"Packaging"}]),
+            choice("base_unit","Base unit",[
+              {value:"g",label:"Gram (g)"},{value:"ml",label:"Millilitre (ml)"},
+              {value:"piece",label:"Piece"}])])}
+          <h2>Products</h2><Table rows={catalog.skus.map((s: Row) => ({
+            name:s.item__name,pack_size_g:s.pack_size_g,price_paise:s.price_paise,hsn:s.hsn}))} />
+          {form("Add sellable product", "master.product", [field("code","Product code"),
+            field("name","Product name"),field("pack_size_g","Pack size in grams","","number"),
+            field("price_paise","Selling price in paise","","number"),
+            field("hsn","HSN code"),field("carton_size","Packets per carton","20","number")])}
+        </>}
+        {setupTab === "recipes" && <>
+          <h2>Production recipes</h2>
+          <p>A new version affects future runs only. Shared recipes let another pack size use the same ingredients.</p>
+          <Table rows={catalog.boms.map((b: Row) => ({product:b.sku__item__name,
+            version:b.version,expected_packets:b.expected_packets}))} />
+          {form("Add BOM version", "master.bom", [
+            choice("sku","Product",asOptions(catalog.skus,"item__name")),
+            field("expected_packets","Expected good packets per batch","","number"),
+            choice("recipe","Ingredient recipe",[
+              {value:"",label:"Create from raw quantities below"},
+              ...catalog.recipes.map((r: Row) => ({value:r.id,label:r.code + " · v" + r.version}))]),
+            ...catalog.items.filter((i: Row) => i.category === "raw")
+              .map((i: Row) => field("raw_" + i.id,i.name + " · " + i.base_unit + " per batch (0 to omit)","0","number")),
+            ...catalog.items.filter((i: Row) => i.category === "packaging")
+              .map((i: Row) => field("pack_" + i.id,i.name + " · pieces per batch (0 to omit)","0","number")),
+          ], {}, (d) => ({sku:d.sku,expected_packets:d.expected_packets,recipe:d.recipe || undefined,
+            raw:collect(d,"raw_"),packaging:collect(d,"pack_")}))}
+        </>}
+      </>}
       {page === "prices" &&
         admin &&
         form("Save customer price", "price", [

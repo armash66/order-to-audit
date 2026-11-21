@@ -25,7 +25,10 @@ def user_by_name(conn, username):
     user = (
         conn.execute(
             text(
-                "SELECT id, username, password, is_active, is_staff FROM auth_user WHERE username=:name"
+                """SELECT u.id,u.username,u.password,u.is_active,u.is_staff,
+                    COALESCE(s.must_change_password,FALSE) AS must_change_password
+                    FROM auth_user u LEFT JOIN factory_accountsecurity s ON s.user_id=u.id
+                    WHERE u.username=:name"""
             ),
             {"name": username},
         )
