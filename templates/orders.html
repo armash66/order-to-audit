@@ -4,11 +4,11 @@
 {% load display static %}
 
 {% block content %}
-<h1>Orders</h1>
+<div class="page-heading"><div><p class="eyebrow">SALES & FULFILMENT</p><h1>Orders</h1><p class="muted">{% if is_admin %}Review demand, reserve stock and move orders through dispatch.{% elif is_sales %}Capture a customer order. Follow it through to delivery.{% else %}Review orders and their billing status.{% endif %}</p></div>{% if is_sales %}<a class="button" href="#new-order">New order</a>{% endif %}</div>
 <script src="{% static 'prices.js' %}" defer></script>
-<p class="muted">Capture once. Track through dispatch.</p>
+<div class="split-layout">
 {% if is_sales %}
-<section class="card">
+<section class="card entry-card" id="new-order">
 <h2>New order</h2>
 <p>
 <a href="/offline/">Offline capture and sync</a>
@@ -36,12 +36,14 @@
 </div>
 <button type="button" class="secondary" id="add-line">Add product</button>
 <button>Submit order</button>
+<p class="form-help">Prices are before GST. The factory checks stock before approving your order.</p>
 </form>
 </section>
-<script>document.getElementById('add-line').onclick=()=>{const row=document.querySelector('.order-line').cloneNode(true);row.querySelector('input').value='1';document.getElementById('order-lines').appendChild(row)};</script>
+<script>document.getElementById('add-line').onclick=()=>{const row=document.querySelector('.order-line').cloneNode(true);row.querySelector('input').value='1';row.querySelector('.remove-line')?.remove();const remove=document.createElement('button');remove.type='button';remove.className='secondary remove-line';remove.textContent='Remove product';remove.onclick=()=>row.remove();row.append(remove);document.getElementById('order-lines').appendChild(row)};</script>
 {% endif %}
-<section class="card scroll">
-<h2>Order history</h2>
+<section class="card scroll {% if is_admin or not is_sales %}queue-first{% endif %}">
+<h2>{% if is_admin %}Order queue{% else %}Order history{% endif %}</h2>
+<form method="get" class="filter-bar"><label>Find order or customer<input type="search" name="q" value="{{ query }}" placeholder="Order number or customer name"></label><div class="fields"><label>Status<select name="status"><option value="">All statuses</option>{% for state in statuses %}<option value="{{ state }}" {% if state == selected_status %}selected{% endif %}>{{ state|capfirst }}</option>{% endfor %}</select></label><button class="secondary">Filter orders</button><a href="{% url 'orders' %}">Clear</a></div></form>
 <table>
 <thead>
 <tr>
@@ -62,15 +64,16 @@
 <td>{{ order.customer.name }}</td>
 <td>{{ order.document_date }}</td>
 <td>
-<span class="badge">{{ order.status }}</span>
+<span class="badge" data-state="{{ order.status }}">{{ order.status }}</span>
 </td>
 </tr>
 {% empty %}
 <tr>
-<td colspan="4">No orders yet.</td>
+<td colspan="4" class="empty-state">No orders match this view. Clear the filters or create a new order.</td>
 </tr>
 {% endfor %}
 </tbody>
 </table>
 </section>
+</div>
 {% endblock %}

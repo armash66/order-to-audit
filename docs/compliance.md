@@ -1,6 +1,8 @@
 # Compliance evidence
 
-Implementation evidence is automated unless marked browser/manual. Commands: `python manage.py test`, `python manage.py benchmark`. The expanded suite has 63 passing tests; the benchmark prints 49 expected/actual checks and also reads the golden workbook directly. This is local verification, not an organizer acceptance result.
+Runtime update (21 November): React → FastAPI → SQLAlchemy → PostgreSQL, with Alembic and no Django runtime dependency. Earlier literal screen URLs below describe the historical implementation; use the corresponding React menus at localhost:8000. Native evidence is `api/tests.py`, `api/test_native.py`, `scripts/react_benchmark_check.py` and `scripts/react_offline_check.py`. Eleven reports are compared against the legacy oracle; see [migration validation](migration.md).
+
+Implementation evidence is automated unless marked browser/manual. Commands: `docker compose --profile test run --build --rm tests` and `docker compose exec api python -m api.cli benchmark`. The regression/API suite has 77 passing tests and checks the golden workbook directly. Ten Django-free checks cover native runtime and migration behavior; the native benchmark prints 49 passing expected/actual checks. This is local verification, not an organizer acceptance result.
 
 ## Section 5
 

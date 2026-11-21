@@ -19,7 +19,7 @@ from .forms import money_input
 
 
 def context(request, **values):
-    if request.GET.get("lang") in ("en","ta"):
+    if request.GET.get("lang") in ("en","ta","hi","mr"):
         request.session["floor_language"]=request.GET["lang"]
     roles = set(request.user.groups.values_list("name", flat=True))
     staff = request.user.is_staff
@@ -37,7 +37,10 @@ def home(request):
     require_role(request.user,["salesman","admin","production","accountant","owner"])
     if request.user.is_staff or request.user.groups.filter(name__in=["admin","owner","accountant"]).exists():
         from reporting.services import dashboard
-        return render(request,"dashboard.html",context(request,dashboard=dashboard(request.user,timezone.localdate())))
+        summary=dashboard(request.user,timezone.localdate())
+        for item in Item.objects.all():
+            summary['stock'][item.code].update(unit=item.base_unit,name=item.name)
+        return render(request,"dashboard.html",context(request,dashboard=summary))
     return render(request,"home.html",context(request))
 
 
@@ -58,7 +61,16 @@ def orders(request):
         except (ValidationError,ValueError,KeyError) as error: failure(request,error)
     rows=Order.objects.select_related("customer","actor").order_by("-pk")
     if not request.user.is_staff and request.user.groups.filter(name="salesman").exists(): rows=rows.filter(actor=request.user)
-    return render(request,"orders.html",context(request,orders=rows,customers=Customer.objects.all(),skus=SKU.objects.select_related("item")))
+    from django.db.models import Q
+    query=request.GET.get("q","").strip()
+    status=request.GET.get("status","")
+    statuses=["submitted","approved","invoiced","dispatched","rejected"]
+    if status in statuses: rows=rows.filter(status=status)
+    if query:
+        matches=Q(customer__name__icontains=query)|Q(customer__code__icontains=query)
+        if query.isdecimal(): matches |= Q(pk=int(query))
+        rows=rows.filter(matches)
+    return render(request,"orders.html",context(request,orders=rows,query=query,selected_status=status,statuses=statuses,customers=Customer.objects.all(),skus=SKU.objects.select_related("item")))
 
 
 @login_required
@@ -161,7 +173,7 @@ def stock(request):
         except (ValidationError,ValueError,KeyError,InvalidOperation) as error: failure(request,error)
     balances=stock_summary()
     for item in Item.objects.all():
-        balances[item.code].update(unit=item.base_unit,category=item.category)
+        balances[item.code].update(unit=item.base_unit,category=item.category,name=item.name)
     return render(request,"stock.html",context(request,balances=balances,items=Item.objects.all()))
 
 

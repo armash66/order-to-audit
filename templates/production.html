@@ -3,9 +3,10 @@
 {% load floor_language %}
 
 {% block content %}
-<h1>{% ui "Production workspace" %}</h1>
-<div class="grid">
-<section class="card">
+<div class="page-heading"><div><p class="eyebrow">FACTORY FLOOR</p><h1>{% ui "Production workspace" %}</h1><p class="muted">Continue a run, receive a delivery or start the next batch.</p></div><div class="actions"><a class="button" href="#start-run">Start a run</a><a class="button secondary" href="#receive-materials">Receive materials</a><a class="button secondary" href="#run-register">View runs</a></div></div>
+<ol class="step-list" aria-label="Production workflow"><li>1 · Receive materials</li><li>2 · Create run</li><li>3 · Issue actual materials</li><li>4 · Record output & packaging</li></ol>
+<div class="production-sections"><div class="grid production-entry">
+<section class="card" id="start-run">
 <h2>{% ui "Start a run" %}</h2>
 <form method="post">
 {% csrf_token %}
@@ -22,7 +23,7 @@
 <button name="action" value="create">{% ui "Create draft run" %}</button>
 </form>
 </section>
-<section class="card">
+<section class="card" id="receive-materials">
 <h2>{% ui "Receive materials" %}</h2>
 <form method="post">
 {% csrf_token %}
@@ -59,7 +60,7 @@
 </form>
 </section>
 </div>
-<section class="card scroll">
+<section class="card scroll" id="run-register">
 <h2>{% ui "Runs" %}</h2>
 <table>
 <tr>
@@ -74,7 +75,7 @@
 </td>
 <td>{% ui run.output_item.name %}</td>
 <td>{{ run.expected_packets }}</td>
-<td>{% ui run.state %}</td>
+<td><span class="badge" data-state="{{ run.state }}">{% ui run.state %}</span><small>{% if run.state == 'draft' %}Next: issue materials{% elif run.state == 'issued' %}Next: record good output{% elif run.state == 'completed' %}Review variance and cost{% endif %}</small></td>
 </tr>
 {% empty %}
 <tr>
@@ -83,4 +84,5 @@
 {% endfor %}
 </table>
 </section>
+</div>
 {% endblock %}

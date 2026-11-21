@@ -4,9 +4,10 @@
 {% load display %}
 
 {% block content %}
-<h1>Factory overview</h1>
+<div class="page-heading"><div><p class="eyebrow">OPERATIONS OVERVIEW</p><h1>Factory overview</h1><p class="muted">Orders, stock and collections in one place.</p></div><span class="badge">{{ today }}</span></div>
+{% include 'workflow_start.html' %}
 {% for alert in dashboard.reorder_alerts %}<p class="alert">Reorder {{ alert.item.name }}: {{ alert.available }} {{ alert.item.base_unit }} available; threshold {{ alert.minimum }}.</p>{% endfor %}
-<div class="grid">
+<div class="grid metrics">
 <section class="card">
 <h2>Today's orders</h2>
 <p class="metric">{{ dashboard.orders_today }}</p>
@@ -33,12 +34,12 @@
 {% empty %}<tr><td>No completed production yet.</td></tr>{% endfor %}
 </table></section>
 <section class="card">
-<h2>Stock in base units</h2>
+<h2>Stock on hand</h2>
 {% for code,balance in dashboard.stock.items %}
 <p>
 <a href="
 {% url 'ledger' code %}
-">{{ code }}</a>: {{ balance.quantity }}</p>
+">{{ balance.name }}</a>: {{ balance.quantity|quantity:balance.unit }}</p>
 {% endfor %}
 </section>
 <a href="/reports/">Open reports and exports</a>

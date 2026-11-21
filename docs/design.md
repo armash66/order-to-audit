@@ -1,5 +1,7 @@
 # Order-to-Audit — design note
 
+Runtime: nginx serves React/TypeScript and forwards `/api/` to FastAPI. SQLAlchemy Core owns explicit queries and atomic service transactions; Alembic adopts the unchanged PostgreSQL schema and owns future changes. The runtime has no Django dependency. Earlier Django code remains only as a separate regression oracle. Signed one-hour tokens stay in browser memory; server-side account, role and ownership checks apply to each request.
+
 ## Documents and relationships
 
 ```mermaid

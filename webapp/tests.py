@@ -10,6 +10,37 @@ from django.core.exceptions import ValidationError
 
 
 class ScreenTests(TestCase):
+    def test_quantity_display_keeps_exact_base_units(self):
+        from .templatetags.display import quantity
+        self.assertEqual(quantity(19500,'ml'),'19.5 L')
+        self.assertEqual(quantity(1,'g'),'0.001 kg')
+        self.assertEqual(quantity(-120001,'g'),'-120.001 kg')
+        self.assertEqual(quantity(188,'piece'),'188 pieces')
+
+    def test_order_filters_keep_salesman_scope(self):
+        own=User.objects.create_user('queue-salesman')
+        own.groups.add(Group.objects.get_or_create(name='salesman')[0])
+        customer=Customer.objects.first()
+        args=dict(customer=customer,quantities={SKU.objects.first().pk:1},document_date=date(2026,11,19))
+        order=submit_order(**args,request_key='queue-own',actor=own)
+        submit_order(**args,request_key='queue-other',actor=self.admin)
+        self.client.force_login(own)
+        response=self.client.get('/orders/',{'q':customer.name,'status':'submitted'})
+        self.assertEqual(list(response.context['orders']),[order])
+        self.assertEqual(list(self.client.get('/orders/',{'status':'dispatched'}).context['orders']),[])
+        self.assertEqual(list(self.client.get('/orders/',{'q':'not-a-customer'}).context['orders']),[])
+        self.assertContains(response,'aria-current="page"')
+
+    def test_language_persistence_and_workflow_guidance(self):
+        for language, heading in [('hi','उत्पादन कार्यस्थल'),('mr','उत्पादन कार्यक्षेत्र')]:
+            self.assertContains(self.client.get('/production/?lang='+language),heading)
+            self.assertContains(self.client.get('/production/'),heading)
+        self.client.get('/production/?lang=invalid')
+        self.assertEqual(self.client.session['floor_language'],'mr')
+        self.assertContains(self.client.get('/?lang=en'),'Start here')
+        order=submit_order(customer=Customer.objects.first(),quantities={SKU.objects.first().pk:1},request_key='ux-order',document_date=date(2026,11,19),actor=self.admin)
+        self.assertContains(self.client.get(f'/orders/{order.pk}/'),'Next: admin checks stock')
+
     def setUp(self):
         seed_benchmark()
         self.admin=User.objects.get(username="benchmark-seed")

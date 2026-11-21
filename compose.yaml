@@ -12,29 +12,50 @@ services:
       interval: 3s
       timeout: 3s
       retries: 20
-  web:
-    build: .
-    ports:
-      - "127.0.0.1:${WEB_PORT:-8000}:8000"
-    environment:
-      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-local-demo-only-not-for-deployment}
-      DJANGO_DEBUG: ${DJANGO_DEBUG:-1}
-      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1,[::1]}
-      DEMO_PASSWORD: ${DEMO_PASSWORD:-DemoPass123!}
+  api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+      target: runtime
+    environment: &api_environment
+      API_SECRET_KEY: ${API_SECRET_KEY:-local-migration-demo-secret-change-for-hosting}
       POSTGRES_DB: ${POSTGRES_DB:-order_to_audit}
       POSTGRES_USER: ${POSTGRES_USER:-order_to_audit}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-local-demo-password}
       POSTGRES_HOST: db
-      POSTGRES_PORT: "5432"
+      DEMO_PASSWORD: ${DEMO_PASSWORD:-DemoPass123!}
     depends_on:
       db:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/login/', timeout=3)"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
       interval: 5s
-      timeout: 5s
-      retries: 20
-      start_period: 10s
+      retries: 30
+      start_period: 15s
+  tests:
+    profiles: ["test"]
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+      target: regression
+    environment:
+      <<: *api_environment
+      DJANGO_SETTINGS_MODULE: config.settings
+      DJANGO_SECRET_KEY: regression-tests-only
+      DJANGO_DEBUG: "0"
+    command: ["python", "manage.py", "test"]
+    depends_on:
+      db:
+        condition: service_healthy
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    ports:
+      - "127.0.0.1:${WEB_PORT:-8000}:80"
+    depends_on:
+      api:
+        condition: service_healthy
 
 volumes:
   postgres_data:

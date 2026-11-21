@@ -4,14 +4,13 @@
 {% load display %}
 
 {% block content %}
-<h1>Stock summary</h1>
-<p class="muted">On-hand quantities derived from immutable movements.</p>
+<div class="page-heading"><div><p class="eyebrow">INVENTORY</p><h1>Stock summary</h1><p class="muted">Current physical stock. Open an item to trace its receipts, issues and dispatches.</p></div><a class="button secondary" href="/batches/">Check expiry & low stock</a></div>
 <section class="card scroll">
 <table>
 <tr>
 <th>Item</th>
 <th>Category / unit</th>
-<th>Quantity (base units)</th>
+<th>On hand</th>
 <th>Value INR</th>
 <th>Basis</th>
 </tr>
@@ -20,10 +19,10 @@
 <td>
 <a href="
 {% url 'ledger' code %}
-">{{ code }}</a>
+">{{ row.name }}</a><small>{{ code }}</small>
 </td>
 <td>{{ row.category }} / {{ row.unit }}</td>
-<td>{{ row.quantity }}</td>
+<td>{{ row.quantity|quantity:row.unit }}<small>{{ row.quantity }} {{ row.unit }}</small></td>
 <td>{{ row.value_paise|money }}</td>
 <td>{{ row.valuation_basis|default:'Weighted average' }}</td>
 </tr>

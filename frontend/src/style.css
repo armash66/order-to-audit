@@ -1,0 +1,183 @@
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: #f4f6f7;
+  color: #20323b;
+  font:
+    15px/1.6 system-ui,
+    sans-serif;
+}
+h1 {
+  font-size: 28px;
+  margin: 12px 0;
+}
+p {
+  color: #52636d;
+}
+button,
+input {
+  font: inherit;
+}
+button {
+  cursor: pointer;
+  background: #246657;
+  color: white;
+  border: 0;
+  border-radius: 5px;
+  padding: 10px 16px;
+  min-height: 44px;
+}
+button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+input {
+  display: block;
+  padding: 11px;
+  width: 100%;
+  border: 1px solid #b7c5ca;
+  border-radius: 4px;
+  margin: 7px 0 18px;
+  background: white;
+}
+label {
+  font-weight: 600;
+  font-size: 13px;
+  display: block;
+  max-width: 460px;
+}
+.login {
+  max-width: 440px;
+  margin: 80px auto;
+  background: white;
+  padding: 32px;
+  border: 1px solid #dbe2e6;
+  border-radius: 8px;
+}
+.eyebrow {
+  font-size: 11px;
+  letter-spacing: 1.5px;
+}
+.workspace {
+  display: flex;
+  min-height: 100vh;
+}
+aside {
+  width: 220px;
+  background: #192f33;
+  color: white;
+  padding: 28px;
+  flex-shrink: 0;
+}
+aside p,
+aside small {
+  color: #b0c5c7;
+}
+aside small {
+  display: block;
+  margin-top: 30px;
+}
+.nav {
+  margin-top: 30px;
+  width: 100%;
+  text-align: left;
+}
+.body {
+  flex: 1;
+  min-width: 0;
+}
+header {
+  padding: 16px 30px;
+  background: white;
+  border-bottom: 1px solid #dbe2e6;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+main {
+  padding: 30px;
+  max-width: 1400px;
+}
+.notice {
+  font-size: 13px;
+  border-left: 3px solid #8ca9a2;
+  background: #eaf1ef;
+  padding: 14px;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+}
+th,
+td {
+  text-align: left;
+  padding: 16px;
+  border-bottom: 1px solid #e1e7e9;
+  white-space: nowrap;
+}
+th {
+  font-size: 12px;
+  color: #61727b;
+  background: #f9fbfb;
+}
+.table-wrap {
+  overflow-x: auto;
+  border: 1px solid #dbe2e6;
+  border-radius: 6px;
+}
+td small {
+  display: block;
+  color: #6c7d85;
+}
+.link {
+  background: none;
+  color: #216176;
+  padding: 0;
+  text-align: left;
+}
+.link:hover {
+  text-decoration: underline;
+}
+[role="alert"] {
+  background: #fff0e9;
+  padding: 14px;
+  color: #8b3d24;
+}
+:focus-visible {
+  outline: 3px solid #bc842b;
+  outline-offset: 3px;
+}
+@media (max-width: 700px) {
+  .workspace {
+    display: block;
+  }
+  aside {
+    width: 100%;
+    padding: 16px;
+  }
+  aside p,
+  aside small {
+    display: none;
+  }
+  .nav {
+    width: auto;
+    margin-top: 12px;
+  }
+  header {
+    padding: 12px 16px;
+  }
+  main {
+    padding: 20px 12px;
+  }
+  .login {
+    margin: 30px 12px;
+    padding: 24px;
+  }
+  th,
+  td {
+    padding: 12px;
+  }
+}

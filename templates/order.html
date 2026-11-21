@@ -10,7 +10,13 @@
 ">Orders</a>
 </p>
 <h1>Order #{{ order.pk }}</h1>
-<p>{{ order.customer.name }} · <span class="badge">{{ order.status }}</span>
+<ol class="step-list" aria-label="Order workflow"><li>1 · Submitted</li><li>2 · Approved</li><li>3 · Invoiced</li><li>4 · Dispatched</li><li>5 · Collection</li></ol>
+{% if order.status == 'submitted' %}<p role="note">Next: admin checks stock and price before approval. A shortage keeps this order submitted until stock is available.</p>
+{% elif order.status == 'approved' %}<p role="note">Next: admin creates the invoice. Stock is reserved; it leaves the factory only when dispatch is recorded.</p>
+{% elif order.status == 'invoiced' %}<p role="note">Next: admin records the remaining dispatch. A partial dispatch keeps the remaining packets reserved. Record collections using the payment form below.</p>
+{% elif order.status == 'dispatched' %}<p role="note">Dispatch is complete. Check outstanding below and record any payment received; download the invoice for the customer.</p>
+{% elif order.status == 'rejected' %}<p role="note">This order is closed. Review the rejection reason before creating a new order.</p>{% endif %}
+<p>{{ order.customer.name }} · <span class="badge" data-state="{{ order.status }}">{{ order.status }}</span>
 </p>
 {% if order.rejection_reason %}
 <p class="alert">{{ order.rejection_reason }}</p>
@@ -42,7 +48,7 @@ alert
 
 {% endif %}
 </section>
-{% if is_admin %}
+{% if is_admin and order.status != 'dispatched' and order.status != 'rejected' %}
 <section class="card">
 <h2>Fulfilment</h2>
 <form method="post">
@@ -68,6 +74,7 @@ alert
 {% if order.status == 'invoiced' %}
 <button name="action" value="dispatch">Dispatch full order</button>
 {% endif %}
+<details><summary>Reject or cancel this order</summary><p class="form-help">Use only to correct or decline this order. A reason is required.</p>
 <label>Reason (required for rejection or credit)<input name="reason">
 </label>
 {% if order.status == 'submitted' or order.status == 'approved' %}
@@ -77,6 +84,7 @@ alert
 {% if invoice.status == 'posted' and order.status == 'invoiced' %}
 <button name="action" value="credit" class="danger">Full credit note</button>
 {% endif %}
+</details>
 </form>
 </section>
 {% if not invoice %}

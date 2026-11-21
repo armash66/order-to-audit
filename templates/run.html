@@ -4,6 +4,7 @@
 {% load display floor_language %}
 
 {% block content %}
+<p><a href="/production/">{% ui "Production workspace" %}</a> / {% ui "Run" %} #{{ run.pk }}</p>
 <h1>{% ui "Run" %} #{{ run.pk }} · {% ui run.output_item.name %}</h1>
 <p>
 <span class="badge">{% ui run.state %}</span> · {{ run.expected_packets }} {% ui "expected packets" %}</p>

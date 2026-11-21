@@ -1,74 +1,27 @@
-
 {% load static display floor_language %}
-<!doctype html>
-<html lang="{{ floor_language|default:'en' }}">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>
-{% block title %}
-Order-to-Audit
-{% endblock %}
-</title>
-<link rel="stylesheet" href="
-{% static 'app.css' %}
-">
-</head>
-<body>
-<header>
-<strong>
-<a href="/">Order-to-Audit</a>
-</strong>
-{% if user.is_authenticated %}
-<nav>
-{% if is_sales or is_reports %}<a href="{% url 'visits' %}">Visits</a>{% endif %}
-{% if is_admin %}<a href="{% url 'pricing' %}">Prices</a>{% endif %}
-{% if is_sales or is_reports %}
-<a href="
-{% url 'orders' %}
-">Orders</a>
-{% endif %}
-
-{% if is_production %}
-<a href="
-{% url 'production' %}
-">{% ui "Production" %}</a>
-<a href="?lang=ta" lang="ta">தமிழ்</a><a href="?lang=en">English</a>
-{% endif %}
-
-{% if is_stock %}
-<a href="{% url 'batches' %}">Batches & alerts</a>
-<a href="
-{% url 'stock' %}
-">{% ui "Stock" %}</a>
-{% endif %}
-
-{% if is_reports or is_sales %}
-<a href="/reports/">Reports</a>
-{% endif %}
-</nav>
-<form method="post" action="
-{% url 'logout' %}
-">
-{% csrf_token %}
-<button class="secondary">Sign out</button>
-</form>
-{% endif %}
-</header>
-<main>
-{% for message in messages %}
-<p class="
-{% if message.tags == 'error' %}
-alert
-{% else %}
-success
-{% endif %}
-" role="status">{{ message }}</p>
-{% endfor %}
-
-{% block content %}
-
-{% endblock %}
-</main>
-</body>
-</html>
+<!doctype html><html lang="{{ floor_language|default:'en' }}"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block title %}Order-to-Audit{% endblock %}</title>
+<link rel="stylesheet" href="{% static 'app.css' %}"><script src="{% static 'workspace.js' %}" defer></script>
+</head><body class="{% if user.is_authenticated %}workspace{% else %}signed-out{% endif %}">
+<a class="skip-link" href="#main">Skip to content</a>
+{% if user.is_authenticated %}<aside class="sidebar">
+<a class="brand" href="/"><span class="brand-mark">OA</span><span>Order-to-Audit<small>Factory workspace</small></span></a>
+<nav aria-label="Main navigation"><span class="nav-label">DAILY WORK</span>
+<a href="/" {% if request.path == '/' %}aria-current="page"{% endif %}>{% ui "Home" %}</a>
+{% if is_sales or is_reports %}<a href="{% url 'orders' %}" {% if '/orders/' in request.path %}aria-current="page"{% endif %}>{% ui "Orders" %}</a>{% endif %}
+{% if is_production %}<a href="{% url 'production' %}" {% if '/production/' in request.path %}aria-current="page"{% endif %}>{% ui "Production" %}</a>{% endif %}
+{% if is_stock %}<a href="{% url 'stock' %}" {% if '/stock/' in request.path %}aria-current="page"{% endif %}>{% ui "Stock" %}</a>{% endif %}
+{% if is_reports or is_sales %}<a href="/reports/" {% if '/reports/' in request.path %}aria-current="page"{% endif %}>{% ui "Reports" %}</a>{% endif %}
+<details class="nav-tools"><summary>More tools</summary>
+{% if is_sales %}<a href="/offline/">Offline orders</a>{% endif %}
+{% if is_sales or is_reports %}<a href="{% url 'visits' %}">{% ui "Visits" %}</a>{% endif %}
+{% if is_admin %}<a href="{% url 'pricing' %}">{% ui "Prices" %}</a>{% endif %}
+{% if is_stock %}<a href="{% url 'batches' %}">{% ui "Batches & alerts" %}</a>{% endif %}
+</details></nav><div class="sidebar-note">One factory.<br>Every movement traceable.</div></aside>
+<div class="workspace-body"><header class="topbar"><span class="workspace-label">{% if is_admin %}Admin workspace{% elif is_production %}Production workspace{% elif is_sales %}Sales workspace{% else %}Accounts & oversight{% endif %}</span>
+<div class="account-tools"><details class="language-menu"><summary>Language / भाषा</summary><div class="language-options"><a href="?lang=en">English</a><a href="?lang=ta" lang="ta">தமிழ்</a><a href="?lang=hi" lang="hi">हिन्दी</a><a href="?lang=mr" lang="mr">मराठी</a><small>Some labels remain English. Save your form before switching.</small></div></details><span>{{ user.username }}</span>
+<form method="post" action="{% url 'logout' %}" data-no-dirty>{% csrf_token %}<button class="text-button">{% ui "Sign out" %}</button></form></div></header>{% endif %}
+<main id="main" tabindex="-1">{% for message in messages %}<div class="{% if message.tags == 'error' %}alert{% else %}success{% endif %}" role="{% if message.tags == 'error' %}alert{% else %}status{% endif %}" tabindex="-1">{{ message }}</div>{% endfor %}{% block content %}{% endblock %}</main>
+{% if user.is_authenticated %}<footer class="workspace-footer">Order-to-Audit <span>Factory operations · {{ today }}</span></footer></div>{% endif %}
+</body></html>

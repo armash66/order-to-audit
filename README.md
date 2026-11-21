@@ -1,5 +1,9 @@
 # Order-to-Audit
 
+**Runtime update — 21 November 2026:** the default application is now **React + TypeScript → FastAPI → PostgreSQL**. Run `docker compose up --build -d --wait` and open http://localhost:8000. Existing accounts and PostgreSQL data are preserved. Commands below that formerly targeted `web` now target `api`.
+
+**Migration:** the running application uses FastAPI, SQLAlchemy Core, Alembic and React; Django is not installed in the runtime image. Existing PostgreSQL tables and data are preserved. Earlier Django source is retained only as a development regression oracle, installed in the separate `tests` image. See [migration details](docs/migration.md).
+
 A local factory workflow for the CDI NIT Trichy internship exercise: order → approval → invoice → dispatch → collection, and purchase → raw issue → production → finished goods → variance/cost.
 
 ## Run locally
@@ -22,22 +26,24 @@ All initial demo passwords: **`DemoPass123!`**. Change `DEMO_PASSWORD` before fi
 | `accountant` | Read-only orders, stock and report exports |
 | `owner` | Read-only dashboard, orders, stock and reports |
 
-These are fictional demo identities. This Compose configuration binds localhost and uses Django's development server; it is not a public hosting configuration.
+These are fictional demo identities. Compose binds localhost; nginx serves React and proxies FastAPI/Uvicorn. This is a local demonstration configuration.
 
 ## Verify
 
 ```sh
-docker compose exec web python manage.py test -v 1
-docker compose exec web python manage.py benchmark
-docker compose exec web python manage.py reconcile_stock
-docker compose exec web python manage.py makemigrations --check --dry-run
+docker compose --profile test run --build --rm tests
+docker compose exec api python -m api.cli benchmark
+docker compose exec api python -m api.cli reconcile
+docker compose exec api python -m api.cli pdf-smoke
+docker compose exec api python -m alembic current
+docker compose exec api python -m pytest api/test_api.py -q -p no:cacheprovider
 ```
 
-`benchmark` runs all nine steps through real services, prints 49 expected/actual checks and rolls its scenario back. It requires opening-only stock data. Use `benchmark --persist` once on a fresh instance to keep the full scenario for inspecting screens. A database with operational stock postings is rejected, never reset. For an independent rehearsal instance use a new Compose project name and `WEB_PORT=8001` in an external environment file. The 63-test suite uses its own temporary database, also checks the golden workbook's decimal XML directly, and never deletes application data.
+`python -m api.cli benchmark` runs all nine steps through native services, prints 49 expected/actual checks and rolls its scenario back. It requires opening-only stock data. Add `--persist` once on a fresh instance to keep the scenario for screen inspection. Operational stock postings are rejected, never reset. For an independent rehearsal use a new Compose project name and a different `WEB_PORT`. The 77-test regression/API suite uses a temporary test database and includes the golden workbook's decimal XML checks. On a fresh opening-only instance, run `python -m pytest api/test_api.py api/test_native.py -q -p no:cacheprovider` inside the API container for native runtime, benchmark, schema, seed, trigger and mutation checks.
 
 ## Stack and rationale
 
-Django with server-rendered forms keeps validation, permissions and business rules in one understandable Python codebase; a React/API split would add state and build tooling without improving the benchmark. PostgreSQL supplies real transactions, row locks and immutable-movement triggers; SQLite would not exercise the same concurrency guarantees. Docker Compose packages PostgreSQL and WeasyPrint's native libraries and fonts into a reproducible local run.
+React/TypeScript and FastAPI match the applicant's preferred tools and separate screens from explicit API contracts. SQLAlchemy Core keeps transactions and queries explicit; PostgreSQL supplies row locks, foreign keys and immutable-movement triggers, with Alembic owning schema changes. Docker Compose packages the API, compiled frontend, PostgreSQL and PDF libraries into one local command.
 
 ## Scope status
 
@@ -51,7 +57,7 @@ Django with server-rendered forms keeps validation, permissions and business rul
 
 See [extended feature guide](docs/extended-features.md) for screens, tests and external-validation boundaries. Tally import and human Tamil review remain unverified; government integrations are explicitly local mocks.
 
-See [compliance evidence](docs/compliance.md), [requirements](docs/requirements.md), [decisions](docs/assumptions.md), [design note](docs/design.md), [golden workbook](docs/benchmark.xlsx), [validation](docs/delivery-validation.md) and [demo walkthrough](docs/demo.md).
+See [compliance evidence](docs/compliance.md), [requirements](docs/requirements.md), [decisions](docs/assumptions.md), [design note](docs/design.md), [golden workbook](docs/benchmark.xlsx), [migration validation](docs/migration.md) and [React demo walkthrough](docs/react-demo.md).
 
 ## Benchmark results
 
@@ -83,21 +89,21 @@ See [compliance evidence](docs/compliance.md), [requirements](docs/requirements.
 - GST is the exercise's fixed 5%, with per-line component rounding. GSTR labels are explanatory mappings, not filing-ready payloads. GSTINs and HSN are fictional. Master data is seeded; no generic master-maintenance UI.
 - Expiry is optional: migrated stock has labelled LEGACY lots with unknown expiry. FEFO excludes expired stock and uses unknown-expiry lots last; valuation stays item-level weighted average. Returned batches use the earliest known original expiry conservatively. Lot allocations are service-frozen and reconciled, not protected by additional database triggers.
 - Customer schemes are fixed price overrides, not a promotion engine. Tally XML has structure/balance tests but has not been imported into Tally. Mock government documents are not valid fiscal documents. Tamil covers production labels, with English validation messages and fallback product names; native-speaker review is pending.
-- Images/transitive dependencies are not fully digest-locked. No hosted demo, production webserver or public deployment hardening. The video/public repository submission and organizer deadline/contact verification remain human delivery tasks.
+- Images/transitive dependencies are not fully digest-locked. No hosted demo or public deployment hardening. The video/public repository submission and organizer deadline/contact verification remain human delivery tasks.
 
 ## Where the code lives
 
 | Files | Purpose |
 | --- | --- |
-| `inventory/models.py`, `services.py`, migrations | Masters, typed sources, ledger, receipt/adjustment/reversal posting and reconciliation |
-| `production/models.py`, `services.py` | Snapshotted runs, exact issues, completion, late overhead, variance and suggestions |
-| `sales/models.py`, `services.py` | Orders/reservations, immutable invoice snapshots, FY sequence, dispatch, payments, credits |
-| `extensions/models.py`, `services.py` | Consented visits/GPS and deterministic local government-document mocks |
-| `access/models.py`, `services.py`, `seed.py` | Audit events, role gates and demo identities |
-| `reporting/services.py`, `benchmark.py` | Shared report tables/exports/dashboard and the nine-step service orchestrator |
-| `webapp/views.py`, `forms.py`, `services.py` | HTTP adaptation, exact entry parsing, PDF and offline sync boundaries |
-| `templates/`, `static/` | Server-rendered screens, shared styling, native file share and offline shell/queue |
-| `config/`, `Dockerfile`, `compose.yaml`, `docker/` | Django runtime, container libraries, startup/migrations/seed |
-| App `tests.py` and `test_*.py` | Arithmetic, posting/retry/concurrency, rollback, permissions, reports, golden benchmark and corrections |
+| `api/main.py`, `workflows.py`, `queries.py` | Authentication, typed HTTP boundary and role-scoped workspace reads |
+| `api/native.py`, `database.py`, `inventory/`, `reconciliation.py` | Factory transactions, exact valuation, receipts, immutable ledger, lots, corrections and source reconciliation |
+| `api/production/services.py`, `api/sales/services.py` | Run snapshots/cost/variance and orders/reservations/invoices/dispatch/payments/returns |
+| `api/extensions.py` | Customer prices, reorder settings, visits/GPS and local government-document mocks |
+| `api/reporting.py`, `pdf.py`, `benchmark.py` | Auditor reports, CSV/PDF/Tally, dashboard and nine-step service orchestrator |
+| `api/seed.py`, `cli.py`, `migrations/`, `alembic.ini` | Native accounts/masters/opening seed, CLI and schema adoption/migrations |
+| `frontend/src/`, `frontend/public/` | React workflows, exact amount inputs, translations, offline queue and service worker |
+| `api/Dockerfile`, `frontend/Dockerfile`, `compose.yaml` | Native runtime, development-only regression image and one-command startup |
+| `api/tests.py`, `api/test_*.py`, `scripts/react_*` | HTTP regression, Django-free native checks and browser workflows |
+| Earlier Django apps, templates and migrations | Historical implementation and regression oracle; not imported by the runtime |
 
 No Git commits or pushes are made by the coding agent. See [NEXT_STEPS](NEXT_STEPS.md) for the handoff and suggested commit batches.

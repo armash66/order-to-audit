@@ -1,0 +1,4608 @@
+{
+  "columns": [
+    [
+      "access_auditlog",
+      "id",
+      "bigint",
+      "NO",
+      null,
+      "YES"
+    ],
+    [
+      "access_auditlog",
+      "occurred_at",
+      "timestamp with time zone",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "access_auditlog",
+      "action",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "access_auditlog",
+      "source_type",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "access_auditlog",
+      "source_id",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "access_auditlog",
+      "before",
+      "jsonb",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "access_auditlog",
+      "after",
+      "jsonb",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "access_auditlog",
+      "actor_id",
+      "integer",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "auth_group",
+      "id",
+      "integer",
+      "NO",
+      null,
+      "YES"
+    ],
+    [
+      "auth_group",
+      "name",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "auth_group_permissions",
+      "id",
+      "bigint",
+      "NO",
+      null,
+      "YES"
+    ],
+    [
+      "auth_group_permissions",
+      "group_id",
+      "integer",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "auth_group_permissions",
+      "permission_id",
+      "integer",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "auth_permission",
+      "id",
+      "integer",
+      "NO",
+      null,
+      "YES"
+    ],
+    [
+      "auth_permission",
+      "name",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "auth_permission",
+      "content_type_id",
+      "integer",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "auth_permission",
+      "codename",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "auth_user",
+      "id",
+      "integer",
+      "NO",
+      null,
+      "YES"
+    ],
+    [
+      "auth_user",
+      "password",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "auth_user",
+      "last_login",
+      "timestamp with time zone",
+      "YES",
+      null,
+      "NO"
+    ],
+    [
+      "auth_user",
+      "is_superuser",
+      "boolean",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "auth_user",
+      "username",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "auth_user",
+      "first_name",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "auth_user",
+      "last_name",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "auth_user",
+      "email",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "auth_user",
+      "is_staff",
+      "boolean",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "auth_user",
+      "is_active",
+      "boolean",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "auth_user",
+      "date_joined",
+      "timestamp with time zone",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "auth_user_groups",
+      "id",
+      "bigint",
+      "NO",
+      null,
+      "YES"
+    ],
+    [
+      "auth_user_groups",
+      "user_id",
+      "integer",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "auth_user_groups",
+      "group_id",
+      "integer",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "auth_user_user_permissions",
+      "id",
+      "bigint",
+      "NO",
+      null,
+      "YES"
+    ],
+    [
+      "auth_user_user_permissions",
+      "user_id",
+      "integer",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "auth_user_user_permissions",
+      "permission_id",
+      "integer",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "django_content_type",
+      "id",
+      "integer",
+      "NO",
+      null,
+      "YES"
+    ],
+    [
+      "django_content_type",
+      "app_label",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "django_content_type",
+      "model",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "django_migrations",
+      "id",
+      "bigint",
+      "NO",
+      null,
+      "YES"
+    ],
+    [
+      "django_migrations",
+      "app",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "django_migrations",
+      "name",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "django_migrations",
+      "applied",
+      "timestamp with time zone",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "django_session",
+      "session_key",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "django_session",
+      "session_data",
+      "text",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "django_session",
+      "expire_date",
+      "timestamp with time zone",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "extensions_mocksubmission",
+      "id",
+      "bigint",
+      "NO",
+      null,
+      "YES"
+    ],
+    [
+      "extensions_mocksubmission",
+      "kind",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "extensions_mocksubmission",
+      "created_at",
+      "timestamp with time zone",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "extensions_mocksubmission",
+      "request_json",
+      "text",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "extensions_mocksubmission",
+      "response",
+      "jsonb",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "extensions_mocksubmission",
+      "actor_id",
+      "integer",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "extensions_mocksubmission",
+      "invoice_id",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "extensions_visit",
+      "id",
+      "bigint",
+      "NO",
+      null,
+      "YES"
+    ],
+    [
+      "extensions_visit",
+      "request_key",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "extensions_visit",
+      "route",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "extensions_visit",
+      "note",
+      "text",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "extensions_visit",
+      "visited_at",
+      "timestamp with time zone",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "extensions_visit",
+      "gps_consent",
+      "boolean",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "extensions_visit",
+      "latitude_microdegrees",
+      "integer",
+      "YES",
+      null,
+      "NO"
+    ],
+    [
+      "extensions_visit",
+      "longitude_microdegrees",
+      "integer",
+      "YES",
+      null,
+      "NO"
+    ],
+    [
+      "extensions_visit",
+      "actor_id",
+      "integer",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "extensions_visit",
+      "customer_id",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_adjustment",
+      "id",
+      "bigint",
+      "NO",
+      null,
+      "YES"
+    ],
+    [
+      "inventory_adjustment",
+      "request_key",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_adjustment",
+      "document_date",
+      "date",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_adjustment",
+      "reason",
+      "text",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_adjustment",
+      "payload",
+      "jsonb",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_adjustment",
+      "actor_id",
+      "integer",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_adjustment",
+      "reversed_run_id",
+      "bigint",
+      "YES",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_adjustmentline",
+      "id",
+      "bigint",
+      "NO",
+      null,
+      "YES"
+    ],
+    [
+      "inventory_adjustmentline",
+      "quantity",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_adjustmentline",
+      "value_paise",
+      "bigint",
+      "YES",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_adjustmentline",
+      "document_id",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_adjustmentline",
+      "item_id",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_bom",
+      "id",
+      "bigint",
+      "NO",
+      null,
+      "YES"
+    ],
+    [
+      "inventory_bom",
+      "version",
+      "integer",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_bom",
+      "expected_packets",
+      "integer",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_bom",
+      "sku_id",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_bom",
+      "recipe_id",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_bomline",
+      "id",
+      "bigint",
+      "NO",
+      null,
+      "YES"
+    ],
+    [
+      "inventory_bomline",
+      "quantity",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_bomline",
+      "bom_id",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_bomline",
+      "item_id",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_customer",
+      "id",
+      "bigint",
+      "NO",
+      null,
+      "YES"
+    ],
+    [
+      "inventory_customer",
+      "code",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_customer",
+      "name",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_customer",
+      "state_code",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_customer",
+      "gstin",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_factorycontrol",
+      "id",
+      "smallint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_factorycontrol",
+      "last_sequence",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_factorycontrol",
+      "tolerance_bps",
+      "integer",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_item",
+      "id",
+      "bigint",
+      "NO",
+      null,
+      "YES"
+    ],
+    [
+      "inventory_item",
+      "code",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_item",
+      "name",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_item",
+      "category",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_item",
+      "base_unit",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_lotallocation",
+      "id",
+      "bigint",
+      "NO",
+      null,
+      "YES"
+    ],
+    [
+      "inventory_lotallocation",
+      "quantity",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_lotallocation",
+      "movement_id",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_lotallocation",
+      "lot_id",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_openingline",
+      "id",
+      "bigint",
+      "NO",
+      null,
+      "YES"
+    ],
+    [
+      "inventory_openingline",
+      "quantity",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_openingline",
+      "value_paise",
+      "bigint",
+      "YES",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_openingline",
+      "item_id",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_openingline",
+      "document_id",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_openingstock",
+      "id",
+      "bigint",
+      "NO",
+      null,
+      "YES"
+    ],
+    [
+      "inventory_openingstock",
+      "request_key",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_openingstock",
+      "document_date",
+      "date",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_openingstock",
+      "actor_id",
+      "integer",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_openingstock",
+      "lot_details",
+      "jsonb",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_posting",
+      "id",
+      "bigint",
+      "NO",
+      null,
+      "YES"
+    ],
+    [
+      "inventory_posting",
+      "sequence",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_posting",
+      "posted_at",
+      "timestamp with time zone",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_posting",
+      "opening_id",
+      "bigint",
+      "YES",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_posting",
+      "purchase_id",
+      "bigint",
+      "YES",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_posting",
+      "production_id",
+      "bigint",
+      "YES",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_posting",
+      "dispatch_id",
+      "bigint",
+      "YES",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_posting",
+      "adjustment_id",
+      "bigint",
+      "YES",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_purchaseline",
+      "id",
+      "bigint",
+      "NO",
+      null,
+      "YES"
+    ],
+    [
+      "inventory_purchaseline",
+      "quantity",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_purchaseline",
+      "value_paise",
+      "bigint",
+      "YES",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_purchaseline",
+      "item_id",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_purchaseline",
+      "document_id",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_purchasereceipt",
+      "id",
+      "bigint",
+      "NO",
+      null,
+      "YES"
+    ],
+    [
+      "inventory_purchasereceipt",
+      "request_key",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_purchasereceipt",
+      "document_date",
+      "date",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_purchasereceipt",
+      "actor_id",
+      "integer",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_purchasereceipt",
+      "supplier_id",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_purchasereceipt",
+      "lot_details",
+      "jsonb",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_recipe",
+      "id",
+      "bigint",
+      "NO",
+      null,
+      "YES"
+    ],
+    [
+      "inventory_recipe",
+      "code",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_recipe",
+      "version",
+      "integer",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_recipeline",
+      "id",
+      "bigint",
+      "NO",
+      null,
+      "YES"
+    ],
+    [
+      "inventory_recipeline",
+      "quantity",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_recipeline",
+      "item_id",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_recipeline",
+      "recipe_id",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_reorderlevel",
+      "id",
+      "bigint",
+      "NO",
+      null,
+      "YES"
+    ],
+    [
+      "inventory_reorderlevel",
+      "minimum_quantity",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_reorderlevel",
+      "item_id",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_sku",
+      "id",
+      "bigint",
+      "NO",
+      null,
+      "YES"
+    ],
+    [
+      "inventory_sku",
+      "pack_size_g",
+      "integer",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_sku",
+      "price_paise",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_sku",
+      "hsn",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_sku",
+      "item_id",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_stocklot",
+      "id",
+      "bigint",
+      "NO",
+      null,
+      "YES"
+    ],
+    [
+      "inventory_stocklot",
+      "code",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_stocklot",
+      "expiry_date",
+      "date",
+      "YES",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_stocklot",
+      "item_id",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_stockmovement",
+      "id",
+      "bigint",
+      "NO",
+      null,
+      "YES"
+    ],
+    [
+      "inventory_stockmovement",
+      "quantity",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_stockmovement",
+      "value_paise",
+      "bigint",
+      "YES",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_stockmovement",
+      "item_id",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_stockmovement",
+      "opening_line_id",
+      "bigint",
+      "YES",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_stockmovement",
+      "posting_id",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_stockmovement",
+      "purchase_line_id",
+      "bigint",
+      "YES",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_stockmovement",
+      "production_line_id",
+      "bigint",
+      "YES",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_stockmovement",
+      "dispatch_line_id",
+      "bigint",
+      "YES",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_stockmovement",
+      "adjustment_line_id",
+      "bigint",
+      "YES",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_supplier",
+      "id",
+      "bigint",
+      "NO",
+      null,
+      "YES"
+    ],
+    [
+      "inventory_supplier",
+      "code",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_supplier",
+      "name",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_unitconversion",
+      "id",
+      "bigint",
+      "NO",
+      null,
+      "YES"
+    ],
+    [
+      "inventory_unitconversion",
+      "unit",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_unitconversion",
+      "numerator",
+      "integer",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_unitconversion",
+      "denominator",
+      "integer",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "inventory_unitconversion",
+      "item_id",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "production_overhead",
+      "id",
+      "bigint",
+      "NO",
+      null,
+      "YES"
+    ],
+    [
+      "production_overhead",
+      "request_key",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "production_overhead",
+      "document_date",
+      "date",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "production_overhead",
+      "label",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "production_overhead",
+      "amount_paise",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "production_overhead",
+      "actor_id",
+      "integer",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "production_overhead",
+      "run_id",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "production_overhead",
+      "posted_at",
+      "timestamp with time zone",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "production_productionevent",
+      "id",
+      "bigint",
+      "NO",
+      null,
+      "YES"
+    ],
+    [
+      "production_productionevent",
+      "request_key",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "production_productionevent",
+      "document_date",
+      "date",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "production_productionevent",
+      "kind",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "production_productionevent",
+      "payload",
+      "jsonb",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "production_productionevent",
+      "actor_id",
+      "integer",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "production_productionevent",
+      "run_id",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "production_productionline",
+      "id",
+      "bigint",
+      "NO",
+      null,
+      "YES"
+    ],
+    [
+      "production_productionline",
+      "quantity",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "production_productionline",
+      "value_paise",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "production_productionline",
+      "event_id",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "production_productionline",
+      "item_id",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "production_productionrun",
+      "id",
+      "bigint",
+      "NO",
+      null,
+      "YES"
+    ],
+    [
+      "production_productionrun",
+      "request_key",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "production_productionrun",
+      "document_date",
+      "date",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "production_productionrun",
+      "bom_version",
+      "integer",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "production_productionrun",
+      "recipe_version",
+      "integer",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "production_productionrun",
+      "batches",
+      "integer",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "production_productionrun",
+      "expected_packets",
+      "integer",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "production_productionrun",
+      "state",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "production_productionrun",
+      "good_packets",
+      "integer",
+      "YES",
+      null,
+      "NO"
+    ],
+    [
+      "production_productionrun",
+      "actor_id",
+      "integer",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "production_productionrun",
+      "bom_id",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "production_productionrun",
+      "output_item_id",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "production_productionrun",
+      "output_expiry",
+      "date",
+      "YES",
+      null,
+      "NO"
+    ],
+    [
+      "production_runstandard",
+      "id",
+      "bigint",
+      "NO",
+      null,
+      "YES"
+    ],
+    [
+      "production_runstandard",
+      "stage",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "production_runstandard",
+      "quantity",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "production_runstandard",
+      "item_id",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "production_runstandard",
+      "run_id",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "production_tolerancechange",
+      "id",
+      "bigint",
+      "NO",
+      null,
+      "YES"
+    ],
+    [
+      "production_tolerancechange",
+      "before_bps",
+      "integer",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "production_tolerancechange",
+      "after_bps",
+      "integer",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "production_tolerancechange",
+      "changed_at",
+      "timestamp with time zone",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "production_tolerancechange",
+      "actor_id",
+      "integer",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_creditnote",
+      "id",
+      "bigint",
+      "NO",
+      null,
+      "YES"
+    ],
+    [
+      "sales_creditnote",
+      "request_key",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_creditnote",
+      "document_date",
+      "date",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_creditnote",
+      "reason",
+      "text",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_creditnote",
+      "amount_paise",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_creditnote",
+      "actor_id",
+      "integer",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_creditnote",
+      "invoice_id",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_customerprice",
+      "id",
+      "bigint",
+      "NO",
+      null,
+      "YES"
+    ],
+    [
+      "sales_customerprice",
+      "price_paise",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_customerprice",
+      "label",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_customerprice",
+      "customer_id",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_customerprice",
+      "sku_id",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_dispatch",
+      "id",
+      "bigint",
+      "NO",
+      null,
+      "YES"
+    ],
+    [
+      "sales_dispatch",
+      "request_key",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_dispatch",
+      "document_date",
+      "date",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_dispatch",
+      "actor_id",
+      "integer",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_dispatch",
+      "invoice_id",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_dispatchline",
+      "id",
+      "bigint",
+      "NO",
+      null,
+      "YES"
+    ],
+    [
+      "sales_dispatchline",
+      "quantity",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_dispatchline",
+      "value_paise",
+      "bigint",
+      "YES",
+      null,
+      "NO"
+    ],
+    [
+      "sales_dispatchline",
+      "document_id",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_dispatchline",
+      "item_id",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_invoice",
+      "id",
+      "bigint",
+      "NO",
+      null,
+      "YES"
+    ],
+    [
+      "sales_invoice",
+      "request_key",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_invoice",
+      "document_date",
+      "date",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_invoice",
+      "number",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_invoice",
+      "status",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_invoice",
+      "customer_name",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_invoice",
+      "customer_gstin",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_invoice",
+      "supply_state",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_invoice",
+      "taxable_paise",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_invoice",
+      "cgst_paise",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_invoice",
+      "sgst_paise",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_invoice",
+      "igst_paise",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_invoice",
+      "total_paise",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_invoice",
+      "actor_id",
+      "integer",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_invoice",
+      "order_id",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_invoiceline",
+      "id",
+      "bigint",
+      "NO",
+      null,
+      "YES"
+    ],
+    [
+      "sales_invoiceline",
+      "description",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_invoiceline",
+      "hsn",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_invoiceline",
+      "quantity",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_invoiceline",
+      "price_paise",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_invoiceline",
+      "taxable_paise",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_invoiceline",
+      "cgst_paise",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_invoiceline",
+      "sgst_paise",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_invoiceline",
+      "igst_paise",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_invoiceline",
+      "invoice_id",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_invoiceline",
+      "sku_id",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_invoicesequence",
+      "financial_year",
+      "integer",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_invoicesequence",
+      "last_number",
+      "integer",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_order",
+      "id",
+      "bigint",
+      "NO",
+      null,
+      "YES"
+    ],
+    [
+      "sales_order",
+      "request_key",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_order",
+      "document_date",
+      "date",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_order",
+      "status",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_order",
+      "rejection_reason",
+      "text",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_order",
+      "submitted_payload",
+      "jsonb",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_order",
+      "actor_id",
+      "integer",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_order",
+      "customer_id",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_orderline",
+      "id",
+      "bigint",
+      "NO",
+      null,
+      "YES"
+    ],
+    [
+      "sales_orderline",
+      "quantity",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_orderline",
+      "price_paise",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_orderline",
+      "order_id",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_orderline",
+      "sku_id",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_orderline",
+      "price_label",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_payment",
+      "id",
+      "bigint",
+      "NO",
+      null,
+      "YES"
+    ],
+    [
+      "sales_payment",
+      "request_key",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_payment",
+      "document_date",
+      "date",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_payment",
+      "amount_paise",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_payment",
+      "actor_id",
+      "integer",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_payment",
+      "invoice_id",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_returnline",
+      "id",
+      "bigint",
+      "NO",
+      null,
+      "YES"
+    ],
+    [
+      "sales_returnline",
+      "quantity",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_returnline",
+      "taxable_paise",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_returnline",
+      "cgst_paise",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_returnline",
+      "sgst_paise",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_returnline",
+      "igst_paise",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_returnline",
+      "invoice_line_id",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_returnline",
+      "document_id",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_returnline",
+      "dispatch_line_id",
+      "bigint",
+      "YES",
+      null,
+      "NO"
+    ],
+    [
+      "sales_returnline",
+      "stock_value_paise",
+      "bigint",
+      "YES",
+      null,
+      "NO"
+    ],
+    [
+      "sales_salesreturn",
+      "id",
+      "bigint",
+      "NO",
+      null,
+      "YES"
+    ],
+    [
+      "sales_salesreturn",
+      "request_key",
+      "character varying",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_salesreturn",
+      "document_date",
+      "date",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_salesreturn",
+      "reason",
+      "text",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_salesreturn",
+      "payload",
+      "jsonb",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_salesreturn",
+      "amount_paise",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_salesreturn",
+      "actor_id",
+      "integer",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_salesreturn",
+      "adjustment_id",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ],
+    [
+      "sales_salesreturn",
+      "invoice_id",
+      "bigint",
+      "NO",
+      null,
+      "NO"
+    ]
+  ],
+  "constraints": [
+    [
+      "access_auditlog",
+      "access_auditlog_actor_id_001eb42e_fk_auth_user_id",
+      "FOREIGN KEY (actor_id) REFERENCES auth_user(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "access_auditlog",
+      "access_auditlog_pkey",
+      "PRIMARY KEY (id)"
+    ],
+    [
+      "access_auditlog",
+      "access_auditlog_source_id_check",
+      "CHECK ((source_id >= 0))"
+    ],
+    [
+      "auth_group",
+      "auth_group_name_key",
+      "UNIQUE (name)"
+    ],
+    [
+      "auth_group",
+      "auth_group_pkey",
+      "PRIMARY KEY (id)"
+    ],
+    [
+      "auth_group_permissions",
+      "auth_group_permissio_permission_id_84c5c92e_fk_auth_perm",
+      "FOREIGN KEY (permission_id) REFERENCES auth_permission(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "auth_group_permissions",
+      "auth_group_permissions_group_id_b120cbf9_fk_auth_group_id",
+      "FOREIGN KEY (group_id) REFERENCES auth_group(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "auth_group_permissions",
+      "auth_group_permissions_group_id_permission_id_0cd325b0_uniq",
+      "UNIQUE (group_id, permission_id)"
+    ],
+    [
+      "auth_group_permissions",
+      "auth_group_permissions_pkey",
+      "PRIMARY KEY (id)"
+    ],
+    [
+      "auth_permission",
+      "auth_permission_content_type_id_2f476e4b_fk_django_co",
+      "FOREIGN KEY (content_type_id) REFERENCES django_content_type(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "auth_permission",
+      "auth_permission_content_type_id_codename_01ab375a_uniq",
+      "UNIQUE (content_type_id, codename)"
+    ],
+    [
+      "auth_permission",
+      "auth_permission_pkey",
+      "PRIMARY KEY (id)"
+    ],
+    [
+      "auth_user",
+      "auth_user_pkey",
+      "PRIMARY KEY (id)"
+    ],
+    [
+      "auth_user",
+      "auth_user_username_key",
+      "UNIQUE (username)"
+    ],
+    [
+      "auth_user_groups",
+      "auth_user_groups_group_id_97559544_fk_auth_group_id",
+      "FOREIGN KEY (group_id) REFERENCES auth_group(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "auth_user_groups",
+      "auth_user_groups_pkey",
+      "PRIMARY KEY (id)"
+    ],
+    [
+      "auth_user_groups",
+      "auth_user_groups_user_id_6a12ed8b_fk_auth_user_id",
+      "FOREIGN KEY (user_id) REFERENCES auth_user(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "auth_user_groups",
+      "auth_user_groups_user_id_group_id_94350c0c_uniq",
+      "UNIQUE (user_id, group_id)"
+    ],
+    [
+      "auth_user_user_permissions",
+      "auth_user_user_permi_permission_id_1fbb5f2c_fk_auth_perm",
+      "FOREIGN KEY (permission_id) REFERENCES auth_permission(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "auth_user_user_permissions",
+      "auth_user_user_permissions_pkey",
+      "PRIMARY KEY (id)"
+    ],
+    [
+      "auth_user_user_permissions",
+      "auth_user_user_permissions_user_id_a95ead1b_fk_auth_user_id",
+      "FOREIGN KEY (user_id) REFERENCES auth_user(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "auth_user_user_permissions",
+      "auth_user_user_permissions_user_id_permission_id_14a6b632_uniq",
+      "UNIQUE (user_id, permission_id)"
+    ],
+    [
+      "django_content_type",
+      "django_content_type_app_label_model_76bd3d3b_uniq",
+      "UNIQUE (app_label, model)"
+    ],
+    [
+      "django_content_type",
+      "django_content_type_pkey",
+      "PRIMARY KEY (id)"
+    ],
+    [
+      "django_migrations",
+      "django_migrations_pkey",
+      "PRIMARY KEY (id)"
+    ],
+    [
+      "django_session",
+      "django_session_pkey",
+      "PRIMARY KEY (session_key)"
+    ],
+    [
+      "extensions_mocksubmission",
+      "extensions_mocksubmi_invoice_id_ca72f8f0_fk_sales_inv",
+      "FOREIGN KEY (invoice_id) REFERENCES sales_invoice(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "extensions_mocksubmission",
+      "extensions_mocksubmission_actor_id_0ab7aa74_fk_auth_user_id",
+      "FOREIGN KEY (actor_id) REFERENCES auth_user(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "extensions_mocksubmission",
+      "extensions_mocksubmission_pkey",
+      "PRIMARY KEY (id)"
+    ],
+    [
+      "extensions_mocksubmission",
+      "unique_invoice_mock",
+      "UNIQUE (invoice_id, kind)"
+    ],
+    [
+      "extensions_visit",
+      "extensions_visit_actor_id_34b87adc_fk_auth_user_id",
+      "FOREIGN KEY (actor_id) REFERENCES auth_user(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "extensions_visit",
+      "extensions_visit_customer_id_931da67a_fk_inventory_customer_id",
+      "FOREIGN KEY (customer_id) REFERENCES inventory_customer(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "extensions_visit",
+      "extensions_visit_pkey",
+      "PRIMARY KEY (id)"
+    ],
+    [
+      "extensions_visit",
+      "extensions_visit_request_key_key",
+      "UNIQUE (request_key)"
+    ],
+    [
+      "inventory_adjustment",
+      "inventory_adjustment_actor_id_b48f6936_fk_auth_user_id",
+      "FOREIGN KEY (actor_id) REFERENCES auth_user(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "inventory_adjustment",
+      "inventory_adjustment_pkey",
+      "PRIMARY KEY (id)"
+    ],
+    [
+      "inventory_adjustment",
+      "inventory_adjustment_request_key_key",
+      "UNIQUE (request_key)"
+    ],
+    [
+      "inventory_adjustment",
+      "inventory_adjustment_reversed_run_id_93c61222_fk_productio",
+      "FOREIGN KEY (reversed_run_id) REFERENCES production_productionrun(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "inventory_adjustment",
+      "inventory_adjustment_reversed_run_id_key",
+      "UNIQUE (reversed_run_id)"
+    ],
+    [
+      "inventory_adjustmentline",
+      "inventory_adjustment_document_id_8edc5a08_fk_inventory",
+      "FOREIGN KEY (document_id) REFERENCES inventory_adjustment(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "inventory_adjustmentline",
+      "inventory_adjustmentline_item_id_8ed36e0d_fk_inventory_item_id",
+      "FOREIGN KEY (item_id) REFERENCES inventory_item(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "inventory_adjustmentline",
+      "inventory_adjustmentline_pkey",
+      "PRIMARY KEY (id)"
+    ],
+    [
+      "inventory_bom",
+      "inventory_bom_expected_packets_check",
+      "CHECK ((expected_packets >= 0))"
+    ],
+    [
+      "inventory_bom",
+      "inventory_bom_pkey",
+      "PRIMARY KEY (id)"
+    ],
+    [
+      "inventory_bom",
+      "inventory_bom_recipe_id_62dcf239_fk_inventory_recipe_id",
+      "FOREIGN KEY (recipe_id) REFERENCES inventory_recipe(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "inventory_bom",
+      "inventory_bom_sku_id_f32bcf1b_fk_inventory_sku_id",
+      "FOREIGN KEY (sku_id) REFERENCES inventory_sku(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "inventory_bom",
+      "inventory_bom_version_check",
+      "CHECK ((version >= 0))"
+    ],
+    [
+      "inventory_bom",
+      "unique_bom_version",
+      "UNIQUE (sku_id, version)"
+    ],
+    [
+      "inventory_bomline",
+      "inventory_bomline_bom_id_f9db4aa0_fk_inventory_bom_id",
+      "FOREIGN KEY (bom_id) REFERENCES inventory_bom(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "inventory_bomline",
+      "inventory_bomline_item_id_a437a3a4_fk_inventory_item_id",
+      "FOREIGN KEY (item_id) REFERENCES inventory_item(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "inventory_bomline",
+      "inventory_bomline_pkey",
+      "PRIMARY KEY (id)"
+    ],
+    [
+      "inventory_bomline",
+      "inventory_bomline_quantity_check",
+      "CHECK ((quantity >= 0))"
+    ],
+    [
+      "inventory_bomline",
+      "unique_bom_item",
+      "UNIQUE (bom_id, item_id)"
+    ],
+    [
+      "inventory_customer",
+      "inventory_customer_code_key",
+      "UNIQUE (code)"
+    ],
+    [
+      "inventory_customer",
+      "inventory_customer_pkey",
+      "PRIMARY KEY (id)"
+    ],
+    [
+      "inventory_factorycontrol",
+      "inventory_factorycontrol_id_check",
+      "CHECK ((id >= 0))"
+    ],
+    [
+      "inventory_factorycontrol",
+      "inventory_factorycontrol_last_sequence_check",
+      "CHECK ((last_sequence >= 0))"
+    ],
+    [
+      "inventory_factorycontrol",
+      "inventory_factorycontrol_pkey",
+      "PRIMARY KEY (id)"
+    ],
+    [
+      "inventory_factorycontrol",
+      "inventory_factorycontrol_tolerance_bps_check",
+      "CHECK ((tolerance_bps >= 0))"
+    ],
+    [
+      "inventory_factorycontrol",
+      "single_factory",
+      "CHECK ((id = 1))"
+    ],
+    [
+      "inventory_item",
+      "inventory_item_code_key",
+      "UNIQUE (code)"
+    ],
+    [
+      "inventory_item",
+      "inventory_item_pkey",
+      "PRIMARY KEY (id)"
+    ],
+    [
+      "inventory_lotallocation",
+      "inventory_lotallocat_lot_id_425a42fa_fk_inventory",
+      "FOREIGN KEY (lot_id) REFERENCES inventory_stocklot(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "inventory_lotallocation",
+      "inventory_lotallocat_movement_id_e590646b_fk_inventory",
+      "FOREIGN KEY (movement_id) REFERENCES inventory_stockmovement(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "inventory_lotallocation",
+      "inventory_lotallocation_pkey",
+      "PRIMARY KEY (id)"
+    ],
+    [
+      "inventory_lotallocation",
+      "nonzero_lot_quantity",
+      "CHECK ((NOT (quantity = 0)))"
+    ],
+    [
+      "inventory_lotallocation",
+      "unique_movement_lot",
+      "UNIQUE (movement_id, lot_id)"
+    ],
+    [
+      "inventory_openingline",
+      "inventory_openinglin_document_id_e19e67a7_fk_inventory",
+      "FOREIGN KEY (document_id) REFERENCES inventory_openingstock(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "inventory_openingline",
+      "inventory_openingline_item_id_e61ecff9_fk_inventory_item_id",
+      "FOREIGN KEY (item_id) REFERENCES inventory_item(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "inventory_openingline",
+      "inventory_openingline_pkey",
+      "PRIMARY KEY (id)"
+    ],
+    [
+      "inventory_openingline",
+      "inventory_openingline_quantity_check",
+      "CHECK ((quantity >= 0))"
+    ],
+    [
+      "inventory_openingline",
+      "inventory_openingline_value_paise_check",
+      "CHECK ((value_paise >= 0))"
+    ],
+    [
+      "inventory_openingline",
+      "opening_positive_quantity",
+      "CHECK ((quantity > 0))"
+    ],
+    [
+      "inventory_openingstock",
+      "inventory_openingstock_actor_id_ed23550f_fk_auth_user_id",
+      "FOREIGN KEY (actor_id) REFERENCES auth_user(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "inventory_openingstock",
+      "inventory_openingstock_pkey",
+      "PRIMARY KEY (id)"
+    ],
+    [
+      "inventory_openingstock",
+      "inventory_openingstock_request_key_key",
+      "UNIQUE (request_key)"
+    ],
+    [
+      "inventory_posting",
+      "inventory_posting_adjustment_id_a213e060_fk_inventory",
+      "FOREIGN KEY (adjustment_id) REFERENCES inventory_adjustment(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "inventory_posting",
+      "inventory_posting_adjustment_id_key",
+      "UNIQUE (adjustment_id)"
+    ],
+    [
+      "inventory_posting",
+      "inventory_posting_dispatch_id_a8ce4a58_fk_sales_dispatch_id",
+      "FOREIGN KEY (dispatch_id) REFERENCES sales_dispatch(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "inventory_posting",
+      "inventory_posting_dispatch_id_key",
+      "UNIQUE (dispatch_id)"
+    ],
+    [
+      "inventory_posting",
+      "inventory_posting_opening_id_2ff287b3_fk_inventory",
+      "FOREIGN KEY (opening_id) REFERENCES inventory_openingstock(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "inventory_posting",
+      "inventory_posting_opening_id_key",
+      "UNIQUE (opening_id)"
+    ],
+    [
+      "inventory_posting",
+      "inventory_posting_pkey",
+      "PRIMARY KEY (id)"
+    ],
+    [
+      "inventory_posting",
+      "inventory_posting_production_id_d4596281_fk_productio",
+      "FOREIGN KEY (production_id) REFERENCES production_productionevent(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "inventory_posting",
+      "inventory_posting_production_id_key",
+      "UNIQUE (production_id)"
+    ],
+    [
+      "inventory_posting",
+      "inventory_posting_purchase_id_c0bef12c_fk_inventory",
+      "FOREIGN KEY (purchase_id) REFERENCES inventory_purchasereceipt(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "inventory_posting",
+      "inventory_posting_purchase_id_key",
+      "UNIQUE (purchase_id)"
+    ],
+    [
+      "inventory_posting",
+      "inventory_posting_sequence_check",
+      "CHECK ((sequence >= 0))"
+    ],
+    [
+      "inventory_posting",
+      "inventory_posting_sequence_key",
+      "UNIQUE (sequence)"
+    ],
+    [
+      "inventory_posting",
+      "posting_one_source",
+      "CHECK ((((adjustment_id IS NULL) AND (dispatch_id IS NULL) AND (opening_id IS NOT NULL) AND (production_id IS NULL) AND (purchase_id IS NULL)) OR ((adjustment_id IS NULL) AND (dispatch_id IS NULL) AND (opening_id IS NULL) AND (production_id IS NULL) AND (purchase_id IS NOT NULL)) OR ((adjustment_id IS NULL) AND (dispatch_id IS NULL) AND (opening_id IS NULL) AND (production_id IS NOT NULL) AND (purchase_id IS NULL)) OR ((adjustment_id IS NULL) AND (dispatch_id IS NOT NULL) AND (opening_id IS NULL) AND (production_id IS NULL) AND (purchase_id IS NULL)) OR ((adjustment_id IS NOT NULL) AND (dispatch_id IS NULL) AND (opening_id IS NULL) AND (production_id IS NULL) AND (purchase_id IS NULL))))"
+    ],
+    [
+      "inventory_purchaseline",
+      "inventory_purchaseli_document_id_07cefbbd_fk_inventory",
+      "FOREIGN KEY (document_id) REFERENCES inventory_purchasereceipt(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "inventory_purchaseline",
+      "inventory_purchaseline_item_id_17935724_fk_inventory_item_id",
+      "FOREIGN KEY (item_id) REFERENCES inventory_item(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "inventory_purchaseline",
+      "inventory_purchaseline_pkey",
+      "PRIMARY KEY (id)"
+    ],
+    [
+      "inventory_purchaseline",
+      "inventory_purchaseline_quantity_check",
+      "CHECK ((quantity >= 0))"
+    ],
+    [
+      "inventory_purchaseline",
+      "inventory_purchaseline_value_paise_check",
+      "CHECK ((value_paise >= 0))"
+    ],
+    [
+      "inventory_purchaseline",
+      "purchase_quantity_value",
+      "CHECK (((quantity > 0) AND (value_paise IS NOT NULL)))"
+    ],
+    [
+      "inventory_purchasereceipt",
+      "inventory_purchasere_supplier_id_4af60b48_fk_inventory",
+      "FOREIGN KEY (supplier_id) REFERENCES inventory_supplier(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "inventory_purchasereceipt",
+      "inventory_purchasereceipt_actor_id_f1801aaa_fk_auth_user_id",
+      "FOREIGN KEY (actor_id) REFERENCES auth_user(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "inventory_purchasereceipt",
+      "inventory_purchasereceipt_pkey",
+      "PRIMARY KEY (id)"
+    ],
+    [
+      "inventory_purchasereceipt",
+      "inventory_purchasereceipt_request_key_key",
+      "UNIQUE (request_key)"
+    ],
+    [
+      "inventory_recipe",
+      "inventory_recipe_pkey",
+      "PRIMARY KEY (id)"
+    ],
+    [
+      "inventory_recipe",
+      "inventory_recipe_version_check",
+      "CHECK ((version >= 0))"
+    ],
+    [
+      "inventory_recipe",
+      "unique_recipe_version",
+      "UNIQUE (code, version)"
+    ],
+    [
+      "inventory_recipeline",
+      "inventory_recipeline_item_id_1d6b3f17_fk_inventory_item_id",
+      "FOREIGN KEY (item_id) REFERENCES inventory_item(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "inventory_recipeline",
+      "inventory_recipeline_pkey",
+      "PRIMARY KEY (id)"
+    ],
+    [
+      "inventory_recipeline",
+      "inventory_recipeline_quantity_check",
+      "CHECK ((quantity >= 0))"
+    ],
+    [
+      "inventory_recipeline",
+      "inventory_recipeline_recipe_id_f6c6446f_fk_inventory_recipe_id",
+      "FOREIGN KEY (recipe_id) REFERENCES inventory_recipe(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "inventory_recipeline",
+      "positive_recipe_quantity",
+      "CHECK ((quantity > 0))"
+    ],
+    [
+      "inventory_recipeline",
+      "unique_recipe_item",
+      "UNIQUE (recipe_id, item_id)"
+    ],
+    [
+      "inventory_reorderlevel",
+      "inventory_reorderlevel_item_id_c611b347_fk_inventory_item_id",
+      "FOREIGN KEY (item_id) REFERENCES inventory_item(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "inventory_reorderlevel",
+      "inventory_reorderlevel_item_id_key",
+      "UNIQUE (item_id)"
+    ],
+    [
+      "inventory_reorderlevel",
+      "inventory_reorderlevel_minimum_quantity_check",
+      "CHECK ((minimum_quantity >= 0))"
+    ],
+    [
+      "inventory_reorderlevel",
+      "inventory_reorderlevel_pkey",
+      "PRIMARY KEY (id)"
+    ],
+    [
+      "inventory_sku",
+      "inventory_sku_item_id_8f8951de_fk_inventory_item_id",
+      "FOREIGN KEY (item_id) REFERENCES inventory_item(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "inventory_sku",
+      "inventory_sku_item_id_key",
+      "UNIQUE (item_id)"
+    ],
+    [
+      "inventory_sku",
+      "inventory_sku_pack_size_g_check",
+      "CHECK ((pack_size_g >= 0))"
+    ],
+    [
+      "inventory_sku",
+      "inventory_sku_pkey",
+      "PRIMARY KEY (id)"
+    ],
+    [
+      "inventory_sku",
+      "inventory_sku_price_paise_check",
+      "CHECK ((price_paise >= 0))"
+    ],
+    [
+      "inventory_stocklot",
+      "inventory_stocklot_item_id_58b08427_fk_inventory_item_id",
+      "FOREIGN KEY (item_id) REFERENCES inventory_item(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "inventory_stocklot",
+      "inventory_stocklot_pkey",
+      "PRIMARY KEY (id)"
+    ],
+    [
+      "inventory_stocklot",
+      "unique_item_lot",
+      "UNIQUE (item_id, code)"
+    ],
+    [
+      "inventory_stockmovement",
+      "inventory_stockmovem_adjustment_line_id_6f5b129f_fk_inventory",
+      "FOREIGN KEY (adjustment_line_id) REFERENCES inventory_adjustmentline(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "inventory_stockmovement",
+      "inventory_stockmovem_dispatch_line_id_1e1127f6_fk_sales_dis",
+      "FOREIGN KEY (dispatch_line_id) REFERENCES sales_dispatchline(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "inventory_stockmovement",
+      "inventory_stockmovem_opening_line_id_9c8475d6_fk_inventory",
+      "FOREIGN KEY (opening_line_id) REFERENCES inventory_openingline(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "inventory_stockmovement",
+      "inventory_stockmovem_posting_id_451a1a79_fk_inventory",
+      "FOREIGN KEY (posting_id) REFERENCES inventory_posting(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "inventory_stockmovement",
+      "inventory_stockmovem_production_line_id_147a80b8_fk_productio",
+      "FOREIGN KEY (production_line_id) REFERENCES production_productionline(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "inventory_stockmovement",
+      "inventory_stockmovem_purchase_line_id_9705b1e4_fk_inventory",
+      "FOREIGN KEY (purchase_line_id) REFERENCES inventory_purchaseline(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "inventory_stockmovement",
+      "inventory_stockmovement_adjustment_line_id_key",
+      "UNIQUE (adjustment_line_id)"
+    ],
+    [
+      "inventory_stockmovement",
+      "inventory_stockmovement_dispatch_line_id_key",
+      "UNIQUE (dispatch_line_id)"
+    ],
+    [
+      "inventory_stockmovement",
+      "inventory_stockmovement_item_id_dc9becf8_fk_inventory_item_id",
+      "FOREIGN KEY (item_id) REFERENCES inventory_item(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "inventory_stockmovement",
+      "inventory_stockmovement_opening_line_id_key",
+      "UNIQUE (opening_line_id)"
+    ],
+    [
+      "inventory_stockmovement",
+      "inventory_stockmovement_pkey",
+      "PRIMARY KEY (id)"
+    ],
+    [
+      "inventory_stockmovement",
+      "inventory_stockmovement_production_line_id_key",
+      "UNIQUE (production_line_id)"
+    ],
+    [
+      "inventory_stockmovement",
+      "inventory_stockmovement_purchase_line_id_key",
+      "UNIQUE (purchase_line_id)"
+    ],
+    [
+      "inventory_stockmovement",
+      "movement_one_source_line",
+      "CHECK ((((adjustment_line_id IS NULL) AND (dispatch_line_id IS NULL) AND (opening_line_id IS NOT NULL) AND (production_line_id IS NULL) AND (purchase_line_id IS NULL)) OR ((adjustment_line_id IS NULL) AND (dispatch_line_id IS NULL) AND (opening_line_id IS NULL) AND (production_line_id IS NULL) AND (purchase_line_id IS NOT NULL)) OR ((adjustment_line_id IS NULL) AND (dispatch_line_id IS NULL) AND (opening_line_id IS NULL) AND (production_line_id IS NOT NULL) AND (purchase_line_id IS NULL)) OR ((adjustment_line_id IS NULL) AND (dispatch_line_id IS NOT NULL) AND (opening_line_id IS NULL) AND (production_line_id IS NULL) AND (purchase_line_id IS NULL)) OR ((adjustment_line_id IS NOT NULL) AND (dispatch_line_id IS NULL) AND (opening_line_id IS NULL) AND (production_line_id IS NULL) AND (purchase_line_id IS NULL))))"
+    ],
+    [
+      "inventory_stockmovement",
+      "nonzero_movement",
+      "CHECK ((NOT (quantity = 0)))"
+    ],
+    [
+      "inventory_supplier",
+      "inventory_supplier_code_key",
+      "UNIQUE (code)"
+    ],
+    [
+      "inventory_supplier",
+      "inventory_supplier_pkey",
+      "PRIMARY KEY (id)"
+    ],
+    [
+      "inventory_unitconversion",
+      "inventory_unitconversion_denominator_check",
+      "CHECK ((denominator >= 0))"
+    ],
+    [
+      "inventory_unitconversion",
+      "inventory_unitconversion_item_id_e8cb99bc_fk_inventory_item_id",
+      "FOREIGN KEY (item_id) REFERENCES inventory_item(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "inventory_unitconversion",
+      "inventory_unitconversion_numerator_check",
+      "CHECK ((numerator >= 0))"
+    ],
+    [
+      "inventory_unitconversion",
+      "inventory_unitconversion_pkey",
+      "PRIMARY KEY (id)"
+    ],
+    [
+      "inventory_unitconversion",
+      "positive_conversion",
+      "CHECK (((denominator > 0) AND (numerator > 0)))"
+    ],
+    [
+      "inventory_unitconversion",
+      "unique_item_unit",
+      "UNIQUE (item_id, unit)"
+    ],
+    [
+      "production_overhead",
+      "positive_overhead",
+      "CHECK ((amount_paise > 0))"
+    ],
+    [
+      "production_overhead",
+      "production_overhead_actor_id_d8b46f73_fk_auth_user_id",
+      "FOREIGN KEY (actor_id) REFERENCES auth_user(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "production_overhead",
+      "production_overhead_amount_paise_check",
+      "CHECK ((amount_paise >= 0))"
+    ],
+    [
+      "production_overhead",
+      "production_overhead_pkey",
+      "PRIMARY KEY (id)"
+    ],
+    [
+      "production_overhead",
+      "production_overhead_request_key_key",
+      "UNIQUE (request_key)"
+    ],
+    [
+      "production_overhead",
+      "production_overhead_run_id_f50ea085_fk_productio",
+      "FOREIGN KEY (run_id) REFERENCES production_productionrun(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "production_productionevent",
+      "production_productio_run_id_e64e9e90_fk_productio",
+      "FOREIGN KEY (run_id) REFERENCES production_productionrun(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "production_productionevent",
+      "production_productionevent_actor_id_f6ee11b1_fk_auth_user_id",
+      "FOREIGN KEY (actor_id) REFERENCES auth_user(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "production_productionevent",
+      "production_productionevent_pkey",
+      "PRIMARY KEY (id)"
+    ],
+    [
+      "production_productionevent",
+      "production_productionevent_request_key_key",
+      "UNIQUE (request_key)"
+    ],
+    [
+      "production_productionevent",
+      "unique_run_event",
+      "UNIQUE (run_id, kind)"
+    ],
+    [
+      "production_productionline",
+      "production_productio_event_id_38ae05d3_fk_productio",
+      "FOREIGN KEY (event_id) REFERENCES production_productionevent(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "production_productionline",
+      "production_productionline_item_id_58bc8791_fk_inventory_item_id",
+      "FOREIGN KEY (item_id) REFERENCES inventory_item(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "production_productionline",
+      "production_productionline_pkey",
+      "PRIMARY KEY (id)"
+    ],
+    [
+      "production_productionline",
+      "unique_event_item",
+      "UNIQUE (event_id, item_id)"
+    ],
+    [
+      "production_productionrun",
+      "production_productio_output_item_id_15e1cc7f_fk_inventory",
+      "FOREIGN KEY (output_item_id) REFERENCES inventory_item(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "production_productionrun",
+      "production_productionrun_actor_id_6684309d_fk_auth_user_id",
+      "FOREIGN KEY (actor_id) REFERENCES auth_user(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "production_productionrun",
+      "production_productionrun_batches_check",
+      "CHECK ((batches >= 0))"
+    ],
+    [
+      "production_productionrun",
+      "production_productionrun_bom_id_5c673854_fk_inventory_bom_id",
+      "FOREIGN KEY (bom_id) REFERENCES inventory_bom(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "production_productionrun",
+      "production_productionrun_bom_version_check",
+      "CHECK ((bom_version >= 0))"
+    ],
+    [
+      "production_productionrun",
+      "production_productionrun_expected_packets_check",
+      "CHECK ((expected_packets >= 0))"
+    ],
+    [
+      "production_productionrun",
+      "production_productionrun_good_packets_check",
+      "CHECK ((good_packets >= 0))"
+    ],
+    [
+      "production_productionrun",
+      "production_productionrun_pkey",
+      "PRIMARY KEY (id)"
+    ],
+    [
+      "production_productionrun",
+      "production_productionrun_recipe_version_check",
+      "CHECK ((recipe_version >= 0))"
+    ],
+    [
+      "production_productionrun",
+      "production_productionrun_request_key_key",
+      "UNIQUE (request_key)"
+    ],
+    [
+      "production_runstandard",
+      "production_runstanda_run_id_bb687fe1_fk_productio",
+      "FOREIGN KEY (run_id) REFERENCES production_productionrun(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "production_runstandard",
+      "production_runstandard_item_id_d0a6cdbe_fk_inventory_item_id",
+      "FOREIGN KEY (item_id) REFERENCES inventory_item(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "production_runstandard",
+      "production_runstandard_pkey",
+      "PRIMARY KEY (id)"
+    ],
+    [
+      "production_runstandard",
+      "production_runstandard_quantity_check",
+      "CHECK ((quantity >= 0))"
+    ],
+    [
+      "production_runstandard",
+      "unique_run_standard",
+      "UNIQUE (run_id, item_id)"
+    ],
+    [
+      "production_tolerancechange",
+      "production_tolerancechange_actor_id_1d5f0bcc_fk_auth_user_id",
+      "FOREIGN KEY (actor_id) REFERENCES auth_user(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "production_tolerancechange",
+      "production_tolerancechange_after_bps_check",
+      "CHECK ((after_bps >= 0))"
+    ],
+    [
+      "production_tolerancechange",
+      "production_tolerancechange_before_bps_check",
+      "CHECK ((before_bps >= 0))"
+    ],
+    [
+      "production_tolerancechange",
+      "production_tolerancechange_pkey",
+      "PRIMARY KEY (id)"
+    ],
+    [
+      "sales_creditnote",
+      "sales_creditnote_actor_id_8c7a68f3_fk_auth_user_id",
+      "FOREIGN KEY (actor_id) REFERENCES auth_user(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "sales_creditnote",
+      "sales_creditnote_amount_paise_check",
+      "CHECK ((amount_paise >= 0))"
+    ],
+    [
+      "sales_creditnote",
+      "sales_creditnote_invoice_id_f3237fbf_fk_sales_invoice_id",
+      "FOREIGN KEY (invoice_id) REFERENCES sales_invoice(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "sales_creditnote",
+      "sales_creditnote_invoice_id_key",
+      "UNIQUE (invoice_id)"
+    ],
+    [
+      "sales_creditnote",
+      "sales_creditnote_pkey",
+      "PRIMARY KEY (id)"
+    ],
+    [
+      "sales_creditnote",
+      "sales_creditnote_request_key_key",
+      "UNIQUE (request_key)"
+    ],
+    [
+      "sales_customerprice",
+      "sales_customerprice_customer_id_75f6e53a_fk_inventory",
+      "FOREIGN KEY (customer_id) REFERENCES inventory_customer(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "sales_customerprice",
+      "sales_customerprice_pkey",
+      "PRIMARY KEY (id)"
+    ],
+    [
+      "sales_customerprice",
+      "sales_customerprice_price_paise_check",
+      "CHECK ((price_paise >= 0))"
+    ],
+    [
+      "sales_customerprice",
+      "sales_customerprice_sku_id_3cbc6f38_fk_inventory_sku_id",
+      "FOREIGN KEY (sku_id) REFERENCES inventory_sku(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "sales_customerprice",
+      "unique_customer_price",
+      "UNIQUE (customer_id, sku_id)"
+    ],
+    [
+      "sales_dispatch",
+      "sales_dispatch_actor_id_9cae7f1b_fk_auth_user_id",
+      "FOREIGN KEY (actor_id) REFERENCES auth_user(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "sales_dispatch",
+      "sales_dispatch_invoice_id_8c160c1c_fk_sales_invoice_id",
+      "FOREIGN KEY (invoice_id) REFERENCES sales_invoice(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "sales_dispatch",
+      "sales_dispatch_pkey",
+      "PRIMARY KEY (id)"
+    ],
+    [
+      "sales_dispatch",
+      "sales_dispatch_request_key_key",
+      "UNIQUE (request_key)"
+    ],
+    [
+      "sales_dispatchline",
+      "sales_dispatchline_document_id_4671e2bd_fk_sales_dispatch_id",
+      "FOREIGN KEY (document_id) REFERENCES sales_dispatch(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "sales_dispatchline",
+      "sales_dispatchline_item_id_89557f04_fk_inventory_item_id",
+      "FOREIGN KEY (item_id) REFERENCES inventory_item(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "sales_dispatchline",
+      "sales_dispatchline_pkey",
+      "PRIMARY KEY (id)"
+    ],
+    [
+      "sales_invoice",
+      "sales_invoice_actor_id_7e86cdd4_fk_auth_user_id",
+      "FOREIGN KEY (actor_id) REFERENCES auth_user(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "sales_invoice",
+      "sales_invoice_cgst_paise_check",
+      "CHECK ((cgst_paise >= 0))"
+    ],
+    [
+      "sales_invoice",
+      "sales_invoice_igst_paise_check",
+      "CHECK ((igst_paise >= 0))"
+    ],
+    [
+      "sales_invoice",
+      "sales_invoice_number_key",
+      "UNIQUE (number)"
+    ],
+    [
+      "sales_invoice",
+      "sales_invoice_order_id_3db25fae_fk_sales_order_id",
+      "FOREIGN KEY (order_id) REFERENCES sales_order(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "sales_invoice",
+      "sales_invoice_order_id_key",
+      "UNIQUE (order_id)"
+    ],
+    [
+      "sales_invoice",
+      "sales_invoice_pkey",
+      "PRIMARY KEY (id)"
+    ],
+    [
+      "sales_invoice",
+      "sales_invoice_request_key_key",
+      "UNIQUE (request_key)"
+    ],
+    [
+      "sales_invoice",
+      "sales_invoice_sgst_paise_check",
+      "CHECK ((sgst_paise >= 0))"
+    ],
+    [
+      "sales_invoice",
+      "sales_invoice_taxable_paise_check",
+      "CHECK ((taxable_paise >= 0))"
+    ],
+    [
+      "sales_invoice",
+      "sales_invoice_total_paise_check",
+      "CHECK ((total_paise >= 0))"
+    ],
+    [
+      "sales_invoiceline",
+      "sales_invoiceline_cgst_paise_check",
+      "CHECK ((cgst_paise >= 0))"
+    ],
+    [
+      "sales_invoiceline",
+      "sales_invoiceline_igst_paise_check",
+      "CHECK ((igst_paise >= 0))"
+    ],
+    [
+      "sales_invoiceline",
+      "sales_invoiceline_invoice_id_7057a7be_fk_sales_invoice_id",
+      "FOREIGN KEY (invoice_id) REFERENCES sales_invoice(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "sales_invoiceline",
+      "sales_invoiceline_pkey",
+      "PRIMARY KEY (id)"
+    ],
+    [
+      "sales_invoiceline",
+      "sales_invoiceline_price_paise_check",
+      "CHECK ((price_paise >= 0))"
+    ],
+    [
+      "sales_invoiceline",
+      "sales_invoiceline_quantity_check",
+      "CHECK ((quantity >= 0))"
+    ],
+    [
+      "sales_invoiceline",
+      "sales_invoiceline_sgst_paise_check",
+      "CHECK ((sgst_paise >= 0))"
+    ],
+    [
+      "sales_invoiceline",
+      "sales_invoiceline_sku_id_7afff49f_fk_inventory_sku_id",
+      "FOREIGN KEY (sku_id) REFERENCES inventory_sku(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "sales_invoiceline",
+      "sales_invoiceline_taxable_paise_check",
+      "CHECK ((taxable_paise >= 0))"
+    ],
+    [
+      "sales_invoicesequence",
+      "sales_invoicesequence_financial_year_check",
+      "CHECK ((financial_year >= 0))"
+    ],
+    [
+      "sales_invoicesequence",
+      "sales_invoicesequence_last_number_check",
+      "CHECK ((last_number >= 0))"
+    ],
+    [
+      "sales_invoicesequence",
+      "sales_invoicesequence_pkey",
+      "PRIMARY KEY (financial_year)"
+    ],
+    [
+      "sales_order",
+      "sales_order_actor_id_2037ac19_fk_auth_user_id",
+      "FOREIGN KEY (actor_id) REFERENCES auth_user(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "sales_order",
+      "sales_order_customer_id_798c889f_fk_inventory_customer_id",
+      "FOREIGN KEY (customer_id) REFERENCES inventory_customer(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "sales_order",
+      "sales_order_pkey",
+      "PRIMARY KEY (id)"
+    ],
+    [
+      "sales_order",
+      "sales_order_request_key_key",
+      "UNIQUE (request_key)"
+    ],
+    [
+      "sales_orderline",
+      "sales_orderline_order_id_9f597de6_fk_sales_order_id",
+      "FOREIGN KEY (order_id) REFERENCES sales_order(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "sales_orderline",
+      "sales_orderline_pkey",
+      "PRIMARY KEY (id)"
+    ],
+    [
+      "sales_orderline",
+      "sales_orderline_price_paise_check",
+      "CHECK ((price_paise >= 0))"
+    ],
+    [
+      "sales_orderline",
+      "sales_orderline_quantity_check",
+      "CHECK ((quantity >= 0))"
+    ],
+    [
+      "sales_orderline",
+      "sales_orderline_sku_id_dc22fd31_fk_inventory_sku_id",
+      "FOREIGN KEY (sku_id) REFERENCES inventory_sku(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "sales_orderline",
+      "unique_order_sku",
+      "UNIQUE (order_id, sku_id)"
+    ],
+    [
+      "sales_payment",
+      "sales_payment_actor_id_960d26a4_fk_auth_user_id",
+      "FOREIGN KEY (actor_id) REFERENCES auth_user(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "sales_payment",
+      "sales_payment_amount_paise_check",
+      "CHECK ((amount_paise >= 0))"
+    ],
+    [
+      "sales_payment",
+      "sales_payment_invoice_id_a17f5653_fk_sales_invoice_id",
+      "FOREIGN KEY (invoice_id) REFERENCES sales_invoice(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "sales_payment",
+      "sales_payment_pkey",
+      "PRIMARY KEY (id)"
+    ],
+    [
+      "sales_payment",
+      "sales_payment_request_key_key",
+      "UNIQUE (request_key)"
+    ],
+    [
+      "sales_returnline",
+      "sales_returnline_cgst_paise_check",
+      "CHECK ((cgst_paise >= 0))"
+    ],
+    [
+      "sales_returnline",
+      "sales_returnline_dispatch_line_id_00817b85_fk_sales_dis",
+      "FOREIGN KEY (dispatch_line_id) REFERENCES sales_dispatchline(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "sales_returnline",
+      "sales_returnline_document_id_5e4c3951_fk_sales_salesreturn_id",
+      "FOREIGN KEY (document_id) REFERENCES sales_salesreturn(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "sales_returnline",
+      "sales_returnline_igst_paise_check",
+      "CHECK ((igst_paise >= 0))"
+    ],
+    [
+      "sales_returnline",
+      "sales_returnline_invoice_line_id_d06b2b57_fk_sales_inv",
+      "FOREIGN KEY (invoice_line_id) REFERENCES sales_invoiceline(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "sales_returnline",
+      "sales_returnline_pkey",
+      "PRIMARY KEY (id)"
+    ],
+    [
+      "sales_returnline",
+      "sales_returnline_quantity_check",
+      "CHECK ((quantity >= 0))"
+    ],
+    [
+      "sales_returnline",
+      "sales_returnline_sgst_paise_check",
+      "CHECK ((sgst_paise >= 0))"
+    ],
+    [
+      "sales_returnline",
+      "sales_returnline_taxable_paise_check",
+      "CHECK ((taxable_paise >= 0))"
+    ],
+    [
+      "sales_salesreturn",
+      "sales_salesreturn_actor_id_6acf325c_fk_auth_user_id",
+      "FOREIGN KEY (actor_id) REFERENCES auth_user(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "sales_salesreturn",
+      "sales_salesreturn_adjustment_id_e5756933_fk_inventory",
+      "FOREIGN KEY (adjustment_id) REFERENCES inventory_adjustment(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "sales_salesreturn",
+      "sales_salesreturn_adjustment_id_key",
+      "UNIQUE (adjustment_id)"
+    ],
+    [
+      "sales_salesreturn",
+      "sales_salesreturn_amount_paise_check",
+      "CHECK ((amount_paise >= 0))"
+    ],
+    [
+      "sales_salesreturn",
+      "sales_salesreturn_invoice_id_a8ef6a28_fk_sales_invoice_id",
+      "FOREIGN KEY (invoice_id) REFERENCES sales_invoice(id) DEFERRABLE INITIALLY DEFERRED"
+    ],
+    [
+      "sales_salesreturn",
+      "sales_salesreturn_pkey",
+      "PRIMARY KEY (id)"
+    ],
+    [
+      "sales_salesreturn",
+      "sales_salesreturn_request_key_key",
+      "UNIQUE (request_key)"
+    ]
+  ],
+  "indexes": [
+    [
+      "access_auditlog",
+      "access_auditlog_actor_id_001eb42e",
+      "CREATE INDEX access_auditlog_actor_id_001eb42e ON public.access_auditlog USING btree (actor_id)"
+    ],
+    [
+      "access_auditlog",
+      "access_auditlog_pkey",
+      "CREATE UNIQUE INDEX access_auditlog_pkey ON public.access_auditlog USING btree (id)"
+    ],
+    [
+      "auth_group",
+      "auth_group_name_a6ea08ec_like",
+      "CREATE INDEX auth_group_name_a6ea08ec_like ON public.auth_group USING btree (name varchar_pattern_ops)"
+    ],
+    [
+      "auth_group",
+      "auth_group_name_key",
+      "CREATE UNIQUE INDEX auth_group_name_key ON public.auth_group USING btree (name)"
+    ],
+    [
+      "auth_group",
+      "auth_group_pkey",
+      "CREATE UNIQUE INDEX auth_group_pkey ON public.auth_group USING btree (id)"
+    ],
+    [
+      "auth_group_permissions",
+      "auth_group_permissions_group_id_b120cbf9",
+      "CREATE INDEX auth_group_permissions_group_id_b120cbf9 ON public.auth_group_permissions USING btree (group_id)"
+    ],
+    [
+      "auth_group_permissions",
+      "auth_group_permissions_group_id_permission_id_0cd325b0_uniq",
+      "CREATE UNIQUE INDEX auth_group_permissions_group_id_permission_id_0cd325b0_uniq ON public.auth_group_permissions USING btree (group_id, permission_id)"
+    ],
+    [
+      "auth_group_permissions",
+      "auth_group_permissions_permission_id_84c5c92e",
+      "CREATE INDEX auth_group_permissions_permission_id_84c5c92e ON public.auth_group_permissions USING btree (permission_id)"
+    ],
+    [
+      "auth_group_permissions",
+      "auth_group_permissions_pkey",
+      "CREATE UNIQUE INDEX auth_group_permissions_pkey ON public.auth_group_permissions USING btree (id)"
+    ],
+    [
+      "auth_permission",
+      "auth_permission_content_type_id_2f476e4b",
+      "CREATE INDEX auth_permission_content_type_id_2f476e4b ON public.auth_permission USING btree (content_type_id)"
+    ],
+    [
+      "auth_permission",
+      "auth_permission_content_type_id_codename_01ab375a_uniq",
+      "CREATE UNIQUE INDEX auth_permission_content_type_id_codename_01ab375a_uniq ON public.auth_permission USING btree (content_type_id, codename)"
+    ],
+    [
+      "auth_permission",
+      "auth_permission_pkey",
+      "CREATE UNIQUE INDEX auth_permission_pkey ON public.auth_permission USING btree (id)"
+    ],
+    [
+      "auth_user",
+      "auth_user_pkey",
+      "CREATE UNIQUE INDEX auth_user_pkey ON public.auth_user USING btree (id)"
+    ],
+    [
+      "auth_user",
+      "auth_user_username_6821ab7c_like",
+      "CREATE INDEX auth_user_username_6821ab7c_like ON public.auth_user USING btree (username varchar_pattern_ops)"
+    ],
+    [
+      "auth_user",
+      "auth_user_username_key",
+      "CREATE UNIQUE INDEX auth_user_username_key ON public.auth_user USING btree (username)"
+    ],
+    [
+      "auth_user_groups",
+      "auth_user_groups_group_id_97559544",
+      "CREATE INDEX auth_user_groups_group_id_97559544 ON public.auth_user_groups USING btree (group_id)"
+    ],
+    [
+      "auth_user_groups",
+      "auth_user_groups_pkey",
+      "CREATE UNIQUE INDEX auth_user_groups_pkey ON public.auth_user_groups USING btree (id)"
+    ],
+    [
+      "auth_user_groups",
+      "auth_user_groups_user_id_6a12ed8b",
+      "CREATE INDEX auth_user_groups_user_id_6a12ed8b ON public.auth_user_groups USING btree (user_id)"
+    ],
+    [
+      "auth_user_groups",
+      "auth_user_groups_user_id_group_id_94350c0c_uniq",
+      "CREATE UNIQUE INDEX auth_user_groups_user_id_group_id_94350c0c_uniq ON public.auth_user_groups USING btree (user_id, group_id)"
+    ],
+    [
+      "auth_user_user_permissions",
+      "auth_user_user_permissions_permission_id_1fbb5f2c",
+      "CREATE INDEX auth_user_user_permissions_permission_id_1fbb5f2c ON public.auth_user_user_permissions USING btree (permission_id)"
+    ],
+    [
+      "auth_user_user_permissions",
+      "auth_user_user_permissions_pkey",
+      "CREATE UNIQUE INDEX auth_user_user_permissions_pkey ON public.auth_user_user_permissions USING btree (id)"
+    ],
+    [
+      "auth_user_user_permissions",
+      "auth_user_user_permissions_user_id_a95ead1b",
+      "CREATE INDEX auth_user_user_permissions_user_id_a95ead1b ON public.auth_user_user_permissions USING btree (user_id)"
+    ],
+    [
+      "auth_user_user_permissions",
+      "auth_user_user_permissions_user_id_permission_id_14a6b632_uniq",
+      "CREATE UNIQUE INDEX auth_user_user_permissions_user_id_permission_id_14a6b632_uniq ON public.auth_user_user_permissions USING btree (user_id, permission_id)"
+    ],
+    [
+      "django_content_type",
+      "django_content_type_app_label_model_76bd3d3b_uniq",
+      "CREATE UNIQUE INDEX django_content_type_app_label_model_76bd3d3b_uniq ON public.django_content_type USING btree (app_label, model)"
+    ],
+    [
+      "django_content_type",
+      "django_content_type_pkey",
+      "CREATE UNIQUE INDEX django_content_type_pkey ON public.django_content_type USING btree (id)"
+    ],
+    [
+      "django_migrations",
+      "django_migrations_pkey",
+      "CREATE UNIQUE INDEX django_migrations_pkey ON public.django_migrations USING btree (id)"
+    ],
+    [
+      "django_session",
+      "django_session_expire_date_a5c62663",
+      "CREATE INDEX django_session_expire_date_a5c62663 ON public.django_session USING btree (expire_date)"
+    ],
+    [
+      "django_session",
+      "django_session_pkey",
+      "CREATE UNIQUE INDEX django_session_pkey ON public.django_session USING btree (session_key)"
+    ],
+    [
+      "django_session",
+      "django_session_session_key_c0390e0f_like",
+      "CREATE INDEX django_session_session_key_c0390e0f_like ON public.django_session USING btree (session_key varchar_pattern_ops)"
+    ],
+    [
+      "extensions_mocksubmission",
+      "extensions_mocksubmission_actor_id_0ab7aa74",
+      "CREATE INDEX extensions_mocksubmission_actor_id_0ab7aa74 ON public.extensions_mocksubmission USING btree (actor_id)"
+    ],
+    [
+      "extensions_mocksubmission",
+      "extensions_mocksubmission_invoice_id_ca72f8f0",
+      "CREATE INDEX extensions_mocksubmission_invoice_id_ca72f8f0 ON public.extensions_mocksubmission USING btree (invoice_id)"
+    ],
+    [
+      "extensions_mocksubmission",
+      "extensions_mocksubmission_pkey",
+      "CREATE UNIQUE INDEX extensions_mocksubmission_pkey ON public.extensions_mocksubmission USING btree (id)"
+    ],
+    [
+      "extensions_mocksubmission",
+      "unique_invoice_mock",
+      "CREATE UNIQUE INDEX unique_invoice_mock ON public.extensions_mocksubmission USING btree (invoice_id, kind)"
+    ],
+    [
+      "extensions_visit",
+      "extensions_visit_actor_id_34b87adc",
+      "CREATE INDEX extensions_visit_actor_id_34b87adc ON public.extensions_visit USING btree (actor_id)"
+    ],
+    [
+      "extensions_visit",
+      "extensions_visit_customer_id_931da67a",
+      "CREATE INDEX extensions_visit_customer_id_931da67a ON public.extensions_visit USING btree (customer_id)"
+    ],
+    [
+      "extensions_visit",
+      "extensions_visit_pkey",
+      "CREATE UNIQUE INDEX extensions_visit_pkey ON public.extensions_visit USING btree (id)"
+    ],
+    [
+      "extensions_visit",
+      "extensions_visit_request_key_1ae64e0d_like",
+      "CREATE INDEX extensions_visit_request_key_1ae64e0d_like ON public.extensions_visit USING btree (request_key varchar_pattern_ops)"
+    ],
+    [
+      "extensions_visit",
+      "extensions_visit_request_key_key",
+      "CREATE UNIQUE INDEX extensions_visit_request_key_key ON public.extensions_visit USING btree (request_key)"
+    ],
+    [
+      "inventory_adjustment",
+      "inventory_adjustment_actor_id_b48f6936",
+      "CREATE INDEX inventory_adjustment_actor_id_b48f6936 ON public.inventory_adjustment USING btree (actor_id)"
+    ],
+    [
+      "inventory_adjustment",
+      "inventory_adjustment_pkey",
+      "CREATE UNIQUE INDEX inventory_adjustment_pkey ON public.inventory_adjustment USING btree (id)"
+    ],
+    [
+      "inventory_adjustment",
+      "inventory_adjustment_request_key_f6fb321c_like",
+      "CREATE INDEX inventory_adjustment_request_key_f6fb321c_like ON public.inventory_adjustment USING btree (request_key varchar_pattern_ops)"
+    ],
+    [
+      "inventory_adjustment",
+      "inventory_adjustment_request_key_key",
+      "CREATE UNIQUE INDEX inventory_adjustment_request_key_key ON public.inventory_adjustment USING btree (request_key)"
+    ],
+    [
+      "inventory_adjustment",
+      "inventory_adjustment_reversed_run_id_key",
+      "CREATE UNIQUE INDEX inventory_adjustment_reversed_run_id_key ON public.inventory_adjustment USING btree (reversed_run_id)"
+    ],
+    [
+      "inventory_adjustmentline",
+      "inventory_adjustmentline_document_id_8edc5a08",
+      "CREATE INDEX inventory_adjustmentline_document_id_8edc5a08 ON public.inventory_adjustmentline USING btree (document_id)"
+    ],
+    [
+      "inventory_adjustmentline",
+      "inventory_adjustmentline_item_id_8ed36e0d",
+      "CREATE INDEX inventory_adjustmentline_item_id_8ed36e0d ON public.inventory_adjustmentline USING btree (item_id)"
+    ],
+    [
+      "inventory_adjustmentline",
+      "inventory_adjustmentline_pkey",
+      "CREATE UNIQUE INDEX inventory_adjustmentline_pkey ON public.inventory_adjustmentline USING btree (id)"
+    ],
+    [
+      "inventory_bom",
+      "inventory_bom_pkey",
+      "CREATE UNIQUE INDEX inventory_bom_pkey ON public.inventory_bom USING btree (id)"
+    ],
+    [
+      "inventory_bom",
+      "inventory_bom_recipe_id_62dcf239",
+      "CREATE INDEX inventory_bom_recipe_id_62dcf239 ON public.inventory_bom USING btree (recipe_id)"
+    ],
+    [
+      "inventory_bom",
+      "inventory_bom_sku_id_f32bcf1b",
+      "CREATE INDEX inventory_bom_sku_id_f32bcf1b ON public.inventory_bom USING btree (sku_id)"
+    ],
+    [
+      "inventory_bom",
+      "unique_bom_version",
+      "CREATE UNIQUE INDEX unique_bom_version ON public.inventory_bom USING btree (sku_id, version)"
+    ],
+    [
+      "inventory_bomline",
+      "inventory_bomline_bom_id_f9db4aa0",
+      "CREATE INDEX inventory_bomline_bom_id_f9db4aa0 ON public.inventory_bomline USING btree (bom_id)"
+    ],
+    [
+      "inventory_bomline",
+      "inventory_bomline_item_id_a437a3a4",
+      "CREATE INDEX inventory_bomline_item_id_a437a3a4 ON public.inventory_bomline USING btree (item_id)"
+    ],
+    [
+      "inventory_bomline",
+      "inventory_bomline_pkey",
+      "CREATE UNIQUE INDEX inventory_bomline_pkey ON public.inventory_bomline USING btree (id)"
+    ],
+    [
+      "inventory_bomline",
+      "unique_bom_item",
+      "CREATE UNIQUE INDEX unique_bom_item ON public.inventory_bomline USING btree (bom_id, item_id)"
+    ],
+    [
+      "inventory_customer",
+      "inventory_customer_code_2daff123_like",
+      "CREATE INDEX inventory_customer_code_2daff123_like ON public.inventory_customer USING btree (code varchar_pattern_ops)"
+    ],
+    [
+      "inventory_customer",
+      "inventory_customer_code_key",
+      "CREATE UNIQUE INDEX inventory_customer_code_key ON public.inventory_customer USING btree (code)"
+    ],
+    [
+      "inventory_customer",
+      "inventory_customer_pkey",
+      "CREATE UNIQUE INDEX inventory_customer_pkey ON public.inventory_customer USING btree (id)"
+    ],
+    [
+      "inventory_factorycontrol",
+      "inventory_factorycontrol_pkey",
+      "CREATE UNIQUE INDEX inventory_factorycontrol_pkey ON public.inventory_factorycontrol USING btree (id)"
+    ],
+    [
+      "inventory_item",
+      "inventory_item_code_2f6e605d_like",
+      "CREATE INDEX inventory_item_code_2f6e605d_like ON public.inventory_item USING btree (code varchar_pattern_ops)"
+    ],
+    [
+      "inventory_item",
+      "inventory_item_code_key",
+      "CREATE UNIQUE INDEX inventory_item_code_key ON public.inventory_item USING btree (code)"
+    ],
+    [
+      "inventory_item",
+      "inventory_item_pkey",
+      "CREATE UNIQUE INDEX inventory_item_pkey ON public.inventory_item USING btree (id)"
+    ],
+    [
+      "inventory_lotallocation",
+      "inventory_lotallocation_lot_id_425a42fa",
+      "CREATE INDEX inventory_lotallocation_lot_id_425a42fa ON public.inventory_lotallocation USING btree (lot_id)"
+    ],
+    [
+      "inventory_lotallocation",
+      "inventory_lotallocation_movement_id_e590646b",
+      "CREATE INDEX inventory_lotallocation_movement_id_e590646b ON public.inventory_lotallocation USING btree (movement_id)"
+    ],
+    [
+      "inventory_lotallocation",
+      "inventory_lotallocation_pkey",
+      "CREATE UNIQUE INDEX inventory_lotallocation_pkey ON public.inventory_lotallocation USING btree (id)"
+    ],
+    [
+      "inventory_lotallocation",
+      "unique_movement_lot",
+      "CREATE UNIQUE INDEX unique_movement_lot ON public.inventory_lotallocation USING btree (movement_id, lot_id)"
+    ],
+    [
+      "inventory_openingline",
+      "inventory_openingline_document_id_e19e67a7",
+      "CREATE INDEX inventory_openingline_document_id_e19e67a7 ON public.inventory_openingline USING btree (document_id)"
+    ],
+    [
+      "inventory_openingline",
+      "inventory_openingline_item_id_e61ecff9",
+      "CREATE INDEX inventory_openingline_item_id_e61ecff9 ON public.inventory_openingline USING btree (item_id)"
+    ],
+    [
+      "inventory_openingline",
+      "inventory_openingline_pkey",
+      "CREATE UNIQUE INDEX inventory_openingline_pkey ON public.inventory_openingline USING btree (id)"
+    ],
+    [
+      "inventory_openingstock",
+      "inventory_openingstock_actor_id_ed23550f",
+      "CREATE INDEX inventory_openingstock_actor_id_ed23550f ON public.inventory_openingstock USING btree (actor_id)"
+    ],
+    [
+      "inventory_openingstock",
+      "inventory_openingstock_pkey",
+      "CREATE UNIQUE INDEX inventory_openingstock_pkey ON public.inventory_openingstock USING btree (id)"
+    ],
+    [
+      "inventory_openingstock",
+      "inventory_openingstock_request_key_525eea6d_like",
+      "CREATE INDEX inventory_openingstock_request_key_525eea6d_like ON public.inventory_openingstock USING btree (request_key varchar_pattern_ops)"
+    ],
+    [
+      "inventory_openingstock",
+      "inventory_openingstock_request_key_key",
+      "CREATE UNIQUE INDEX inventory_openingstock_request_key_key ON public.inventory_openingstock USING btree (request_key)"
+    ],
+    [
+      "inventory_posting",
+      "inventory_posting_adjustment_id_key",
+      "CREATE UNIQUE INDEX inventory_posting_adjustment_id_key ON public.inventory_posting USING btree (adjustment_id)"
+    ],
+    [
+      "inventory_posting",
+      "inventory_posting_dispatch_id_key",
+      "CREATE UNIQUE INDEX inventory_posting_dispatch_id_key ON public.inventory_posting USING btree (dispatch_id)"
+    ],
+    [
+      "inventory_posting",
+      "inventory_posting_opening_id_key",
+      "CREATE UNIQUE INDEX inventory_posting_opening_id_key ON public.inventory_posting USING btree (opening_id)"
+    ],
+    [
+      "inventory_posting",
+      "inventory_posting_pkey",
+      "CREATE UNIQUE INDEX inventory_posting_pkey ON public.inventory_posting USING btree (id)"
+    ],
+    [
+      "inventory_posting",
+      "inventory_posting_production_id_key",
+      "CREATE UNIQUE INDEX inventory_posting_production_id_key ON public.inventory_posting USING btree (production_id)"
+    ],
+    [
+      "inventory_posting",
+      "inventory_posting_purchase_id_key",
+      "CREATE UNIQUE INDEX inventory_posting_purchase_id_key ON public.inventory_posting USING btree (purchase_id)"
+    ],
+    [
+      "inventory_posting",
+      "inventory_posting_sequence_key",
+      "CREATE UNIQUE INDEX inventory_posting_sequence_key ON public.inventory_posting USING btree (sequence)"
+    ],
+    [
+      "inventory_purchaseline",
+      "inventory_purchaseline_document_id_07cefbbd",
+      "CREATE INDEX inventory_purchaseline_document_id_07cefbbd ON public.inventory_purchaseline USING btree (document_id)"
+    ],
+    [
+      "inventory_purchaseline",
+      "inventory_purchaseline_item_id_17935724",
+      "CREATE INDEX inventory_purchaseline_item_id_17935724 ON public.inventory_purchaseline USING btree (item_id)"
+    ],
+    [
+      "inventory_purchaseline",
+      "inventory_purchaseline_pkey",
+      "CREATE UNIQUE INDEX inventory_purchaseline_pkey ON public.inventory_purchaseline USING btree (id)"
+    ],
+    [
+      "inventory_purchasereceipt",
+      "inventory_purchasereceipt_actor_id_f1801aaa",
+      "CREATE INDEX inventory_purchasereceipt_actor_id_f1801aaa ON public.inventory_purchasereceipt USING btree (actor_id)"
+    ],
+    [
+      "inventory_purchasereceipt",
+      "inventory_purchasereceipt_pkey",
+      "CREATE UNIQUE INDEX inventory_purchasereceipt_pkey ON public.inventory_purchasereceipt USING btree (id)"
+    ],
+    [
+      "inventory_purchasereceipt",
+      "inventory_purchasereceipt_request_key_0a72505e_like",
+      "CREATE INDEX inventory_purchasereceipt_request_key_0a72505e_like ON public.inventory_purchasereceipt USING btree (request_key varchar_pattern_ops)"
+    ],
+    [
+      "inventory_purchasereceipt",
+      "inventory_purchasereceipt_request_key_key",
+      "CREATE UNIQUE INDEX inventory_purchasereceipt_request_key_key ON public.inventory_purchasereceipt USING btree (request_key)"
+    ],
+    [
+      "inventory_purchasereceipt",
+      "inventory_purchasereceipt_supplier_id_4af60b48",
+      "CREATE INDEX inventory_purchasereceipt_supplier_id_4af60b48 ON public.inventory_purchasereceipt USING btree (supplier_id)"
+    ],
+    [
+      "inventory_recipe",
+      "inventory_recipe_pkey",
+      "CREATE UNIQUE INDEX inventory_recipe_pkey ON public.inventory_recipe USING btree (id)"
+    ],
+    [
+      "inventory_recipe",
+      "unique_recipe_version",
+      "CREATE UNIQUE INDEX unique_recipe_version ON public.inventory_recipe USING btree (code, version)"
+    ],
+    [
+      "inventory_recipeline",
+      "inventory_recipeline_item_id_1d6b3f17",
+      "CREATE INDEX inventory_recipeline_item_id_1d6b3f17 ON public.inventory_recipeline USING btree (item_id)"
+    ],
+    [
+      "inventory_recipeline",
+      "inventory_recipeline_pkey",
+      "CREATE UNIQUE INDEX inventory_recipeline_pkey ON public.inventory_recipeline USING btree (id)"
+    ],
+    [
+      "inventory_recipeline",
+      "inventory_recipeline_recipe_id_f6c6446f",
+      "CREATE INDEX inventory_recipeline_recipe_id_f6c6446f ON public.inventory_recipeline USING btree (recipe_id)"
+    ],
+    [
+      "inventory_recipeline",
+      "unique_recipe_item",
+      "CREATE UNIQUE INDEX unique_recipe_item ON public.inventory_recipeline USING btree (recipe_id, item_id)"
+    ],
+    [
+      "inventory_reorderlevel",
+      "inventory_reorderlevel_item_id_key",
+      "CREATE UNIQUE INDEX inventory_reorderlevel_item_id_key ON public.inventory_reorderlevel USING btree (item_id)"
+    ],
+    [
+      "inventory_reorderlevel",
+      "inventory_reorderlevel_pkey",
+      "CREATE UNIQUE INDEX inventory_reorderlevel_pkey ON public.inventory_reorderlevel USING btree (id)"
+    ],
+    [
+      "inventory_sku",
+      "inventory_sku_item_id_key",
+      "CREATE UNIQUE INDEX inventory_sku_item_id_key ON public.inventory_sku USING btree (item_id)"
+    ],
+    [
+      "inventory_sku",
+      "inventory_sku_pkey",
+      "CREATE UNIQUE INDEX inventory_sku_pkey ON public.inventory_sku USING btree (id)"
+    ],
+    [
+      "inventory_stocklot",
+      "inventory_stocklot_item_id_58b08427",
+      "CREATE INDEX inventory_stocklot_item_id_58b08427 ON public.inventory_stocklot USING btree (item_id)"
+    ],
+    [
+      "inventory_stocklot",
+      "inventory_stocklot_pkey",
+      "CREATE UNIQUE INDEX inventory_stocklot_pkey ON public.inventory_stocklot USING btree (id)"
+    ],
+    [
+      "inventory_stocklot",
+      "unique_item_lot",
+      "CREATE UNIQUE INDEX unique_item_lot ON public.inventory_stocklot USING btree (item_id, code)"
+    ],
+    [
+      "inventory_stockmovement",
+      "inventory_stockmovement_adjustment_line_id_key",
+      "CREATE UNIQUE INDEX inventory_stockmovement_adjustment_line_id_key ON public.inventory_stockmovement USING btree (adjustment_line_id)"
+    ],
+    [
+      "inventory_stockmovement",
+      "inventory_stockmovement_dispatch_line_id_key",
+      "CREATE UNIQUE INDEX inventory_stockmovement_dispatch_line_id_key ON public.inventory_stockmovement USING btree (dispatch_line_id)"
+    ],
+    [
+      "inventory_stockmovement",
+      "inventory_stockmovement_item_id_dc9becf8",
+      "CREATE INDEX inventory_stockmovement_item_id_dc9becf8 ON public.inventory_stockmovement USING btree (item_id)"
+    ],
+    [
+      "inventory_stockmovement",
+      "inventory_stockmovement_opening_line_id_key",
+      "CREATE UNIQUE INDEX inventory_stockmovement_opening_line_id_key ON public.inventory_stockmovement USING btree (opening_line_id)"
+    ],
+    [
+      "inventory_stockmovement",
+      "inventory_stockmovement_pkey",
+      "CREATE UNIQUE INDEX inventory_stockmovement_pkey ON public.inventory_stockmovement USING btree (id)"
+    ],
+    [
+      "inventory_stockmovement",
+      "inventory_stockmovement_posting_id_451a1a79",
+      "CREATE INDEX inventory_stockmovement_posting_id_451a1a79 ON public.inventory_stockmovement USING btree (posting_id)"
+    ],
+    [
+      "inventory_stockmovement",
+      "inventory_stockmovement_production_line_id_key",
+      "CREATE UNIQUE INDEX inventory_stockmovement_production_line_id_key ON public.inventory_stockmovement USING btree (production_line_id)"
+    ],
+    [
+      "inventory_stockmovement",
+      "inventory_stockmovement_purchase_line_id_key",
+      "CREATE UNIQUE INDEX inventory_stockmovement_purchase_line_id_key ON public.inventory_stockmovement USING btree (purchase_line_id)"
+    ],
+    [
+      "inventory_supplier",
+      "inventory_supplier_code_2fe5ff58_like",
+      "CREATE INDEX inventory_supplier_code_2fe5ff58_like ON public.inventory_supplier USING btree (code varchar_pattern_ops)"
+    ],
+    [
+      "inventory_supplier",
+      "inventory_supplier_code_key",
+      "CREATE UNIQUE INDEX inventory_supplier_code_key ON public.inventory_supplier USING btree (code)"
+    ],
+    [
+      "inventory_supplier",
+      "inventory_supplier_pkey",
+      "CREATE UNIQUE INDEX inventory_supplier_pkey ON public.inventory_supplier USING btree (id)"
+    ],
+    [
+      "inventory_unitconversion",
+      "inventory_unitconversion_item_id_e8cb99bc",
+      "CREATE INDEX inventory_unitconversion_item_id_e8cb99bc ON public.inventory_unitconversion USING btree (item_id)"
+    ],
+    [
+      "inventory_unitconversion",
+      "inventory_unitconversion_pkey",
+      "CREATE UNIQUE INDEX inventory_unitconversion_pkey ON public.inventory_unitconversion USING btree (id)"
+    ],
+    [
+      "inventory_unitconversion",
+      "unique_item_unit",
+      "CREATE UNIQUE INDEX unique_item_unit ON public.inventory_unitconversion USING btree (item_id, unit)"
+    ],
+    [
+      "production_overhead",
+      "production_overhead_actor_id_d8b46f73",
+      "CREATE INDEX production_overhead_actor_id_d8b46f73 ON public.production_overhead USING btree (actor_id)"
+    ],
+    [
+      "production_overhead",
+      "production_overhead_pkey",
+      "CREATE UNIQUE INDEX production_overhead_pkey ON public.production_overhead USING btree (id)"
+    ],
+    [
+      "production_overhead",
+      "production_overhead_request_key_5da0654c_like",
+      "CREATE INDEX production_overhead_request_key_5da0654c_like ON public.production_overhead USING btree (request_key varchar_pattern_ops)"
+    ],
+    [
+      "production_overhead",
+      "production_overhead_request_key_key",
+      "CREATE UNIQUE INDEX production_overhead_request_key_key ON public.production_overhead USING btree (request_key)"
+    ],
+    [
+      "production_overhead",
+      "production_overhead_run_id_f50ea085",
+      "CREATE INDEX production_overhead_run_id_f50ea085 ON public.production_overhead USING btree (run_id)"
+    ],
+    [
+      "production_productionevent",
+      "production_productionevent_actor_id_f6ee11b1",
+      "CREATE INDEX production_productionevent_actor_id_f6ee11b1 ON public.production_productionevent USING btree (actor_id)"
+    ],
+    [
+      "production_productionevent",
+      "production_productionevent_pkey",
+      "CREATE UNIQUE INDEX production_productionevent_pkey ON public.production_productionevent USING btree (id)"
+    ],
+    [
+      "production_productionevent",
+      "production_productionevent_request_key_7fc2e7fc_like",
+      "CREATE INDEX production_productionevent_request_key_7fc2e7fc_like ON public.production_productionevent USING btree (request_key varchar_pattern_ops)"
+    ],
+    [
+      "production_productionevent",
+      "production_productionevent_request_key_key",
+      "CREATE UNIQUE INDEX production_productionevent_request_key_key ON public.production_productionevent USING btree (request_key)"
+    ],
+    [
+      "production_productionevent",
+      "production_productionevent_run_id_e64e9e90",
+      "CREATE INDEX production_productionevent_run_id_e64e9e90 ON public.production_productionevent USING btree (run_id)"
+    ],
+    [
+      "production_productionevent",
+      "unique_run_event",
+      "CREATE UNIQUE INDEX unique_run_event ON public.production_productionevent USING btree (run_id, kind)"
+    ],
+    [
+      "production_productionline",
+      "production_productionline_event_id_38ae05d3",
+      "CREATE INDEX production_productionline_event_id_38ae05d3 ON public.production_productionline USING btree (event_id)"
+    ],
+    [
+      "production_productionline",
+      "production_productionline_item_id_58bc8791",
+      "CREATE INDEX production_productionline_item_id_58bc8791 ON public.production_productionline USING btree (item_id)"
+    ],
+    [
+      "production_productionline",
+      "production_productionline_pkey",
+      "CREATE UNIQUE INDEX production_productionline_pkey ON public.production_productionline USING btree (id)"
+    ],
+    [
+      "production_productionline",
+      "unique_event_item",
+      "CREATE UNIQUE INDEX unique_event_item ON public.production_productionline USING btree (event_id, item_id)"
+    ],
+    [
+      "production_productionrun",
+      "production_productionrun_actor_id_6684309d",
+      "CREATE INDEX production_productionrun_actor_id_6684309d ON public.production_productionrun USING btree (actor_id)"
+    ],
+    [
+      "production_productionrun",
+      "production_productionrun_bom_id_5c673854",
+      "CREATE INDEX production_productionrun_bom_id_5c673854 ON public.production_productionrun USING btree (bom_id)"
+    ],
+    [
+      "production_productionrun",
+      "production_productionrun_output_item_id_15e1cc7f",
+      "CREATE INDEX production_productionrun_output_item_id_15e1cc7f ON public.production_productionrun USING btree (output_item_id)"
+    ],
+    [
+      "production_productionrun",
+      "production_productionrun_pkey",
+      "CREATE UNIQUE INDEX production_productionrun_pkey ON public.production_productionrun USING btree (id)"
+    ],
+    [
+      "production_productionrun",
+      "production_productionrun_request_key_11289f33_like",
+      "CREATE INDEX production_productionrun_request_key_11289f33_like ON public.production_productionrun USING btree (request_key varchar_pattern_ops)"
+    ],
+    [
+      "production_productionrun",
+      "production_productionrun_request_key_key",
+      "CREATE UNIQUE INDEX production_productionrun_request_key_key ON public.production_productionrun USING btree (request_key)"
+    ],
+    [
+      "production_runstandard",
+      "production_runstandard_item_id_d0a6cdbe",
+      "CREATE INDEX production_runstandard_item_id_d0a6cdbe ON public.production_runstandard USING btree (item_id)"
+    ],
+    [
+      "production_runstandard",
+      "production_runstandard_pkey",
+      "CREATE UNIQUE INDEX production_runstandard_pkey ON public.production_runstandard USING btree (id)"
+    ],
+    [
+      "production_runstandard",
+      "production_runstandard_run_id_bb687fe1",
+      "CREATE INDEX production_runstandard_run_id_bb687fe1 ON public.production_runstandard USING btree (run_id)"
+    ],
+    [
+      "production_runstandard",
+      "unique_run_standard",
+      "CREATE UNIQUE INDEX unique_run_standard ON public.production_runstandard USING btree (run_id, item_id)"
+    ],
+    [
+      "production_tolerancechange",
+      "production_tolerancechange_actor_id_1d5f0bcc",
+      "CREATE INDEX production_tolerancechange_actor_id_1d5f0bcc ON public.production_tolerancechange USING btree (actor_id)"
+    ],
+    [
+      "production_tolerancechange",
+      "production_tolerancechange_pkey",
+      "CREATE UNIQUE INDEX production_tolerancechange_pkey ON public.production_tolerancechange USING btree (id)"
+    ],
+    [
+      "sales_creditnote",
+      "sales_creditnote_actor_id_8c7a68f3",
+      "CREATE INDEX sales_creditnote_actor_id_8c7a68f3 ON public.sales_creditnote USING btree (actor_id)"
+    ],
+    [
+      "sales_creditnote",
+      "sales_creditnote_invoice_id_key",
+      "CREATE UNIQUE INDEX sales_creditnote_invoice_id_key ON public.sales_creditnote USING btree (invoice_id)"
+    ],
+    [
+      "sales_creditnote",
+      "sales_creditnote_pkey",
+      "CREATE UNIQUE INDEX sales_creditnote_pkey ON public.sales_creditnote USING btree (id)"
+    ],
+    [
+      "sales_creditnote",
+      "sales_creditnote_request_key_b9d89939_like",
+      "CREATE INDEX sales_creditnote_request_key_b9d89939_like ON public.sales_creditnote USING btree (request_key varchar_pattern_ops)"
+    ],
+    [
+      "sales_creditnote",
+      "sales_creditnote_request_key_key",
+      "CREATE UNIQUE INDEX sales_creditnote_request_key_key ON public.sales_creditnote USING btree (request_key)"
+    ],
+    [
+      "sales_customerprice",
+      "sales_customerprice_customer_id_75f6e53a",
+      "CREATE INDEX sales_customerprice_customer_id_75f6e53a ON public.sales_customerprice USING btree (customer_id)"
+    ],
+    [
+      "sales_customerprice",
+      "sales_customerprice_pkey",
+      "CREATE UNIQUE INDEX sales_customerprice_pkey ON public.sales_customerprice USING btree (id)"
+    ],
+    [
+      "sales_customerprice",
+      "sales_customerprice_sku_id_3cbc6f38",
+      "CREATE INDEX sales_customerprice_sku_id_3cbc6f38 ON public.sales_customerprice USING btree (sku_id)"
+    ],
+    [
+      "sales_customerprice",
+      "unique_customer_price",
+      "CREATE UNIQUE INDEX unique_customer_price ON public.sales_customerprice USING btree (customer_id, sku_id)"
+    ],
+    [
+      "sales_dispatch",
+      "sales_dispatch_actor_id_9cae7f1b",
+      "CREATE INDEX sales_dispatch_actor_id_9cae7f1b ON public.sales_dispatch USING btree (actor_id)"
+    ],
+    [
+      "sales_dispatch",
+      "sales_dispatch_invoice_id_8c160c1c",
+      "CREATE INDEX sales_dispatch_invoice_id_8c160c1c ON public.sales_dispatch USING btree (invoice_id)"
+    ],
+    [
+      "sales_dispatch",
+      "sales_dispatch_pkey",
+      "CREATE UNIQUE INDEX sales_dispatch_pkey ON public.sales_dispatch USING btree (id)"
+    ],
+    [
+      "sales_dispatch",
+      "sales_dispatch_request_key_76946b6f_like",
+      "CREATE INDEX sales_dispatch_request_key_76946b6f_like ON public.sales_dispatch USING btree (request_key varchar_pattern_ops)"
+    ],
+    [
+      "sales_dispatch",
+      "sales_dispatch_request_key_key",
+      "CREATE UNIQUE INDEX sales_dispatch_request_key_key ON public.sales_dispatch USING btree (request_key)"
+    ],
+    [
+      "sales_dispatchline",
+      "sales_dispatchline_document_id_4671e2bd",
+      "CREATE INDEX sales_dispatchline_document_id_4671e2bd ON public.sales_dispatchline USING btree (document_id)"
+    ],
+    [
+      "sales_dispatchline",
+      "sales_dispatchline_item_id_89557f04",
+      "CREATE INDEX sales_dispatchline_item_id_89557f04 ON public.sales_dispatchline USING btree (item_id)"
+    ],
+    [
+      "sales_dispatchline",
+      "sales_dispatchline_pkey",
+      "CREATE UNIQUE INDEX sales_dispatchline_pkey ON public.sales_dispatchline USING btree (id)"
+    ],
+    [
+      "sales_invoice",
+      "sales_invoice_actor_id_7e86cdd4",
+      "CREATE INDEX sales_invoice_actor_id_7e86cdd4 ON public.sales_invoice USING btree (actor_id)"
+    ],
+    [
+      "sales_invoice",
+      "sales_invoice_number_be53c67c_like",
+      "CREATE INDEX sales_invoice_number_be53c67c_like ON public.sales_invoice USING btree (number varchar_pattern_ops)"
+    ],
+    [
+      "sales_invoice",
+      "sales_invoice_number_key",
+      "CREATE UNIQUE INDEX sales_invoice_number_key ON public.sales_invoice USING btree (number)"
+    ],
+    [
+      "sales_invoice",
+      "sales_invoice_order_id_key",
+      "CREATE UNIQUE INDEX sales_invoice_order_id_key ON public.sales_invoice USING btree (order_id)"
+    ],
+    [
+      "sales_invoice",
+      "sales_invoice_pkey",
+      "CREATE UNIQUE INDEX sales_invoice_pkey ON public.sales_invoice USING btree (id)"
+    ],
+    [
+      "sales_invoice",
+      "sales_invoice_request_key_a060a86d_like",
+      "CREATE INDEX sales_invoice_request_key_a060a86d_like ON public.sales_invoice USING btree (request_key varchar_pattern_ops)"
+    ],
+    [
+      "sales_invoice",
+      "sales_invoice_request_key_key",
+      "CREATE UNIQUE INDEX sales_invoice_request_key_key ON public.sales_invoice USING btree (request_key)"
+    ],
+    [
+      "sales_invoiceline",
+      "sales_invoiceline_invoice_id_7057a7be",
+      "CREATE INDEX sales_invoiceline_invoice_id_7057a7be ON public.sales_invoiceline USING btree (invoice_id)"
+    ],
+    [
+      "sales_invoiceline",
+      "sales_invoiceline_pkey",
+      "CREATE UNIQUE INDEX sales_invoiceline_pkey ON public.sales_invoiceline USING btree (id)"
+    ],
+    [
+      "sales_invoiceline",
+      "sales_invoiceline_sku_id_7afff49f",
+      "CREATE INDEX sales_invoiceline_sku_id_7afff49f ON public.sales_invoiceline USING btree (sku_id)"
+    ],
+    [
+      "sales_invoicesequence",
+      "sales_invoicesequence_pkey",
+      "CREATE UNIQUE INDEX sales_invoicesequence_pkey ON public.sales_invoicesequence USING btree (financial_year)"
+    ],
+    [
+      "sales_order",
+      "sales_order_actor_id_2037ac19",
+      "CREATE INDEX sales_order_actor_id_2037ac19 ON public.sales_order USING btree (actor_id)"
+    ],
+    [
+      "sales_order",
+      "sales_order_customer_id_798c889f",
+      "CREATE INDEX sales_order_customer_id_798c889f ON public.sales_order USING btree (customer_id)"
+    ],
+    [
+      "sales_order",
+      "sales_order_pkey",
+      "CREATE UNIQUE INDEX sales_order_pkey ON public.sales_order USING btree (id)"
+    ],
+    [
+      "sales_order",
+      "sales_order_request_key_cce48816_like",
+      "CREATE INDEX sales_order_request_key_cce48816_like ON public.sales_order USING btree (request_key varchar_pattern_ops)"
+    ],
+    [
+      "sales_order",
+      "sales_order_request_key_key",
+      "CREATE UNIQUE INDEX sales_order_request_key_key ON public.sales_order USING btree (request_key)"
+    ],
+    [
+      "sales_orderline",
+      "sales_orderline_order_id_9f597de6",
+      "CREATE INDEX sales_orderline_order_id_9f597de6 ON public.sales_orderline USING btree (order_id)"
+    ],
+    [
+      "sales_orderline",
+      "sales_orderline_pkey",
+      "CREATE UNIQUE INDEX sales_orderline_pkey ON public.sales_orderline USING btree (id)"
+    ],
+    [
+      "sales_orderline",
+      "sales_orderline_sku_id_dc22fd31",
+      "CREATE INDEX sales_orderline_sku_id_dc22fd31 ON public.sales_orderline USING btree (sku_id)"
+    ],
+    [
+      "sales_orderline",
+      "unique_order_sku",
+      "CREATE UNIQUE INDEX unique_order_sku ON public.sales_orderline USING btree (order_id, sku_id)"
+    ],
+    [
+      "sales_payment",
+      "sales_payment_actor_id_960d26a4",
+      "CREATE INDEX sales_payment_actor_id_960d26a4 ON public.sales_payment USING btree (actor_id)"
+    ],
+    [
+      "sales_payment",
+      "sales_payment_invoice_id_a17f5653",
+      "CREATE INDEX sales_payment_invoice_id_a17f5653 ON public.sales_payment USING btree (invoice_id)"
+    ],
+    [
+      "sales_payment",
+      "sales_payment_pkey",
+      "CREATE UNIQUE INDEX sales_payment_pkey ON public.sales_payment USING btree (id)"
+    ],
+    [
+      "sales_payment",
+      "sales_payment_request_key_207442e2_like",
+      "CREATE INDEX sales_payment_request_key_207442e2_like ON public.sales_payment USING btree (request_key varchar_pattern_ops)"
+    ],
+    [
+      "sales_payment",
+      "sales_payment_request_key_key",
+      "CREATE UNIQUE INDEX sales_payment_request_key_key ON public.sales_payment USING btree (request_key)"
+    ],
+    [
+      "sales_returnline",
+      "sales_returnline_dispatch_line_id_00817b85",
+      "CREATE INDEX sales_returnline_dispatch_line_id_00817b85 ON public.sales_returnline USING btree (dispatch_line_id)"
+    ],
+    [
+      "sales_returnline",
+      "sales_returnline_document_id_5e4c3951",
+      "CREATE INDEX sales_returnline_document_id_5e4c3951 ON public.sales_returnline USING btree (document_id)"
+    ],
+    [
+      "sales_returnline",
+      "sales_returnline_invoice_line_id_d06b2b57",
+      "CREATE INDEX sales_returnline_invoice_line_id_d06b2b57 ON public.sales_returnline USING btree (invoice_line_id)"
+    ],
+    [
+      "sales_returnline",
+      "sales_returnline_pkey",
+      "CREATE UNIQUE INDEX sales_returnline_pkey ON public.sales_returnline USING btree (id)"
+    ],
+    [
+      "sales_salesreturn",
+      "sales_salesreturn_actor_id_6acf325c",
+      "CREATE INDEX sales_salesreturn_actor_id_6acf325c ON public.sales_salesreturn USING btree (actor_id)"
+    ],
+    [
+      "sales_salesreturn",
+      "sales_salesreturn_adjustment_id_key",
+      "CREATE UNIQUE INDEX sales_salesreturn_adjustment_id_key ON public.sales_salesreturn USING btree (adjustment_id)"
+    ],
+    [
+      "sales_salesreturn",
+      "sales_salesreturn_invoice_id_a8ef6a28",
+      "CREATE INDEX sales_salesreturn_invoice_id_a8ef6a28 ON public.sales_salesreturn USING btree (invoice_id)"
+    ],
+    [
+      "sales_salesreturn",
+      "sales_salesreturn_pkey",
+      "CREATE UNIQUE INDEX sales_salesreturn_pkey ON public.sales_salesreturn USING btree (id)"
+    ],
+    [
+      "sales_salesreturn",
+      "sales_salesreturn_request_key_c5096845_like",
+      "CREATE INDEX sales_salesreturn_request_key_c5096845_like ON public.sales_salesreturn USING btree (request_key varchar_pattern_ops)"
+    ],
+    [
+      "sales_salesreturn",
+      "sales_salesreturn_request_key_key",
+      "CREATE UNIQUE INDEX sales_salesreturn_request_key_key ON public.sales_salesreturn USING btree (request_key)"
+    ]
+  ],
+  "triggers": [
+    [
+      "inventory_stockmovement",
+      "stock_movement_immutable",
+      "CREATE TRIGGER stock_movement_immutable BEFORE DELETE OR UPDATE ON public.inventory_stockmovement FOR EACH ROW EXECUTE FUNCTION reject_stock_movement_change()",
+      "\n            BEGIN\n                RAISE EXCEPTION 'Stock movements are immutable; append a correction';\n            END;\n            ",
+      "O"
+    ]
+  ]
+}

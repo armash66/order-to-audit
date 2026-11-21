@@ -4,6 +4,7 @@
 {% block content %}
 <p class="muted">FACTORY WORKSPACE · {{ today }}</p>
 <h1>Hello, {{ user.username }}</h1>
+{% include 'workflow_start.html' %}
 <p class="muted">Every order, batch and stock movement connected.</p>
 <div class="grid">
 {% if is_sales %}

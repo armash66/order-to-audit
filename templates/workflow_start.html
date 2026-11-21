@@ -1,0 +1,7 @@
+<section class="card" aria-label="Workflow shortcuts"><h2>Start here</h2>
+<div class="task-links">
+{% if is_admin %}<a class="task-link" href="/orders/?status=submitted"><strong>Review incoming orders →</strong><span>Check stock and approve or reject.</span></a><a class="task-link" href="/orders/?status=approved"><strong>Prepare invoices →</strong><span>Bill the orders already approved.</span></a><a class="task-link" href="/orders/?status=invoiced"><strong>Dispatch orders →</strong><span>Record goods leaving the factory.</span></a>
+{% elif is_sales %}<a class="task-link" href="/orders/#new-order"><strong>Take a customer order →</strong><span>Select customer, product and packets.</span></a><a class="task-link" href="/orders/"><strong>Track my orders →</strong><span>See approval and dispatch status.</span></a><a class="task-link" href="/offline/"><strong>Prepare for weak network →</strong><span>Load your offline catalogue before travelling.</span></a>{% endif %}
+{% if is_production %}<a class="task-link" href="/production/#run-register"><strong>Continue production →</strong><span>Open a run to issue materials or record output.</span></a><a class="task-link" href="/production/#receive-materials"><strong>Receive a delivery →</strong><span>Record supplier, quantity and purchase value.</span></a>{% endif %}
+{% if is_reports %}<a class="task-link" href="/reports/"><strong>Review accounts →</strong><span>Sales, tax, stock and collections by period.</span></a>{% endif %}
+</div></section>

@@ -2,7 +2,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>Reports</h1>
+<div class="page-heading"><div><p class="eyebrow">ACCOUNTS & AUDIT</p><h1>Reports</h1><p class="muted">Choose the register and period. Review the results, then export the same figures.</p></div></div>
 {% if is_reports %}<p><a href="{% url 'tally_download' %}?start={{ table.start|date:'Y-m-d' }}&amp;end={{ table.end|date:'Y-m-d' }}">Download Tally accounting XML (ZIP)</a></p>{% endif %}
 <form class="card fields" method="get">
 <label>Report<select name="report">
@@ -20,8 +20,8 @@ selected
 <label>Through / as of<input name="end" type="date" value="{{ table.end|date:'Y-m-d' }}" required>
 </label>
 <button>View</button>
-<button name="format" value="csv">CSV</button>
-<button name="format" value="pdf">PDF</button>
+<button name="format" value="csv" class="secondary">CSV</button>
+<button name="format" value="pdf" class="secondary">PDF</button>
 </form>
 <p>Stock follows posting dates; commercial reports use document dates. Ageing includes all invoices through the as-of date. GST mapping is an exercise summary, not a filing.</p>
 <section class="card scroll">

@@ -33,7 +33,25 @@ TAMIL={
 }
 
 
+HINDI={
+    "Home":"मुख्य पृष्ठ", "Orders":"ऑर्डर", "Reports":"रिपोर्ट", "Visits":"ग्राहक मुलाकातें", "Prices":"कीमतें", "Batches & alerts":"बैच और सूचनाएँ", "Sign out":"लॉग आउट",
+    "Production":"उत्पादन", "Stock":"स्टॉक", "Production workspace":"उत्पादन कार्यस्थल", "Start a run":"उत्पादन शुरू करें", "BOM":"सामग्री सूची", "Batches":"बैच", "Create draft run":"उत्पादन का प्रारूप बनाएँ",
+    "Receive materials":"सामग्री प्राप्त करें", "Supplier":"आपूर्तिकर्ता", "Item":"वस्तु", "Quantity":"मात्रा", "Unit":"इकाई", "Total material value INR":"सामग्री का कुल मूल्य ₹", "Post receipt":"प्राप्ति दर्ज करें", "Runs":"उत्पादन रिकॉर्ड", "Run":"उत्पादन", "Product":"उत्पाद", "Expected":"अपेक्षित", "State":"स्थिति", "No runs yet.":"अभी कोई उत्पादन रिकॉर्ड नहीं है।",
+    "Issue raw materials":"कच्चा माल जारी करें", "Post raw issue":"कच्चे माल का उपयोग दर्ज करें", "Complete run":"उत्पादन पूरा करें", "Good packets":"अच्छे पैकेट", "Post packaging and receive FG":"पैकेजिंग दर्ज करें और तैयार माल प्राप्त करें",
+    "Planned versus actual":"नियोजित और वास्तविक", "Actual":"वास्तविक", "Variance":"अंतर", "Yield":"उत्पादन प्राप्ति", "Materials":"सामग्री", "Overhead":"अतिरिक्त खर्च", "Total":"कुल", "Add overhead":"अतिरिक्त खर्च जोड़ें", "Amount INR":"राशि ₹", "Overhead description":"अतिरिक्त खर्च का विवरण",
+    "draft":"प्रारूप", "issued":"जारी", "completed":"पूरा", "reversed":"उलटा दर्ज", "Flour":"आटा", "Cooking oil":"खाद्य तेल", "Spice mix":"मसाला मिश्रण", "Carton":"कार्टन", "expected packets":"अपेक्षित पैकेट", "good packet":"अच्छा पैकेट", "flagged":"चेतावनी",
+}
+MARATHI={
+    "Home":"मुख्य पृष्ठ", "Orders":"ऑर्डर", "Reports":"अहवाल", "Visits":"ग्राहक भेटी", "Prices":"किमती", "Batches & alerts":"बॅच आणि सूचना", "Sign out":"लॉग आउट",
+    "Production":"उत्पादन", "Stock":"साठा", "Production workspace":"उत्पादन कार्यक्षेत्र", "Start a run":"उत्पादन सुरू करा", "BOM":"साहित्य सूची", "Batches":"बॅच", "Create draft run":"उत्पादनाचा मसुदा तयार करा",
+    "Receive materials":"साहित्य प्राप्त करा", "Supplier":"पुरवठादार", "Item":"वस्तू", "Quantity":"प्रमाण", "Unit":"एकक", "Total material value INR":"साहित्याचे एकूण मूल्य ₹", "Post receipt":"प्राप्ती नोंदवा", "Runs":"उत्पादन नोंदी", "Run":"उत्पादन", "Product":"उत्पादन", "Expected":"अपेक्षित", "State":"स्थिती", "No runs yet.":"अद्याप उत्पादन नोंदी नाहीत.",
+    "Issue raw materials":"कच्चा माल द्या", "Post raw issue":"कच्च्या मालाचा वापर नोंदवा", "Complete run":"उत्पादन पूर्ण करा", "Good packets":"चांगली पाकिटे", "Post packaging and receive FG":"पॅकेजिंग नोंदवा आणि तयार माल प्राप्त करा",
+    "Planned versus actual":"नियोजित आणि प्रत्यक्ष", "Actual":"प्रत्यक्ष", "Variance":"फरक", "Yield":"उत्पादन प्राप्ती", "Materials":"साहित्य", "Overhead":"अतिरिक्त खर्च", "Total":"एकूण", "Add overhead":"अतिरिक्त खर्च जोडा", "Amount INR":"रक्कम ₹", "Overhead description":"अतिरिक्त खर्चाचा तपशील",
+    "draft":"मसुदा", "issued":"दिलेला", "completed":"पूर्ण", "reversed":"उलट नोंद", "Flour":"पीठ", "Cooking oil":"खाद्यतेल", "Spice mix":"मसाला मिश्रण", "Carton":"खोका", "expected packets":"अपेक्षित पाकिटे", "good packet":"चांगले पाकीट", "flagged":"सूचना",
+}
+
+
 @register.simple_tag(takes_context=True)
 def ui(context, text):
     language=context['request'].session.get('floor_language','en')
-    return TAMIL.get(str(text),text) if language=='ta' else text
+    return {'ta':TAMIL,'hi':HINDI,'mr':MARATHI}.get(language,{}).get(str(text),text)
