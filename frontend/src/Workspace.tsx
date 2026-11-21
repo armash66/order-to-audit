@@ -217,6 +217,8 @@ export function Workspace({
     [data, setData] = useState<any>(null),
     [error, setError] = useState(""),
     [selected, setSelected] = useState<string | null>(null),
+    [sourceDetail, setSourceDetail] = useState<Row | null>(null),
+    [recallDetail, setRecallDetail] = useState<Row | null>(null),
     [revision, setRevision] = useState(0);
   const [kind, setKind] = useState("sales"),
     [start, setStart] = useState("2026-11-01"),
@@ -250,6 +252,8 @@ export function Workspace({
     let active = true;
     setError("");
     setData(null);
+    setSourceDetail(null);
+    setRecallDetail(null);
     let route =
       page === "reports"
         ? `/reports/${kind}?start=${start}&end=${end}`
@@ -313,6 +317,8 @@ export function Workspace({
   }
   function navigate(next: string) {
     setData(null);
+    setSourceDetail(null);
+    setRecallDetail(null);
     setPage(next);
     setSelected(null);
   }
@@ -355,6 +361,7 @@ export function Workspace({
     ...(sales || reports ? ["orders"] : []),
     ...(production ? ["production"] : []),
     ...(stock ? ["stock", "batches"] : []),
+    ...(stock ? ["audit"] : []),
     ...(sales || reports ? ["reports", "visits"] : []),
     ...(sales ? ["offline"] : []),
     ...(admin ? ["prices"] : []),
@@ -514,6 +521,11 @@ export function Workspace({
               </button>
               {admin && data.invoice.status === "posted" && (
                 <>
+                  {data.invoice.outstanding !== "0" && form(
+                    "Record collection follow-up", "collection.followup",
+                    [field("note", "Contact note"), field("next_contact", "Next contact date", catalog.today, "date")],
+                    { invoice: data.invoice.id },
+                  )}
                   {form(
                     "Record payment",
                     "order.payment",
@@ -604,13 +616,22 @@ export function Workspace({
                   />
                 </>
               )}
+              {data.invoice.followups?.length > 0 && <>
+                <h3>Collection follow-ups</h3><Table rows={data.invoice.followups} />
+              </>}
             </section>
           )}
           {data.suggestions && (
-            <details className="card">
-              <summary>Production suggestions</summary>
-              {display(data.suggestions)}
-            </details>
+            <section className="card" aria-label="Shortage resolution">
+              <h2>Shortage resolution</h2>
+              {data.suggestions.map((plan: Row, index: number) => <div key={index}>
+                <p>{plan.uncovered} uncovered packets · {plan.required_batches} batches needed · {plan.feasible_batches} feasible now.</p>
+                <strong>{plan.next_action}</strong>
+                {plan.required_batches !== "0" && <Table rows={plan.inputs} />}
+              </div>)}
+              {data.suggestions.some((plan: Row) => plan.required_batches !== "0") &&
+                <button onClick={() => navigate("production")}>Open production and receipts</button>}
+            </section>
           )}
         </>
       )}
@@ -739,6 +760,14 @@ export function Workspace({
             ],
             { id: selected },
           )}
+          {data.state === "completed" && form(
+            "Explain production loss", "run.loss_note",
+            [field("reason", "Loss reason"), field("note", "Explanation")],
+            { run: selected },
+          )}
+          {data.loss_notes?.length > 0 && <section className="card">
+            <h2>Production loss explanations</h2><Table rows={data.loss_notes} />
+          </section>}
           {data.state === "draft" &&
             form(
               "Edit batch count",
@@ -774,16 +803,18 @@ export function Workspace({
       {page === "stock" && selected && data && !Array.isArray(data) && (
         <>
           <h2>{data.item.name}</h2>
-          <Table rows={data.movements} />
-          <p>Posting IDs identify source documents; open the source below.</p>
-          <ActionForm
-            title="Inspect source posting"
-            fields={[field("id", "Posting ID", "", "number")]}
-            submit={async (d) => {
-              const result = await load("/sources/" + d.id);
-              window.alert(JSON.stringify(result, null, 2));
-            }}
-          />
+          <Table rows={data.movements} onOpen={async (row) => {
+            try {
+              setSourceDetail(await load("/sources/" + row.posting_id));
+              setError("");
+            } catch (e) { setError((e as Error).message); }
+          }} />
+          {sourceDetail && <section className="card" aria-label="Source document">
+            <h2>Source document · posting #{sourceDetail.id}</h2>
+            <p>Document</p>{display(sourceDetail.document)}
+            <h3>Source lines</h3><Table rows={sourceDetail.lines || []} />
+            <button onClick={() => setSourceDetail(null)}>Close source</button>
+          </section>}
         </>
       )}
       {page === "stock" &&
@@ -806,13 +837,47 @@ export function Workspace({
         ])}
       {page === "batches" && data && (
         <>
-          {display(data)}
+          <h2>Lots and quality status</h2>
+          <Table rows={data.lots} onOpen={async (row) => {
+            try { setRecallDetail(await load("/recall/" + row.id)); setError(""); }
+            catch (e) { setError((e as Error).message); }
+          }} />
+          {recallDetail && <section className="card" aria-label="Batch recall trace">
+            <h2>Trace lot {recallDetail.lot.code}</h2>
+            <p>Original movements and source documents</p>
+            <Table rows={recallDetail.movements} onOpen={async (row) => {
+              try { setSourceDetail(await load("/sources/" + row.posting_id)); setError(""); }
+              catch (e) { setError((e as Error).message); }
+            }} />
+            {sourceDetail && <div className="notice">
+              <h3>Source posting #{sourceDetail.id}</h3>
+              {display(sourceDetail.document)}<Table rows={sourceDetail.lines || []} />
+            </div>}
+            <h3>Production runs</h3>{display(recallDetail.production_run_ids)}
+            <h3>Finished lots</h3><Table rows={recallDetail.finished_lots} />
+            <h3>Affected dispatches and customers</h3><Table rows={recallDetail.dispatches} />
+          </section>}
+          <h2>Reorder alerts</h2><Table rows={data.alerts} />
+          {production && form("Hold or release finished lot", "quality", [
+            choice("lot", "Finished lot", data.lots.filter((r: Row) => r.category === "finished" && BigInt(r.quantity) > 0n)
+              .map((r: Row) => ({value:r.id,label:r.item + " / " + r.code + " (" + r.quantity + ")"}))),
+            choice("status", "Quality decision", [
+              {value:"held",label:"Hold from dispatch"},{value:"released",label:"Release"}]),
+            field("reason", "Reason"),
+          ])}
           {admin &&
             form("Set reorder minimum", "reorder", [
               item,
               field("minimum", "Minimum in base units", "0", "number"),
             ])}
         </>
+      )}
+      {page === "audit" && Array.isArray(data) && (
+        <section className="card" aria-label="Audit history">
+          <h2>Recent audit history</h2>
+          <p>Latest 100 recorded actions. Each entry shows the actor, time, document and values captured before and after the action.</p>
+          <Table rows={data} />
+        </section>
       )}
       {page === "prices" &&
         admin &&

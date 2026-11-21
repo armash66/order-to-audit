@@ -81,8 +81,56 @@ def suggestion(conn, sku_id):
         "required_batches": batches,
         "feasible_batches": feasible,
         "blocked": batches > feasible,
+        "next_action": (
+            "Receive missing BOM inputs, then start production."
+            if batches > feasible else
+            "Start the suggested production run."
+            if batches else "Available finished goods cover submitted demand."
+        ),
         "inputs": result,
     }
+
+
+# Trace an input or finished-goods lot through immutable allocations and dispatches.
+def recall(lot_id, user):
+    authorize(user, ["admin", "production", "accountant", "owner"])
+    with database.transaction() as conn:
+        lot = get_row(conn, "inventory_stocklot", lot_id)
+        item = get_row(conn, "inventory_item", lot["item_id"])
+        movements = rows(conn, """SELECT m.id,m.posting_id,m.quantity,p.sequence,p.opening_id,p.purchase_id,
+            p.production_id,p.dispatch_id,p.adjustment_id FROM inventory_lotallocation a
+            JOIN inventory_stockmovement m ON m.id=a.movement_id
+            JOIN inventory_posting p ON p.id=m.posting_id WHERE a.lot_id=:lot ORDER BY p.sequence,m.id""", lot=lot_id)
+        run_ids = {row["run_id"] for row in rows(conn, """SELECT DISTINCT e.run_id
+            FROM inventory_lotallocation a JOIN inventory_stockmovement m ON m.id=a.movement_id
+            JOIN production_productionline l ON l.id=m.production_line_id
+            JOIN production_productionevent e ON e.id=l.event_id
+            WHERE a.lot_id=:lot AND m.quantity<0""", lot=lot_id)}
+        finished = []
+        if item["category"] == "finished":
+            finished.append({"id": lot["id"], "code": lot["code"], "item": item["name"]})
+        for run_id in sorted(run_ids):
+            finished.extend(rows(conn, """SELECT DISTINCT b.id,b.code,i.name AS item
+                FROM production_productionevent e JOIN production_productionline l ON l.event_id=e.id
+                JOIN inventory_stockmovement m ON m.production_line_id=l.id
+                JOIN inventory_lotallocation a ON a.movement_id=m.id
+                JOIN inventory_stocklot b ON b.id=a.lot_id
+                JOIN inventory_item i ON i.id=b.item_id
+                WHERE e.run_id=:run AND m.quantity>0 AND i.category='finished'""", run=run_id))
+        finished = list({row["id"]: row for row in finished}.values())
+        dispatches = []
+        for fg in finished:
+            dispatches.extend(rows(conn, """SELECT DISTINCT d.id AS dispatch_id,d.document_date,
+                v.number AS invoice,c.name AS customer,-a.quantity AS packets
+                FROM inventory_lotallocation a JOIN inventory_stockmovement m ON m.id=a.movement_id
+                JOIN sales_dispatchline l ON l.id=m.dispatch_line_id
+                JOIN sales_dispatch d ON d.id=l.document_id JOIN sales_invoice v ON v.id=d.invoice_id
+                JOIN sales_order o ON o.id=v.order_id JOIN inventory_customer c ON c.id=o.customer_id
+                WHERE a.lot_id=:lot AND a.quantity<0 ORDER BY d.id""", lot=fg["id"]))
+        return {"lot": {"id": lot["id"], "code": lot["code"], "item": item["name"],
+                        "expiry": lot["expiry_date"]}, "movements": movements,
+                "production_run_ids": sorted(run_ids), "finished_lots": finished,
+                "dispatches": dispatches}
 
 
 def order_detail(identifier, user):
@@ -162,6 +210,9 @@ def order_detail(identifier, user):
             result["invoice"].update(
                 outstanding=outstanding(conn, invoice), fulfilment=progress
             )
+            result["invoice"]["followups"] = rows(conn, """SELECT f.id,f.note,f.next_contact,
+                f.recorded_at,u.username AS actor FROM factory_collectionfollowup f
+                JOIN auth_user u ON u.id=f.actor_id WHERE f.invoice_id=:id ORDER BY f.id DESC""", id=invoice["id"])
         if user["is_staff"] or "admin" in user["roles"]:
             result["suggestions"] = [
                 value
@@ -183,7 +234,7 @@ def read(kind, user, identifier=None):
                 if kind == "prices"
                 else (
                     ["admin", "production", "accountant", "owner"]
-                    if kind in ("batches", "source")
+                    if kind in ("batches", "source", "audit")
                     else ["admin", "salesman", "accountant", "owner"]
                 )
             )
@@ -191,6 +242,14 @@ def read(kind, user, identifier=None):
     )
     authorize(user, roles)
     with database.transaction() as conn:
+        if kind == "audit":
+            # Recent entries show who changed a document and its recorded before/after values.
+            return rows(
+                conn,
+                """SELECT a.id,a.occurred_at,u.username AS actor,a.action,a.source_type,
+                    a.source_id,a.before,a.after FROM access_auditlog a
+                    JOIN auth_user u ON u.id=a.actor_id ORDER BY a.id DESC LIMIT 100""",
+            )
         if kind == "catalog":
             factory = user["is_staff"] or bool(
                 set(user["roles"]) & {"admin", "production", "accountant", "owner"}
@@ -241,7 +300,7 @@ def read(kind, user, identifier=None):
             factory_lock(conn)
             run = get_row(conn, "production_productionrun", identifier)
             item = get_row(conn, "inventory_item", run["output_item_id"])
-            return {
+            result = {
                 "id": run["id"],
                 "name": item["name"],
                 "state": run["state"],
@@ -253,6 +312,10 @@ def read(kind, user, identifier=None):
                     id=run["id"],
                 ),
             }
+            result["loss_notes"] = rows(conn, """SELECT n.id,n.reason,n.note,n.recorded_at,
+                u.username AS actor FROM factory_lossnote n JOIN auth_user u ON u.id=n.actor_id
+                WHERE n.run_id=:id ORDER BY n.id""", id=run["id"])
+            return result
         if kind == "prices":
             get_row(conn, "inventory_customer", identifier)
             return rows(
@@ -276,9 +339,13 @@ def read(kind, user, identifier=None):
             factory_lock(conn)
             batches = rows(
                 conn,
-                """SELECT i.name AS item,l.code,l.expiry_date AS expiry,COALESCE(SUM(a.quantity),0)::bigint AS quantity
-                FROM inventory_stocklot l JOIN inventory_item i ON i.id=l.item_id LEFT JOIN inventory_lotallocation a ON a.lot_id=l.id
-                GROUP BY l.id,i.name ORDER BY l.expiry_date NULLS LAST,l.id""",
+                """SELECT l.id,i.name AS item,i.category,l.code,l.expiry_date AS expiry,
+                COALESCE(h.status,'released') AS quality_status,h.reason AS quality_reason,
+                COALESCE(SUM(a.quantity),0)::bigint AS quantity
+                FROM inventory_stocklot l JOIN inventory_item i ON i.id=l.item_id
+                LEFT JOIN inventory_lotallocation a ON a.lot_id=l.id
+                LEFT JOIN factory_qualityhold h ON h.lot_id=l.id
+                GROUP BY l.id,i.name,i.category,h.status,h.reason ORDER BY l.expiry_date NULLS LAST,l.id""",
             )
             alerts = []
             for level in rows(

@@ -4,7 +4,7 @@ import os
 from uuid import uuid4
 from django.test import TransactionTestCase
 from django.conf import settings
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, inspect
 from fastapi.testclient import TestClient
 from inventory.seed import seed_benchmark
 from access.seed import seed_logins
@@ -22,6 +22,13 @@ class APIWorkflowTests(TransactionTestCase):
         database.engine = create_engine(
             self.original.url.set(database=settings.DATABASES["default"]["NAME"])
         )
+        if not inspect(database.engine).has_table('factory_qualityhold'):
+            from alembic.migration import MigrationContext
+            from alembic.operations import Operations
+            from importlib import import_module
+            with database.engine.begin() as conn:
+                with Operations.context(MigrationContext.configure(conn)):
+                    import_module('api.migrations.versions.0002_factory_actions').upgrade()
         FactoryControl.objects.get_or_create(pk=1)
         seed_benchmark()
         seed_logins()
@@ -48,6 +55,12 @@ class APIWorkflowTests(TransactionTestCase):
             }
 
     def tearDown(self):
+        from alembic.migration import MigrationContext
+        from alembic.operations import Operations
+        from importlib import import_module
+        with self.database.engine.begin() as conn:
+            with Operations.context(MigrationContext.configure(conn)):
+                import_module('api.migrations.versions.0002_factory_actions').downgrade()
         self.client.close()
         self.database.engine.dispose()
         self.database.engine = self.original
@@ -140,6 +153,9 @@ class APIWorkflowTests(TransactionTestCase):
             "salesman_b",
         )["id"]
         self.assertEqual(self.get("/orders/" + other)["stock"][0]["shortage"], "32")
+        plan = self.get("/orders/" + other)["suggestions"][0]
+        self.assertEqual((plan["uncovered"], plan["required_batches"], plan["blocked"]), ("32", "1", False))
+        self.assertEqual(next(row for row in plan["inputs"] if row["item"] == "POUCH")["shortage"], "0")
         self.command("order.approve", {"id": other}, status=400)
         self.command(
             "order.payment",
@@ -770,3 +786,128 @@ class APIWorkflowTests(TransactionTestCase):
         )
         self.assertEqual(pdf.status_code, 200)
         self.assertTrue(pdf.content.startswith(b"%PDF"))
+
+    def test_audit_history_and_source_drilldown_are_role_scoped(self):
+        from inventory.models import StockMovement
+
+        self.command(
+            "receipt",
+            {"supplier": str(Supplier.objects.first().pk), "lines": [
+                {"item": str(Item.objects.get(code="FLOUR").pk), "quantity": "1000", "value_paise": "4500"}
+            ]},
+            "production",
+        )
+        order = self.command("order.create", {
+            "customer": str(Customer.objects.get(code="A").pk),
+            "quantities": {str(SKU.objects.first().pk): "2"},
+        }, "salesman_a")["id"]
+        self.command("order.approve", {"id": order})
+        history = self.get("/audit", "accountant")
+        approval = next(row for row in history if row["action"] == "order.approve")
+        self.assertEqual(approval["actor"], "admin")
+        self.assertEqual(approval["before"]["status"], "submitted")
+        self.assertEqual(approval["after"]["status"], "approved")
+        self.assertEqual(self.client.get("/api/workspace/audit", headers=self.headers["salesman_a"]).status_code, 403)
+        movement = StockMovement.objects.filter(item__code="FLOUR").order_by("-pk").first()
+        source = self.get(f"/sources/{movement.posting_id}", "accountant")
+        self.assertEqual(source["lines"][0]["quantity"], "1000")
+        self.assertEqual(self.client.get(f"/api/workspace/sources/{movement.posting_id}", headers=self.headers["salesman_a"]).status_code, 403)
+
+    def test_quality_hold_blocks_approval_without_changing_ledger(self):
+        from inventory.models import StockMovement
+        lot = next(r for r in self.get("/batches")["lots"] if r["category"] == "finished")
+        movements = StockMovement.objects.count()
+        self.command("quality", {"lot": lot["id"], "status": "held", "reason": "Seal inspection"}, "production")
+        held = next(r for r in self.get("/batches")["lots"] if r["id"] == lot["id"])
+        self.assertEqual((held["quantity"], held["quality_status"]), ("50", "held"))
+        order = self.command("order.create", {"customer": str(Customer.objects.get(code="A").pk),
+            "quantities": {str(SKU.objects.first().pk): "1"}}, "salesman_a")["id"]
+        self.assertEqual(self.get("/orders/" + order)["stock"][0]["available"], "0")
+        self.command("order.approve", {"id": order}, status=400)
+        self.command("quality", {"lot": lot["id"], "status": "released", "reason": "Passed inspection"}, "production")
+        self.command("order.approve", {"id": order})
+        self.assertEqual(StockMovement.objects.count(), movements)
+        self.command("quality", {"lot": lot["id"], "status": "held", "reason": "No"}, "salesman_a", status=403)
+
+    def test_offline_sync_accepts_two_skus_once(self):
+        second_item = Item.objects.create(code="OFFLINE500", name="Offline 500 g test SKU",
+                                          category="finished", base_unit="piece")
+        second_sku = SKU.objects.create(item=second_item, pack_size_g=500,
+                                        price_paise=12500, hsn="99999999")
+        payload = {"customer": str(Customer.objects.get(code="A").pk),
+                   "quantities": {str(SKU.objects.exclude(pk=second_sku.pk).first().pk): "2",
+                                  str(second_sku.pk): "3"},
+                   "request_key": "two-skus", "date": "2026-11-19",
+                   "user_id": self.get("/catalog", "salesman_a")["user_id"]}
+        response = self.client.post("/api/workspace/offline/sync", headers=self.headers["salesman_a"], json=payload)
+        self.assertEqual(response.status_code, 200, response.text)
+        again = self.client.post("/api/workspace/offline/sync", headers=self.headers["salesman_a"], json=payload)
+        self.assertEqual(again.json(), response.json())
+        order = self.get("/orders/" + response.json()["id"], "salesman_a")
+        self.assertEqual({line["quantity"] for line in order["lines"]}, {"2", "3"})
+
+    def test_recall_follows_input_lot_to_customer_dispatch(self):
+        run = self.command("production.create", {"bom": str(BOM.objects.first().pk), "batches": "1"}, "production")["id"]
+        self.command("production.issue", {"id": run,
+            "actual": {"FLOUR": "40000", "OIL": "10000", "SPICE": "1200"}}, "production")
+        self.command("production.complete", {"id": run,
+            "actual": {"POUCH": "200", "CARTON": "10"}, "good_packets": "200"}, "production")
+        order = self.command("order.create", {"customer": str(Customer.objects.get(code="A").pk),
+            "quantities": {str(SKU.objects.first().pk): "60"}}, "salesman_a")["id"]
+        self.command("order.approve", {"id": order})
+        self.command("order.invoice", {"id": order})
+        self.command("order.dispatch", {"id": order})
+        flour = next(r for r in self.get("/batches")["lots"] if r["item"] == "Flour")
+        trace = self.get("/recall/" + flour["id"], "accountant")
+        self.assertIn(run, trace["production_run_ids"])
+        self.assertTrue(trace["finished_lots"])
+        self.assertIn("document", self.get("/sources/" + trace["movements"][0]["posting_id"], "accountant"))
+        self.assertEqual(trace["dispatches"][0]["customer"], "Demo Retailer A")
+        self.assertEqual(self.client.get("/api/workspace/recall/" + flour["id"], headers=self.headers["salesman_a"]).status_code, 403)
+
+    def test_shortage_plan_shows_two_batches_and_missing_inputs(self):
+        run = self.command("production.create", {"bom": str(BOM.objects.first().pk), "batches": "1"}, "production")["id"]
+        self.command("production.issue", {"id": run,
+            "actual": {"FLOUR": "40000", "OIL": "10500", "SPICE": "1200"}}, "production")
+        self.command("production.complete", {"id": run,
+            "actual": {"POUCH": "194", "CARTON": "9"}, "damaged": {"POUCH": "6"},
+            "good_packets": "188"}, "production")
+        order = self.command("order.create", {"customer": str(Customer.objects.get(code="B").pk),
+            "quantities": {str(SKU.objects.first().pk): "488"}}, "salesman_b")["id"]
+        plan = self.get("/orders/" + order)["suggestions"][0]
+        self.assertEqual((plan["uncovered"], plan["required_batches"], plan["feasible_batches"], plan["blocked"]),
+                         ("250", "2", "1", True))
+        self.assertEqual(next(r for r in plan["inputs"] if r["item"] == "OIL")["shortage"], "500")
+        self.assertEqual(next(r for r in plan["inputs"] if r["item"] == "POUCH")["shortage"], "94")
+
+    def test_loss_explanation_and_collection_followup_are_idempotent(self):
+        from inventory.models import StockMovement
+        run = self.command("production.create", {"bom": str(BOM.objects.first().pk), "batches": "1"}, "production")["id"]
+        self.command("production.issue", {"id": run,
+            "actual": {"FLOUR": "40000", "OIL": "10000", "SPICE": "1200"}}, "production")
+        self.command("production.complete", {"id": run,
+            "actual": {"POUCH": "194", "CARTON": "9"}, "damaged": {"POUCH": "6"},
+            "good_packets": "188"}, "production")
+        before = StockMovement.objects.count()
+        note = {"run": run, "reason": "Unclassified yield loss", "note": "Investigate frying time"}
+        first = self.command("run.loss_note", note, "production", key="loss-1")
+        self.assertEqual(self.command("run.loss_note", note, "production", key="loss-1"), first)
+        self.assertEqual(self.get("/production/" + run, "production")["loss_notes"][0]["reason"], note["reason"])
+        self.assertEqual(StockMovement.objects.count(), before)
+        order = self.command("order.create", {"customer": str(Customer.objects.get(code="A").pk),
+            "quantities": {str(SKU.objects.first().pk): "2"}}, "salesman_a")["id"]
+        self.command("order.approve", {"id": order})
+        self.command("order.invoice", {"id": order})
+        invoice = self.get("/orders/" + order)["invoice"]["id"]
+        from datetime import timedelta
+        from api.native import now
+        followup = {"invoice": invoice, "note": "Retailer asked for a call",
+                    "next_contact": str(now().date() + timedelta(days=3))}
+        self.command("collection.followup", followup, key="follow-1")
+        self.command("collection.followup", followup, key="follow-1")
+        self.assertEqual(len(self.get("/orders/" + order)["invoice"]["followups"]), 1)
+        self.assertEqual(self.get("/dashboard")["due_followups"], [])
+        due = {**followup, "next_contact": str(now().date())}
+        self.command("collection.followup", due, key="follow-2")
+        self.assertEqual(self.get("/dashboard")["due_followups"][0]["customer"], "Demo Retailer A")
+        self.command("collection.followup", followup, "salesman_a", status=403)

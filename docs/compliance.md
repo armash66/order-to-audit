@@ -55,11 +55,22 @@ Implementation evidence is automated unless marked browser/manual. Commands: `do
 | Requirement | Evidence / boundary |
 | --- | --- |
 | Immutable ledger and exact arithmetic | PostgreSQL update/delete trigger; integer base units/paise, Fraction; rollback and duplicate-request concurrency tests; mutation checks in stock/production validation notes |
-| Corrections and audit | Reasoned adjustments; bounded exact-inverse run reversal tests; full unpaid/undispatched credit; draft invoice/run edit audit tests |
+| Corrections and audit | Reasoned adjustments; bounded exact-inverse run reversal tests; full unpaid/undispatched credit; draft invoice/run edit audit tests; role-gated React Audit page shows actor/time and before/after values |
 | Shared recipe / 500 g change | `production/test_fixtures.py` plus test; 33 added lines across two files after recipe separation; benchmark seed unchanged |
 | One-command local run | Clean source-copy Compose startup with fresh DB and automatic role seed; no local `.env` required |
 | Design/README | `docs/design.md`, README and this matrix |
 | Public repo/history/video | Applicant must commit/push their work, confirm repository visibility and record/upload the ≤8-minute walkthrough; agent does not commit/push or send messages |
 | Real-user order timing | Screen requires customer/product/quantity and submit; automated 360 px check passes. Applicant must perform the under-one-minute usability trial. |
+
+## Additional operational gap solutions
+
+| ID | Evidence / boundary |
+| --- | --- |
+| OPS-1 | Order detail shows uncovered packets, batches, BOM input shortages and next action; read-only computation, including 250-uncovered test and 360 px browser check |
+| OPS-2 | Batch screen hold/release with reason; held FG stays in ledger but leaves available and FEFO stock; API and 360 px browser checks |
+| OPS-3 | Batch screen opens lot-to-production-to-dispatch/customer trace; API test checks input lot and salesman denial, browser opens trace |
+| OPS-4 | Completed-run loss note shown with actor/time; retry and unchanged-movement test; no invented shortfall classification |
+| OPS-5 | Offline screen queues multiple product lines for review before explicit sync; browser restart test and API two-SKU test |
+| OPS-6 | Invoice follow-up note and next-contact date; API test checks retry, permissions and no payment posting |
 
 Known limitations and deliberate PS interpretations are listed in README; no Must/Should item was removed under the earlier cut line.

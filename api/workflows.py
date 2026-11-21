@@ -116,6 +116,12 @@ def batches(user=Depends(current_user)):
     return wire(queries.read("batches", user))
 
 
+@router.get("/recall/{lot_id}")
+@domain
+def recall(lot_id: int, user=Depends(current_user)):
+    return wire(queries.recall(lot_id, user))
+
+
 @router.get("/visits")
 @domain
 def visits(user=Depends(current_user)):
@@ -173,6 +179,12 @@ def invoice_pdf(pk: int, user=Depends(current_user)):
 @domain
 def source(pk: int, user=Depends(current_user)):
     return wire(queries.read("source", user, pk))
+
+
+@router.get("/audit")
+@domain
+def audit_history(user=Depends(current_user)):
+    return wire(queries.read("audit", user))
 
 
 class Command(BaseModel):
@@ -236,4 +248,12 @@ def command(body: Command, user=Depends(current_user)):
 
         result = extension_command(action, d, user, key)
         return result if action == "mock" else {"ok": True, "id": str(result)}
+    if action in ("quality", "run.loss_note", "collection.followup"):
+        from api import factory_actions
+
+        service = {"quality": factory_actions.quality,
+                   "run.loss_note": factory_actions.loss_note,
+                   "collection.followup": factory_actions.followup}[action]
+        identifier = service(d, user) if action == "quality" else service(d, user, key)
+        return {"ok": True, "id": str(identifier)}
     raise ValueError("Unknown action.")

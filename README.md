@@ -49,11 +49,12 @@ React/TypeScript and FastAPI match the applicant's preferred tools and separate 
 
 | Section 6 tier | Delivered |
 | --- | --- |
-| Must | Five role groups; seeded masters/conversions/versioned BOMs; mobile ordering and admin approval; GST PDF; two-stage production; consumption/yield variance; ledger/summary; CSV sales and stock reports |
+| Must | Five role groups; seeded masters/conversions/versioned BOMs; mobile ordering and admin approval; GST PDF; two-stage production; consumption/yield variance; ledger/summary with source drill-down; CSV sales and stock reports; visible audit history |
 | Should | Suppliers/purchases; allocations/outstanding/ageing; exact cost with overheads; GST summary; configurable strict tolerance alerts; owner dashboard |
 | Additional section 4 | Customer/product sales, purchase, production, collections and ageing reports; inclusive dates; CSV/PDF via one renderer; native PDF sharing with desktop attachment fallback |
 | Optional sales | Customer-specific fixed prices/scheme labels, partial dispatch and resalable returns with exact credit allocation |
-| All eight stretch categories | Shortage planning; offline capture/reconnect sync; batches/expiry/FEFO; reorder alerts; visits/consented GPS; Tally XML export; local e-invoice/e-way-bill mocks; Tamil production labels |
+| All eight stretch categories | Shortage planning; offline capture/review/sync; batches/expiry/FEFO; reorder alerts; visits/consented GPS; Tally XML export; local e-invoice/e-way-bill mocks; Tamil production labels |
+| Factory workflow additions | Shortage-to-BOM input guidance; reasoned finished-lot quality hold/release; batch-to-customer recall trace; immutable run-loss notes; reviewed multi-SKU offline queue; collection follow-up dates |
 
 See [extended feature guide](docs/extended-features.md) for screens, tests and external-validation boundaries. Tally import and human Tamil review remain unverified; government integrations are explicitly local mocks.
 
@@ -85,9 +86,10 @@ See [compliance evidence](docs/compliance.md), [requirements](docs/requirements.
 - Run reversals correct recording errors, not physical production. Later or intervening affected-item stock events and reserved FG block reversal. No cascading revaluation, fractional planned batches or ingredient substitution.
 - Posted sources are frozen by services; privileged ORM/SQL can bypass this. The database trigger protects movement update/delete only. Reconciliation detects source/ledger disagreement. Direct database owners are trusted.
 - Native file sharing depends on the device. Desktop fallback requires downloading and attaching the PDF manually. The app does not send email or WhatsApp messages. Localhost links are not public customer links.
-- Offline capture is one SKU per queued order, supports a private demo device, and confirms server pricing at sync. Cached dummy catalog/queued data remains on that device across sign-out; sync requires the original account. No background sync or multi-device conflict resolution.
+- Offline capture accepts multiple SKU lines, supports a private demo device, and confirms server pricing at explicit sync after queue review. Cached dummy catalog/queued data remains on that device across sign-out; sync requires the original account. No background sync or multi-device conflict resolution.
 - GST is the exercise's fixed 5%, with per-line component rounding. GSTR labels are explanatory mappings, not filing-ready payloads. GSTINs and HSN are fictional. Master data is seeded; no generic master-maintenance UI.
 - Expiry is optional: migrated stock has labelled LEGACY lots with unknown expiry. FEFO excludes expired stock and uses unknown-expiry lots last; valuation stays item-level weighted average. Returned batches use the earliest known original expiry conservatively. Lot allocations are service-frozen and reconciled, not protected by additional database triggers.
+- Quality holds cover finished lots only. A recall trace uses recorded allocations and can identify dispatched customers, but does not send notifications or infer pre-opening provenance. Holds and loss/follow-up notes are audited service decisions, without extra stock movements.
 - Customer schemes are fixed price overrides, not a promotion engine. Tally XML has structure/balance tests but has not been imported into Tally. Mock government documents are not valid fiscal documents. Tamil covers production labels, with English validation messages and fallback product names; native-speaker review is pending.
 - Images/transitive dependencies are not fully digest-locked. No hosted demo or public deployment hardening. The video/public repository submission and organizer deadline/contact verification remain human delivery tasks.
 
@@ -98,6 +100,7 @@ See [compliance evidence](docs/compliance.md), [requirements](docs/requirements.
 | `api/main.py`, `workflows.py`, `queries.py` | Authentication, typed HTTP boundary and role-scoped workspace reads |
 | `api/native.py`, `database.py`, `inventory/`, `reconciliation.py` | Factory transactions, exact valuation, receipts, immutable ledger, lots, corrections and source reconciliation |
 | `api/production/services.py`, `api/sales/services.py` | Run snapshots/cost/variance and orders/reservations/invoices/dispatch/payments/returns |
+| `api/factory_actions.py`, `api/migrations/versions/0002_factory_actions.py` | Quality holds, immutable loss/follow-up notes and their additive tables |
 | `api/extensions.py` | Customer prices, reorder settings, visits/GPS and local government-document mocks |
 | `api/reporting.py`, `pdf.py`, `benchmark.py` | Auditor reports, CSV/PDF/Tally, dashboard and nine-step service orchestrator |
 | `api/seed.py`, `cli.py`, `migrations/`, `alembic.ini` | Native accounts/masters/opening seed, CLI and schema adoption/migrations |

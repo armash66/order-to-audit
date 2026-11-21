@@ -7,7 +7,7 @@ All optional sales features and eight section 6 stretch categories were authoriz
 | Customer prices/schemes | Admin → Prices; set a customer/SKU price and scheme label. New orders snapshot it; existing orders retain their price. | `sales/test_extended.py`: override, snapshot and catalogue |
 | Partial dispatch | On an invoiced order enter quantities in the partial-dispatch form. Unshipped quantities remain reserved. | Partial/retry/over-dispatch and reservation tests |
 | Returns | Admin records resalable sealed goods against dispatched quantities, with reason. Original tax/value is credited cumulatively. | Paid return, over-return, exact rounding residual tests |
-| Offline orders | Salesman opens Offline online once, captures without network; page reconnect/reopen automatically syncs with the original account. | Server retry/ownership tests; `scripts/extended_browser_check.py` browser restart/reconnect |
+| Offline orders | Salesman opens Offline online once, captures multiple SKU lines without network, reviews the saved queue and explicitly syncs with the original account. | Server retry/ownership/two-SKU tests; `scripts/react_offline_check.py` browser restart/review/sync |
 | Batch/expiry/FEFO | Enter receipt batch/expiry and run output expiry; Batch alerts and ledger show allocations. Expired stock cannot be issued or dispatched. | `inventory/test_batches.py`: FEFO, expired-stock rollback, reconciliation |
 | Reorder alerts | Admin sets raw-material minimum in Batch alerts; owner dashboard shows quantities at/below threshold. | Reorder/available-stock tests |
 | Production planning | Order detail shows aggregate shortage, batches needed and BOM input feasibility. | `SuggestionTests`: 250 uncovered, two needed, one feasible |

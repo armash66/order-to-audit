@@ -1,6 +1,12 @@
 # Execution status
 
+## Operational gap workflows — complete, 21 November
+
+Done: shortage-to-BOM actions, finished-lot quality hold/release, lot-to-customer recall, completed-run loss explanations, reviewed multi-SKU offline queue and collection follow-ups with due dashboard reminders. Additive Alembic revision 0002 and role-scoped FastAPI endpoints preserve benchmark balances. Validation: 83 regression/API tests, 10 native tests, all 49 benchmark checks, React build, offline restart/review browser check and 360 px factory hold/recall/shortage browser check pass on isolated Compose. Next: user commits, records/reviews the eight-minute demo and submits. No Git staging or commits performed.
+
 ## FastAPI / React migration — complete
+
+Post-migration usability phase done: the stock ledger opens a selected posting's source document and lines directly in the workspace, and factory/accounting roles have a read-only Audit page with the latest 100 actor/time/before/after entries. Salesmen are denied the audit endpoint. React build and all 78 regression/API tests pass; main Compose stack is healthy on port 8000. Next: timed mobile-order trial, source-link review in reports, video rehearsal and final submission. Suggested commit: `feat: expose audit history and direct stock source drilldown`.
 
 Done: native SQLAlchemy services, all workspace reads/reports/dashboard, PDFs, seed, benchmark/reconciliation CLI and Alembic schema adoption. Runtime image has no Django installed or imported. PostgreSQL schema/data remain intact; earlier Django source is retained only in the separate regression test image.
 

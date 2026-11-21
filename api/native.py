@@ -139,10 +139,11 @@ def lots(conn, item_id):
     return (
         conn.execute(
             text(
-                """SELECT l.id, l.code, l.expiry_date,
+                """SELECT l.id, l.code, l.expiry_date, COALESCE(h.status,'released') AS quality_status,
         COALESCE(SUM(a.quantity),0) AS quantity FROM inventory_stocklot l
-        LEFT JOIN inventory_lotallocation a ON a.lot_id=l.id WHERE l.item_id=:item
-        GROUP BY l.id ORDER BY l.expiry_date ASC NULLS LAST, l.id"""
+        LEFT JOIN inventory_lotallocation a ON a.lot_id=l.id
+        LEFT JOIN factory_qualityhold h ON h.lot_id=l.id WHERE l.item_id=:item
+        GROUP BY l.id,h.status ORDER BY l.expiry_date ASC NULLS LAST, l.id"""
             ),
             {"item": item_id},
         )
@@ -211,6 +212,8 @@ def movement(
     else:
         remaining = -quantity
         for lot in lots(conn, item_id):
+            if lot['quality_status'] == 'held':
+                continue
             if (
                 not allow_expired
                 and lot["expiry_date"]

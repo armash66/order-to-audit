@@ -71,3 +71,16 @@ Allowed state transitions and correction limits are defined in [assumptions.md](
 ## Delivery update — 20 November 2026
 
 The latest scope instruction supersedes the earlier cut line and deferred labels: all Must/Should features, SAL-9, SAL-10 and STR-1 through STR-8 are implemented as bounded prototypes. No cut has been taken. DEC-41 supersedes the earlier physical-return/partial-dispatch restriction; full cancellation credit remains unpaid/undispatched only. INV-3 remains an explicit modeling choice: issued-run costs are retained on production documents, without a separate WIP stock account. See compliance.md for test/screen evidence and extended-features.md for exact optional behavior and external validation limits. A real-user timing trial, final video and public submission still require the applicant.
+
+## Additional factory workflows — 21 November 2026
+
+These solve operational gaps beyond the PS benchmark without changing its expected numbers.
+
+| ID | Requirement | Tier | Acceptance check |
+| --- | --- | --- | --- |
+| OPS-1 | Shortage resolution | Additional | A submitted shortage shows required batches, each BOM input's stock/shortfall and the next receipt or run action; the calculation posts nothing |
+| OPS-2 | Finished-lot quality hold/release | Additional | Reasoned hold keeps on-hand unchanged, removes lot from available/FEFO stock, blocks approval when necessary and is auditable; release restores availability |
+| OPS-3 | Batch recall lookup | Additional | From a raw lot, show production run, finished lot, dispatch and customer; salesman cannot read it |
+| OPS-4 | Completed-run loss explanation | Additional | Append-only reason and note appear on the run, idempotent retry adds one note, stock/cost/variance stay unchanged |
+| OPS-5 | Multi-SKU offline review | Additional | One offline order contains two SKU quantities, survives restart, shows both lines for review and syncs once on explicit confirmation |
+| OPS-6 | Collection follow-up | Additional | Admin records note and next-contact date for an unpaid invoice; retry is idempotent and outstanding stays unchanged |

@@ -8,7 +8,7 @@ from sqlalchemy import text
 from api import database
 from api.native import authorize, factory_lock, now, round_paise, balance
 from api.queries import rows
-from api.sales.services import outstanding, available
+from api.sales.services import outstanding, available, get_row
 from api.production.services import run_report
 from api.pdf import money, table_pdf
 
@@ -520,6 +520,16 @@ def dashboard(user, today):
             "run_cost": sum(report["total_paise"] for report in reports),
             "products": list(products.values()),
             "reorder_alerts": alerts,
+            "due_followups": [
+                followup for followup in rows(conn, """SELECT
+                    f.invoice_id,f.next_contact,f.note,c.name AS customer,v.number AS invoice
+                    FROM (SELECT DISTINCT ON (invoice_id) invoice_id,next_contact,note
+                        FROM factory_collectionfollowup ORDER BY invoice_id,id DESC) f
+                    JOIN sales_invoice v ON v.id=f.invoice_id
+                    JOIN sales_order o ON o.id=v.order_id JOIN inventory_customer c ON c.id=o.customer_id
+                    WHERE f.next_contact<=:today ORDER BY f.next_contact,f.invoice_id""", today=today)
+                if outstanding(conn, get_row(conn, "sales_invoice", followup["invoice_id"]), today) > 0
+            ],
         }
 
 

@@ -54,10 +54,12 @@ def quantity_map(values):
 # Reservations are derived from approved/invoiced lines less gross dispatch, not mutable counters.
 def available(conn, item_id):
     quantity, _ = balance(conn, item_id)
-    expired = conn.execute(
+    unavailable = conn.execute(
         text(
             """SELECT COALESCE(SUM(a.quantity),0) FROM inventory_lotallocation a
-        JOIN inventory_stocklot l ON l.id=a.lot_id WHERE l.item_id=:item AND l.expiry_date<:today"""
+        JOIN inventory_stocklot l ON l.id=a.lot_id
+        LEFT JOIN factory_qualityhold h ON h.lot_id=l.id
+        WHERE l.item_id=:item AND (l.expiry_date<:today OR h.status='held')"""
         ),
         {"item": item_id, "today": now().date()},
     ).scalar_one()
@@ -71,7 +73,7 @@ def available(conn, item_id):
         ),
         {"item": item_id},
     ).scalar_one()
-    return quantity - int(expired) - int(reserved)
+    return quantity - int(unavailable) - int(reserved)
 
 
 def order_lines(conn, identifier):

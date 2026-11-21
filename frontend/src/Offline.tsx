@@ -16,6 +16,7 @@ export function Offline({ catalog, token }: Props) {
     "Orders stay on this device until synced.",
   );
   const [busy, setBusy] = useState(false);
+  const [extraLines, setExtraLines] = useState<number[]>([]);
   const syncing = useRef(false);
   async function sync() {
     if (
@@ -61,10 +62,10 @@ export function Offline({ catalog, token }: Props) {
       localStorage.setItem("ota-react-catalog", JSON.stringify(catalog));
   }, [catalog]);
   useEffect(() => {
-    sync();
-    window.addEventListener("online", sync);
-    return () => window.removeEventListener("online", sync);
-  }, [token, catalog, queue.length]);
+    const reconnect = () => setMessage("Connection restored. Review queued orders, then sync.");
+    window.addEventListener("online", reconnect);
+    return () => window.removeEventListener("online", reconnect);
+  }, []);
   if (!saved)
     return (
       <main>
@@ -87,11 +88,20 @@ export function Offline({ catalog, token }: Props) {
           const data = new FormData(event.currentTarget);
           const now = new Date();
           const day = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+          const quantities: Record<string, string> = {};
+          for (const suffix of ["", ...extraLines.map(String)]) {
+            const product = String(data.get("sku" + suffix));
+            const raw = String(data.get("quantity" + suffix) || "0");
+            if (!/^\d+$/.test(raw)) { setMessage("Use whole packet quantities."); return; }
+            const count = BigInt(raw);
+            if (count > 0n) quantities[product] = String(BigInt(quantities[product] || "0") + count);
+          }
+          if (!Object.keys(quantities).length) { setMessage("Add at least one packet."); return; }
           const order = {
             request_key: crypto.randomUUID(),
             user_id: saved.user_id,
             customer: data.get("customer"),
-            quantities: { [String(data.get("sku"))]: data.get("quantity") },
+            quantities,
             date: day,
           };
           try {
@@ -101,7 +111,9 @@ export function Offline({ catalog, token }: Props) {
             ];
             localStorage.setItem(queueKey, JSON.stringify(next));
             setQueue(next);
-            setMessage("Order saved on this device.");
+            setExtraLines([]);
+            event.currentTarget.reset();
+            setMessage("Order saved. Review it below before syncing.");
           } catch {
             setMessage("Device storage failed; order was not saved.");
           }
@@ -131,12 +143,33 @@ export function Offline({ catalog, token }: Props) {
           Packets
           <input name="quantity" type="number" min="1" step="1" required />
         </label>
+        {extraLines.map((line) => <React.Fragment key={line}>
+          <label>Another product
+            <select name={"sku" + line}>{saved.skus.map((s: any) =>
+              <option key={s.id} value={s.id}>{s.item__name}</option>)}</select>
+          </label>
+          <label>Packets
+            <input name={"quantity" + line} type="number" min="1" step="1" required />
+          </label>
+        </React.Fragment>)}
+        <button type="button" onClick={() => setExtraLines([...extraLines, (extraLines[extraLines.length - 1] || 0) + 1])}>Add another product</button>
         <button>Save offline order</button>
       </form>
       <p role="status">{message}</p>
       <p>{queue.length} queued orders</p>
+      {queue.map((order) => <div className="card" key={order.request_key}>
+        <strong>{saved.customers.find((c: any) => String(c.id) === String(order.customer))?.name || order.customer}</strong>
+        <p>{order.date}</p>
+        <ul>{Object.entries(order.quantities).map(([id, qty]) => <li key={id}>
+          {saved.skus.find((s: any) => String(s.id) === id)?.item__name || id}: {String(qty)} packets
+        </li>)}</ul>
+        <button type="button" onClick={() => {
+          const next = queue.filter((row) => row.request_key !== order.request_key);
+          localStorage.setItem(queueKey, JSON.stringify(next)); setQueue(next);
+        }}>Remove queued order</button>
+      </div>)}
       <button disabled={!token || busy} onClick={sync}>
-        Sync orders
+        Confirm and sync orders
       </button>
       {!token && (
         <p>

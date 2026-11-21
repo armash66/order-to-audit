@@ -14,6 +14,8 @@ Use a fresh isolated Compose project, never reset the working database. All acco
 
 Optional tools: Batches/reorder, Prices, Visits/GPS, Offline; returns/partial dispatch and mock documents are on order detail. Tally export is on Reports. The language chooser has partial navigation/production translations with English fallback.
 
-Offline: open Offline online once, then capture without network. Active-page reconnection syncs automatically. After a browser restart use `/offline` for cached capture; sign in as the original account and open Offline to sync. Never promise closed-browser background sync.
+Offline: open Offline online once, then capture without network. Add product lines, review the saved queue, and press **Confirm and sync orders** when connected. After a browser restart use `/offline` for cached capture; sign in as the original account to sync. Never promise closed-browser background sync.
+
+Operational add-ons for a separate walkthrough: open B's order to see the batch count, BOM input gaps and receipt/run action; open Batches to hold/release a finished lot with a reason and trace an input lot to affected dispatches; add a loss explanation on a completed run; add a collection follow-up on an unpaid invoice and check the Dashboard when its contact date is due. These actions leave the nine-step benchmark figures unchanged unless a quality hold intentionally blocks dispatch.
 
 Keep the narrated benchmark under eight minutes. Explain FastAPI services, SQLAlchemy Core transactions, the PostgreSQL factory lock and immutable ledger, and Alembic's schema-preserving adoption. Django remains only in the separate regression test image, not the running application.
