@@ -12,7 +12,7 @@ Use a fresh isolated Compose project, never reset the working database. All acco
 8. Admin → Production → run → Add overhead: Labour **1200**, Gas/power **600**. Display cost **31.14**, exact ratio retained.
 9. Accountant → Reports: select the month's dates, review each register and export CSV/PDF. Owner → Dashboard.
 
-Optional tools: Batches/reorder, Prices, Visits/GPS, Offline; returns/partial dispatch and mock documents are on order detail. Tally export is on Reports. The language chooser has partial navigation/production translations with English fallback.
+Optional tools: Batches/reorder, Prices, Visits/GPS, Offline; returns/partial dispatch and mock documents are on order detail. Tally export is on Reports. The language chooser covers the operator interface in Tamil, Hindi and Marathi; see [localization](localization.md) for scope and validation.
 
 Offline: open Offline online once, then capture without network. Add product lines, review the saved queue, and press **Confirm and sync orders** when connected. After a browser restart use `/offline` for cached capture; sign in as the original account to sync. Never promise closed-browser background sync.
 

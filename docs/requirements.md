@@ -47,7 +47,8 @@ Source: supplied **Problem Statement - Winter Internship Application - 2026 .pdf
 | STR-5 | Salesman route/visit log and GPS check-in | Stretch/deferred | Visit records customer, time and consented position | 6 |
 | STR-6 | Tally-compatible export | Stretch/deferred | Sample export imports or validates against a documented format; daily work remains independent | 4.6, 6 |
 | STR-7 | Mock e-Invoice/e-Way Bill data | Stretch/deferred | Dummy payload validates against stated format and mocked response is clearly identified | 6 |
-| STR-8 | Tamil floor interface | Stretch/deferred | Production workflow has Tamil labels with the same quantities and permissions | 6 |
+| STR-8 | Tamil floor interface | Stretch/delivered | Production workflow has Tamil labels with the same quantities and permissions | 6 |
+| LOC-1 | Consistent English, Tamil, Hindi and Marathi operator text | Applicant addition | Sign-in, setup, daily work, reports and offline capture switch language together; static coverage check and role browser check pass at 360 px | Applicant request |
 
 Additional release constraints from sections 5, 7 and 8 and the requested design:
 

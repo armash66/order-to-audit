@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import { Workspace } from "./Workspace";
 import { Offline } from "./Offline";
+import { LanguageProvider, LanguageSwitch, useErrorText, useLocalize, useTranslate } from "./language";
 import "./style.css";
 import "./workspace.css";
 
@@ -11,6 +12,7 @@ type Session = {
 };
 
 function App() {
+  const localize = useLocalize(), translate = useTranslate(), errorText = useErrorText();
   const [session, setSession] = useState<Session | null>(null),
     [busy, setBusy] = useState(false),
     [error, setError] = useState(""),
@@ -61,18 +63,19 @@ function App() {
     return response.json();
   }
   if (location.pathname === "/offline")
-    return (
+    return localize(
       <main>
         <Offline />
       </main>
     );
   if (!session)
-    return (
+    return localize(
       <main className="login">
+        <LanguageSwitch />
         <p className="eyebrow">ORDER-TO-AUDIT</p>
         <h1>Sign in</h1>
         <p>Orders, production and accounts in one place.</p>
-        {error && <p role="alert">{error}</p>}
+        {error && <p role="alert">{errorText(error)}</p>}
         <form
           onSubmit={async (event) => {
             event.preventDefault();
@@ -115,11 +118,12 @@ function App() {
       </main>
     );
   if (session.user.must_change_password)
-    return <main className="login">
+    return localize(<main className="login">
+      <LanguageSwitch />
       <p className="eyebrow">ORDER-TO-AUDIT</p>
       <h1>Set your password</h1>
       <p>Replace the temporary password before opening your workspace.</p>
-      {error && <p role="alert">{error}</p>}
+      {error && <p role="alert">{errorText(error)}</p>}
       <form onSubmit={async (event) => {
         event.preventDefault(); setBusy(true); setError("");
         const values = new FormData(event.currentTarget);
@@ -139,8 +143,8 @@ function App() {
         <button disabled={busy}>Set password</button>
       </form>
       <button className="link" onClick={() => setSession(null)}>Sign out</button>
-    </main>;
-  return (
+    </main>);
+  return localize(
     <div className="workspace">
       <aside>
         <strong>Order-to-Audit</strong>
@@ -149,7 +153,7 @@ function App() {
       <section className="body">
         <header>
           <span>
-            {session.user.username} · {session.user.roles.join(", ")}
+            {session.user.username} · {session.user.roles.map(translate).join(", ")}
           </span>
           <div>
             <button onClick={() => {setPasswordOpen(!passwordOpen); setError("");}}>Change password</button>
@@ -159,7 +163,7 @@ function App() {
         <main>
           {passwordOpen && <section className="card">
             <h2>Change password</h2>
-            {error && <p role="alert">{error}</p>}
+            {error && <p role="alert">{errorText(error)}</p>}
             <form onSubmit={async (event) => {
               event.preventDefault(); setBusy(true); setError("");
               const values = new FormData(event.currentTarget);
@@ -191,4 +195,4 @@ function App() {
   );
 }
 
-createRoot(document.getElementById("root")!).render(<App />);
+createRoot(document.getElementById("root")!).render(<LanguageProvider><App /></LanguageProvider>);

@@ -1,116 +1,89 @@
 # Order-to-Audit
 
-**Runtime update — 21 November 2026:** the default application is now **React + TypeScript → FastAPI → PostgreSQL**. Run `docker compose up --build -d --wait` and open http://localhost:8000. Existing accounts and PostgreSQL data are preserved. Commands below that formerly targeted `web` now target `api`.
+Factory orders, production, inventory and accounts in one traceable workflow.
 
-**Migration:** the running application uses FastAPI, SQLAlchemy Core, Alembic and React; Django is not installed in the runtime image. Existing PostgreSQL tables and data are preserved. Earlier Django source is retained only as a development regression oracle, installed in the separate `tests` image. See [migration details](docs/migration.md).
+Built for the CDI NIT Trichy Software Developer Internship exercise. Sales documents and production runs meet at a shared stock ledger; every movement links to its source.
 
-A local factory workflow for the CDI NIT Trichy internship exercise: order → approval → invoice → dispatch → collection, and purchase → raw issue → production → finished goods → variance/cost.
+[Quick start](#quick-start) · [Documentation](docs/README.md) · [Benchmark](docs/reference.md) · [Design](docs/design.md)
 
-## Run locally
+## Quick start
 
-Install Docker with Compose, then from this directory:
+Install Docker with Compose. From the repository root:
 
 ```sh
 docker compose up --build -d --wait
 ```
 
-Open **http://localhost:8000**. Startup migrates PostgreSQL, seeds the section 5 masters/opening stock and creates demo logins. No `.env` is required; `.env.example` documents optional overrides. `.env` is ignored and excluded from the image. Data persists in the project-specific Docker volume. Stop with `docker compose down`; do not delete the volume unless you intend to erase its data.
+Open [localhost:8000](http://localhost:8000). Startup applies migrations and loads fictional benchmark masters, opening stock and demo accounts.
 
-All initial demo passwords: **`DemoPass123!`**. Change `DEMO_PASSWORD` before first startup to choose another; restarts never reset existing passwords.
+No configuration file is required for the local demo. Optional settings are in [.env.example](.env.example). PostgreSQL data persists in a Docker volume. Use `docker compose down` to stop; keep the volume to retain your records.
 
-| Login | Access |
+## Demo accounts
+
+Initial password for every account: **`DemoPass123!`**
+
+| Username | Workspace |
 | --- | --- |
-| `salesman_a`, `salesman_b` | Capture orders; see only own orders and own customer sales; PDF/share |
-| `admin` | Approve/reject, invoice, dispatch, payments, corrections and production |
-| `production` | Receipts, run issue/completion, variance and stock |
-| `accountant` | Read-only orders, stock and report exports |
-| `owner` | Read-only dashboard, orders, stock and reports |
+| `salesman_a`, `salesman_b` | Mobile orders, own sales, visits and offline capture |
+| `admin` | Approval, billing, dispatch, payments, production and setup |
+| `production` | Receipts, material issues, output, variance and stock |
+| `accountant` | Read-only records and report exports |
+| `owner` | Read-only dashboard, costs, stock and outstanding |
 
-These are fictional demo identities. Compose binds localhost; nginx serves React and proxies FastAPI/Uvicorn. This is a local demonstration configuration.
+Choose English, Tamil, Hindi or Marathi at sign-in or in the workspace. The preference is saved on the device.
 
-To work with your own **invented or authorized** records, sign in as `admin` and open **Setup**. Create staff accounts, customers, suppliers, materials, sellable products and versioned BOMs there; receipts and production then create stock through documents. New staff receive a temporary password that they must replace on first sign-in. Admins can disable accounts or reset passwords; each person can change their own password. The seeded benchmark parties remain fictional and unchanged.
+Follow the [nine-step demo](docs/react-demo.md) for a first walkthrough. To add fictional staff, customers, suppliers or products, sign in as admin and open **Setup**. New staff must replace their temporary password at first sign-in.
+
+## Features
+
+| Scope | Implementation |
+| --- | --- |
+| Must | Role access; masters and versioned BOMs; mobile ordering and approval; GST invoice PDF; automatic production postings; consumption/yield variance; stock ledger; sales and stock CSV |
+| Should | Suppliers and purchases; payments, outstanding and ageing; overhead costing; GST summary; variance alerts; owner dashboard |
+| Optional sales | Customer prices, partial dispatch and sealed-goods returns |
+| Stretch | Offline sync; batches/expiry/FEFO; reorder alerts; production suggestions; consented GPS visits; Tally XML; mocked fiscal documents; Tamil interface |
+| Operator tools | Staff setup, first-use passwords, quality holds, recall tracing, loss notes, collection follow-ups and Hindi/Marathi interfaces |
+
+See the [compliance matrix](docs/compliance.md) for evidence. Tally import has not been validated in Tally; fiscal adapters are local mocks. Invoice and exported report content remains in English.
 
 ## Verify
 
 ```sh
 docker compose --profile test run --build --rm tests
-docker compose exec api python -m api.cli benchmark
-docker compose exec api python -m api.cli reconcile
-docker compose exec api python -m api.cli pdf-smoke
-docker compose exec api python -m alembic current
-docker compose exec api python -m pytest api/test_api.py -q -p no:cacheprovider
 ```
 
-`python -m api.cli benchmark` runs all nine steps through native services, prints 49 expected/actual checks and rolls its scenario back. It requires opening-only stock data. Add `--persist` once on a fresh instance to keep the scenario for screen inspection. Operational stock postings are rejected, never reset. For an independent rehearsal use a new Compose project name and a different `WEB_PORT`. The 86-test regression/API suite uses a temporary test database and includes the golden workbook's decimal XML checks. On a fresh opening-only instance, run `python -m pytest api/test_api.py api/test_native.py -q -p no:cacheprovider` inside the API container for native runtime, benchmark, schema, seed, trigger and mutation checks.
+On a database containing only opening stock:
 
-## Stack and rationale
+```sh
+docker compose exec api python -m api.cli benchmark
+```
 
-React/TypeScript and FastAPI match the applicant's preferred tools and separate screens from explicit API contracts. SQLAlchemy Core keeps transactions and queries explicit; PostgreSQL supplies row locks, foreign keys and immutable-movement triggers, with Alembic owning schema changes. Docker Compose packages the API, compiled frontend, PostgreSQL and PDF libraries into one local command.
+The benchmark checks all nine steps and rolls back its scenario. It rejects operational postings rather than resetting them. Follow the [isolated test instructions](docs/development.md) if your main database already has transactions.
 
-## Scope status
+Expected results include **120 kg flour**, **19.5 L oil**, **306 pouches**, **88 finished packets after dispatch**, **₹3,875 outstanding** and **₹31.14 per good packet**. [All figures and interpretations](docs/reference.md).
 
-| Section 6 tier | Delivered |
+## Architecture
+
+React/TypeScript provides the screens; FastAPI and SQLAlchemy Core implement explicit service transactions; PostgreSQL supplies persistence, constraints and locking. This stack matches the applicant's experience and supports a live code walkthrough. Docker Compose packages the frontend, API, database and PDF dependencies.
+
+- Money uses integer paise; quantities use integer base units.
+- Ratios use exact fractions and half-up rounding.
+- Stock derives from immutable movements.
+- Posting, reservations and numbering share a factory lock.
+- Corrections append reasoned adjustments or reversals.
+
+The [design note](docs/design.md) explains the model, lifecycle and costing. Earlier Django code remains a development regression oracle; it is absent from the runtime image.
+
+## Documentation
+
+| Guide | Contents |
 | --- | --- |
-| Must | Five role groups; seeded masters/conversions/versioned BOMs; mobile ordering and admin approval; GST PDF; two-stage production; consumption/yield variance; ledger/summary with source drill-down; CSV sales and stock reports; visible audit history |
-| Should | Suppliers/purchases; allocations/outstanding/ageing; exact cost with overheads; GST summary; configurable strict tolerance alerts; owner dashboard |
-| Additional section 4 | Customer/product sales, purchase, production, collections and ageing reports; inclusive dates; CSV/PDF via one renderer; native PDF sharing with desktop attachment fallback |
-| Optional sales | Customer-specific fixed prices/scheme labels, partial dispatch and resalable returns with exact credit allocation |
-| All eight stretch categories | Shortage planning; offline capture/review/sync; batches/expiry/FEFO; reorder alerts; visits/consented GPS; Tally XML export; local e-invoice/e-way-bill mocks; Tamil production labels |
-| Factory workflow additions | Shortage-to-BOM input guidance; reasoned finished-lot quality hold/release; batch-to-customer recall trace; immutable run-loss notes; reviewed multi-SKU offline queue; collection follow-up dates |
-| Operator setup | Admin-managed staff accounts and first-use password changes; customer/supplier/material/product creation; versioned BOM setup; local sign-in throttling and browser security headers |
+| [Operations](docs/operations.md) | Daily workflows, roles, setup and offline use |
+| [Development](docs/development.md) | Code map, commands, isolated tests and troubleshooting |
+| [Localization](docs/localization.md) | Language behavior, catalogue maintenance and verification |
+| [Benchmark and boundaries](docs/reference.md) | Expected numbers, assumptions and known limitations |
+| [Security](docs/security.md) | Access controls, local deployment and data handling |
+| [Requirements](docs/requirements.md) / [decisions](docs/assumptions.md) | Scope and business choices |
+| [Demo](docs/react-demo.md) | Submission video sequence |
 
-See [extended feature guide](docs/extended-features.md) for screens, tests and external-validation boundaries. Tally import and human Tamil review remain unverified; government integrations are explicitly local mocks.
-
-See [compliance evidence](docs/compliance.md), [requirements](docs/requirements.md), [decisions](docs/assumptions.md), [design note](docs/design.md), [golden workbook](docs/benchmark.xlsx), [migration validation](docs/migration.md) and [React demo walkthrough](docs/react-demo.md).
-
-## Benchmark results
-
-| Check | Result |
-| --- | --- |
-| Flour / oil / spice closing | 120 kg / 19.5 L / 3.8 kg |
-| Pouches / cartons | 306 / 21 |
-| FG after run / after dispatch | 238 / 88 packets |
-| Approval and invoice: on-hand / reserved / available | 238 / 150 / 88 |
-| Dispatch: on-hand / reserved / available | 88 / 0 / 88 |
-| Yield / oil / cartons / pouches variance | −6% flagged / +5% flagged / −10% flagged / −3% not flagged |
-| A invoice | ₹7,500 + ₹187.50 CGST + ₹187.50 SGST = ₹7,875 |
-| A collected / outstanding | ₹4,000 / ₹3,875 |
-| B | Submitted, shortage 32; no invoice or reservation |
-| Weighted flour / materials / total cost | ₹43.125/kg / ₹4,055 / ₹5,855 |
-| Cost and margin per good packet | Exact ₹5,855/188; displayed ₹31.14; margin ₹18.86 |
-
-**Deliberate interpretations:** the uniform tolerance rule also flags cartons (−10%), beyond the PS's named yield/oil alerts. Nine cartons are recorded as given, with eight packets loose. The 12 packet-equivalents of output shortfall are **unclassified**; six damaged pouches are separate packaging damage already included in the 194 issued. No assumed 6 + 6 food-loss split and no additional stock deduction. No benchmark quantity or money result differs from the golden file.
-
-## Boundaries and known gaps
-
-- FG valuation is materials-only. Opening FG value is unknown, so aggregate FG value and COGS remain unknown. Late overhead changes run cost, not past FG movements.
-- Tolerance changes apply retroactively to displayed alerts. Production reports select runs by document date and show their currently recorded costs. Stock reports use posting date/sequence; commercial registers use document dates. Ageing is due-date based, due on invoice date, and ignores its range start.
-- Payments are allocated in full to one invoice; several payments per invoice are supported. Full cancellation credit is unpaid/undispatched only. Partial dispatch and resalable returns are supported; returns credit original tax and restore original dispatch value. Paid returns may leave customer credit; no cash-refund settlement workflow.
-- Run reversals correct recording errors, not physical production. Later or intervening affected-item stock events and reserved FG block reversal. No cascading revaluation, fractional planned batches or ingredient substitution.
-- Posted sources are frozen by services; privileged ORM/SQL can bypass this. The database trigger protects movement update/delete only. Reconciliation detects source/ledger disagreement. Direct database owners are trusted.
-- Native file sharing depends on the device. Desktop fallback requires downloading and attaching the PDF manually. The app does not send email or WhatsApp messages. Localhost links are not public customer links.
-- Offline capture accepts multiple SKU lines, supports a private device, and confirms server pricing at explicit sync after queue review. Cached catalogue/queued data remains across sign-out; **Clear this device** removes both after confirmation. Sync requires the original account. No background sync or multi-device conflict resolution.
-- GST is the exercise's fixed 5%, with per-line component rounding. GSTR labels are explanatory mappings, not filing-ready payloads. GSTINs and HSN are fictional. Setup creates new masters but does not edit historical master records or import large customer lists.
-- Expiry is optional: migrated stock has labelled LEGACY lots with unknown expiry. FEFO excludes expired stock and uses unknown-expiry lots last; valuation stays item-level weighted average. Returned batches use the earliest known original expiry conservatively. Lot allocations are service-frozen and reconciled, not protected by additional database triggers.
-- Quality holds cover finished lots only. A recall trace uses recorded allocations and can identify dispatched customers, but does not send notifications or infer pre-opening provenance. Holds and loss/follow-up notes are audited service decisions, without extra stock movements.
-- Customer schemes are fixed price overrides, not a promotion engine. Tally XML has structure/balance tests but has not been imported into Tally. Mock government documents are not valid fiscal documents. Tamil covers production labels, with English validation messages and fallback product names; native-speaker review is pending.
-- Demo credentials and default secrets are suitable only for localhost. The database-backed login limit, role checks and browser headers improve this local build; public hosting still needs HTTPS, unique secrets, changed demo passwords and a deployment security review. Images/transitive dependencies are not fully digest-locked. The video/public repository submission and organizer deadline/contact verification remain human delivery tasks.
-
-## Where the code lives
-
-| Files | Purpose |
-| --- | --- |
-| `api/main.py`, `workflows.py`, `queries.py` | Authentication, typed HTTP boundary and role-scoped workspace reads |
-| `api/native.py`, `database.py`, `inventory/`, `reconciliation.py` | Factory transactions, exact valuation, receipts, immutable ledger, lots, corrections and source reconciliation |
-| `api/production/services.py`, `api/sales/services.py` | Run snapshots/cost/variance and orders/reservations/invoices/dispatch/payments/returns |
-| `api/factory_actions.py`, `api/migrations/versions/0002_factory_actions.py` | Quality holds, immutable loss/follow-up notes and their additive tables |
-| `api/accounts/services.py`, `api/masters/services.py`, `api/security/services.py`, `api/migrations/versions/0003_operator_setup.py` | Account lifecycle, master setup, sign-in throttling and additive setup tables |
-| `api/extensions.py` | Customer prices, reorder settings, visits/GPS and local government-document mocks |
-| `api/reporting.py`, `pdf.py`, `benchmark.py` | Auditor reports, CSV/PDF/Tally, dashboard and nine-step service orchestrator |
-| `api/seed.py`, `cli.py`, `migrations/`, `alembic.ini` | Native accounts/masters/opening seed, CLI and schema adoption/migrations |
-| `frontend/src/`, `frontend/public/` | React workflows, exact amount inputs, translations, offline queue and service worker |
-| `api/Dockerfile`, `frontend/Dockerfile`, `compose.yaml` | Native runtime, development-only regression image and one-command startup |
-| `api/tests.py`, `api/test_*.py`, `scripts/react_*` | HTTP regression, Django-free native checks and browser workflows |
-| Earlier Django apps, templates and migrations | Historical implementation and regression oracle; not imported by the runtime |
-
-No Git commits or pushes are made by the coding agent. See [NEXT_STEPS](NEXT_STEPS.md) for the handoff and suggested commit batches.
+[Documentation index](docs/README.md) · [Current handoff](NEXT_STEPS.md)

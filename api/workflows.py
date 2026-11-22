@@ -21,7 +21,7 @@ router = APIRouter(prefix="/api/workspace")
 @router.get("/translations")
 def translations(user=Depends(current_user)):
     return json.loads(
-        Path(__file__).with_name("translations.json").read_text(encoding="utf-8")
+        (Path(__file__).resolve().parent.parent / "frontend/src/translations.json").read_text(encoding="utf-8")
     )
 
 

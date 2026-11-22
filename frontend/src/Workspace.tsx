@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Offline } from "./Offline";
 import { VisitForm } from "./VisitForm";
-import { LanguageContext, useTranslate } from "./language";
+import { LanguageSwitch, useErrorText, useLocalize, useTranslate } from "./language";
 
 type Row = Record<string, any>;
 type Request = (
@@ -52,9 +52,10 @@ export function money(value: unknown): string {
 }
 
 function Table({ rows, onOpen }: { rows: Row[]; onOpen?: (row: Row) => void }) {
-  if (!rows.length) return <p>No records yet.</p>;
+  const localize = useLocalize();
+  if (!rows.length) return localize(<p>No records yet.</p>);
   const columns = Object.keys(rows[0]);
-  return (
+  return localize(
     <div className="table-wrap">
       <table>
         <thead>
@@ -88,7 +89,7 @@ function display(value: any, key = ""): React.ReactNode {
   if (value === null || value === undefined) return "—";
   if (key.endsWith("paise") && typeof value === "string") return money(value);
   if (typeof value === "object" && "numerator" in value)
-    return `${value.numerator}/${value.denominator} (exact)`;
+    return <>{value.numerator}/{value.denominator} {"(exact)"}</>;
   if (Array.isArray(value))
     return value.length ? (
       <Table
@@ -123,13 +124,15 @@ function ActionForm({
   customerPrices?: (id: string) => Promise<Row[]>;
 }) {
   const translate = useTranslate();
+  const localize = useLocalize();
+  const errorText = useErrorText();
   const [prices,setPrices]=useState<Row[]>([]);
   async function refreshPrices(id:string){if(customerPrices)try{setPrices(await customerPrices(id));}catch{setPrices([]);}}
   useEffect(()=>{const id=fields.find(f=>f.name==='customer')?.options?.[0]?.value;if(id)refreshPrices(id);},[]);
   const [busy, setBusy] = useState(false),
     [error, setError] = useState(""),
     [key, setKey] = useState(crypto.randomUUID());
-  return (
+  return localize(
     <details className="card">
       <summary>{translate(title)}</summary>
       <form
@@ -189,7 +192,7 @@ function ActionForm({
             )}
           </label>
         ))}
-        {error && <p role="alert">{error}</p>}
+        {error && <p role="alert">{errorText(error)}</p>}
         {prices.length>0&&<div className="notice">Prices before GST:{prices.map(price=><p key={price.sku_id}>{price.name}: {money(price.price_paise)} · {price.label}</p>)}</div>}
         <button disabled={busy}>{busy ? "Saving…" : translate(title)}</button>
       </form>
@@ -206,12 +209,7 @@ export function Workspace({
   user: Row;
   request: Request;
 }) {
-  const [language, setLanguage] = useState(
-      localStorage.getItem("ota-language") || "en",
-    ),
-    [translations, setTranslations] = useState<
-      Record<string, Record<string, string>>
-    >({});
+  const translate = useTranslate(), localize = useLocalize(), errorText = useErrorText();
   const [catalog, setCatalog] = useState<Row | null>(null),
     [page, setPage] = useState("orders"),
     [data, setData] = useState<any>(null),
@@ -234,11 +232,6 @@ export function Workspace({
   const stock = production || reports;
   const load = (path: string, options?: RequestInit) =>
     request("/workspace" + path, token, options);
-  useEffect(() => {
-    load("/translations")
-      .then(setTranslations)
-      .catch(() => {});
-  }, []);
   useEffect(() => {
     load("/catalog")
       .then((c) => {
@@ -308,7 +301,7 @@ export function Workspace({
         type: "application/pdf",
       });
       if (navigator.canShare?.({ files: [file] })) {
-        await navigator.share({ files: [file], title: "Tax invoice" });
+        await navigator.share({ files: [file], title: translate("Invoice") });
       } else {
         await download(`/invoices/${id}/pdf`, "invoice.pdf");
         setError(
@@ -320,6 +313,7 @@ export function Workspace({
     }
   }
   function navigate(next: string) {
+    if (next === page && selected === null) return;
     setData(null);
     setSourceDetail(null);
     setRecallDetail(null);
@@ -327,7 +321,7 @@ export function Workspace({
     setPage(next);
     setSelected(null);
   }
-  if (!catalog) return <p>{error || "Loading workspace…"}</p>;
+  if (!catalog) return <p>{error ? errorText(error) : translate("Loading workspace…")}</p>;
   const dateField = field("date", "Document date", catalog.today, "date");
   const customer = choice(
     "customer",
@@ -374,29 +368,13 @@ export function Workspace({
   ];
   const dailyMenu = menu.filter((name) => ["dashboard", "orders", "production", "stock", "reports"].includes(name));
   const toolsMenu = menu.filter((name) => !dailyMenu.includes(name));
-  const translate = (label: string) => translations[language]?.[label] || label;
-  return (
-    <LanguageContext.Provider value={translations[language] || {}}>
-      <label>
-        Language / भाषा
-        <select
-          value={language}
-          onChange={(e) => {
-            setLanguage(e.target.value);
-            localStorage.setItem("ota-language", e.target.value);
-            document.documentElement.lang = e.target.value;
-          }}
-        >
-          <option value="en">English</option>
-          <option value="ta">தமிழ்</option>
-          <option value="hi">हिन्दी</option>
-          <option value="mr">मराठी</option>
-        </select>
-      </label>
+  return localize(
+    <>
+      <LanguageSwitch />
       <nav className="tabs" aria-label="Workspace">
         {[{heading:'Daily work',names:dailyMenu},{heading:'Tools & setup',names:toolsMenu}].map((group) =>
           <div className="nav-group" key={group.heading}>
-            <span>{group.heading}</span>
+            <span>{translate(group.heading)}</span>
             {group.names.map((name) => <button key={name}
               aria-current={page === name ? "page" : undefined}
               onClick={() => navigate(name)}>
@@ -410,7 +388,7 @@ export function Workspace({
       {selected && (
         <button onClick={() => setSelected(null)}>← Back to list</button>
       )}
-      {error && <p role="alert">{error}</p>}
+      {error && <p role="alert">{errorText(error)}</p>}
       {notice && <p role="status" className="notice">{notice}</p>}
       {page === "orders" && !selected && (
         <>
@@ -424,7 +402,7 @@ export function Workspace({
                 ...catalog.skus.map((s: Row) =>
                   field(
                     "qty_" + s.id,
-                    s["item__name"] + " · packets (0 to omit)",
+                    translate(s["item__name"]) + " · " + translate("packets (0 to omit)"),
                     "0",
                     "number",
                   ),
@@ -445,7 +423,7 @@ export function Workspace({
       {page === "orders" && selected && data && !Array.isArray(data) && (
         <>
           <h2>
-            {data.customer} · {data.status}
+            {data.customer} · {translate(data.status)}
           </h2>
           <Table rows={data.lines} />
           <h3>Stock check</h3>
@@ -481,7 +459,7 @@ export function Workspace({
                   data.lines.flatMap((line: Row) => [
                     field(
                       "qty_" + line.id,
-                      line["sku__item__name"] + " packets",
+                      translate(line["sku__item__name"]) + " " + translate("packets"),
                       line.quantity,
                       "number",
                     ),
@@ -556,7 +534,7 @@ export function Workspace({
                       ...data.invoice.fulfilment.map((r: Row) =>
                         field(
                           "qty_" + r.item_id,
-                          r.name + " · remaining " + r.remaining,
+                          translate(r.name) + " · " + translate("remaining") + " " + r.remaining,
                           "0",
                           "number",
                         ),
@@ -574,7 +552,7 @@ export function Workspace({
                       ...data.invoice.fulfilment.map((r: Row) =>
                         field(
                           "qty_" + r.item_id,
-                          r.name + " · returnable " + r.returnable,
+                          translate(r.name) + " · " + translate("returnable") + " " + r.returnable,
                           "0",
                           "number",
                         ),
@@ -633,8 +611,8 @@ export function Workspace({
             <section className="card" aria-label="Shortage resolution">
               <h2>Shortage resolution</h2>
               {data.suggestions.map((plan: Row, index: number) => <div key={index}>
-                <p>{plan.uncovered} uncovered packets · {plan.required_batches} batches needed · {plan.feasible_batches} feasible now.</p>
-                <strong>{plan.next_action}</strong>
+                <p>{plan.uncovered} {translate("uncovered packets")} · {plan.required_batches} {translate("batches needed")} · {plan.feasible_batches} {translate("feasible now.")}</p>
+                <strong>{translate(plan.next_action)}</strong>
                 {plan.required_batches !== "0" && <Table rows={plan.inputs} />}
               </div>)}
               {data.suggestions.some((plan: Row) => plan.required_batches !== "0") &&
@@ -651,7 +629,7 @@ export function Workspace({
               "Product / BOM",
               catalog.boms.map((b: Row) => ({
                 value: b.id,
-                label: b["sku__item__name"] + " · v" + b.version,
+                label: translate(b["sku__item__name"]) + " · v" + b.version,
               })),
             ),
             field("batches", "Batches", "1", "number"),
@@ -709,7 +687,7 @@ export function Workspace({
       {page === "production" && selected && data && !Array.isArray(data) && (
         <>
           <h2>
-            {data.name} · {data.state}
+            {data.name} · {translate(data.state)}
           </h2>
           {data.state === "draft" &&
             form(
@@ -720,7 +698,7 @@ export function Workspace({
                 .map((s: Row) =>
                   field(
                     "qty_" + s.item__code,
-                    s.item__name + " (" + s.item__base_unit + ")",
+                    translate(s.item__name) + " (" + s.item__base_unit + ")",
                     s.quantity,
                     "number",
                   ),
@@ -739,13 +717,13 @@ export function Workspace({
                   .flatMap((s: Row) => [
                     field(
                       "qty_" + s.item__code,
-                      s.item__name + " total issued (including damage)",
+                      translate(s.item__name) + " " + translate("total issued (including damage)"),
                       s.quantity,
                       "number",
                     ),
                     field(
                       "damage_" + s.item__code,
-                      s.item__name + " damaged",
+                      translate(s.item__name) + " " + translate("damaged"),
                       "0",
                       "number",
                     ),
@@ -818,7 +796,7 @@ export function Workspace({
             } catch (e) { setError((e as Error).message); }
           }} />
           {sourceDetail && <section className="card" aria-label="Source document">
-            <h2>Source document · posting #{sourceDetail.id}</h2>
+            <h2>{translate("Source document")} · {translate("posting")} #{sourceDetail.id}</h2>
             <p>Document</p>{display(sourceDetail.document)}
             <h3>Source lines</h3><Table rows={sourceDetail.lines || []} />
             <button onClick={() => setSourceDetail(null)}>Close source</button>
@@ -851,14 +829,14 @@ export function Workspace({
             catch (e) { setError((e as Error).message); }
           }} />
           {recallDetail && <section className="card" aria-label="Batch recall trace">
-            <h2>Trace lot {recallDetail.lot.code}</h2>
+            <h2>{translate("Trace lot")} {recallDetail.lot.code}</h2>
             <p>Original movements and source documents</p>
             <Table rows={recallDetail.movements} onOpen={async (row) => {
               try { setSourceDetail(await load("/sources/" + row.posting_id)); setError(""); }
               catch (e) { setError((e as Error).message); }
             }} />
             {sourceDetail && <div className="notice">
-              <h3>Source posting #{sourceDetail.id}</h3>
+              <h3>{translate("Source posting")} #{sourceDetail.id}</h3>
               {display(sourceDetail.document)}<Table rows={sourceDetail.lines || []} />
             </div>}
             <h3>Production runs</h3>{display(recallDetail.production_run_ids)}
@@ -868,7 +846,7 @@ export function Workspace({
           <h2>Reorder alerts</h2><Table rows={data.alerts} />
           {production && form("Hold or release finished lot", "quality", [
             choice("lot", "Finished lot", data.lots.filter((r: Row) => r.category === "finished" && BigInt(r.quantity) > 0n)
-              .map((r: Row) => ({value:r.id,label:r.item + " / " + r.code + " (" + r.quantity + ")"}))),
+              .map((r: Row) => ({value:r.id,label:translate(r.item) + " / " + r.code + " (" + r.quantity + ")"}))),
             choice("status", "Quality decision", [
               {value:"held",label:"Hold from dispatch"},{value:"released",label:"Release"}]),
             field("reason", "Reason"),
@@ -910,7 +888,7 @@ export function Workspace({
           ])}
           {form("Enable or disable account", "account.active", [
             choice("id", "Account", data.filter((r: Row) => r.id !== catalog.user_id)
-              .map((r: Row) => ({value:r.id,label:r.username + " · " + r.role}))),
+              .map((r: Row) => ({value:r.id,label:r.username + " · " + translate(r.role)}))),
             choice("active", "Access", [{value:"true",label:"Enable"},{value:"false",label:"Disable"}]),
           ], {}, (d) => ({id:d.id,active:d.active === "true"}))}
           {form("Reset temporary password", "account.reset", [
@@ -960,9 +938,9 @@ export function Workspace({
               {value:"",label:"Create from raw quantities below"},
               ...catalog.recipes.map((r: Row) => ({value:r.id,label:r.code + " · v" + r.version}))]),
             ...catalog.items.filter((i: Row) => i.category === "raw")
-              .map((i: Row) => field("raw_" + i.id,i.name + " · " + i.base_unit + " per batch (0 to omit)","0","number")),
+              .map((i: Row) => field("raw_" + i.id,translate(i.name) + " · " + i.base_unit + " " + translate("per batch (0 to omit)"),"0","number")),
             ...catalog.items.filter((i: Row) => i.category === "packaging")
-              .map((i: Row) => field("pack_" + i.id,i.name + " · pieces per batch (0 to omit)","0","number")),
+              .map((i: Row) => field("pack_" + i.id,translate(i.name) + " · " + translate("pieces per batch (0 to omit)"),"0","number")),
           ], {}, (d) => ({sku:d.sku,expected_packets:d.expected_packets,recipe:d.recipe || undefined,
             raw:collect(d,"raw_"),packaging:collect(d,"pack_")}))}
         </>}
@@ -1070,6 +1048,6 @@ export function Workspace({
       {page === "dashboard" && data && display(data)}
       {page === "offline" && <Offline catalog={catalog} token={token} />}
       {!data && !error && <p role="status">Loading…</p>}
-    </LanguageContext.Provider>
+    </>
   );
 }

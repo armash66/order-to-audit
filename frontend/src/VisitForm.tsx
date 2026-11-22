@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useErrorText, useLocalize } from "./language";
 
 export function VisitForm({
   customers,
@@ -7,15 +8,18 @@ export function VisitForm({
   customers: any[];
   submit: (data: any, key: string) => Promise<void>;
 }) {
+  const localize = useLocalize();
+  const errorText = useErrorText();
   const [consent, setConsent] = useState(false),
     [position, setPosition] = useState<{
       latitude: string;
       longitude: string;
     } | null>(null),
     [message, setMessage] = useState(""),
+    [messageIsError, setMessageIsError] = useState(false),
     [busy, setBusy] = useState(false),
     [key, setKey] = useState(crypto.randomUUID());
-  return (
+  return localize(
     <details className="card">
       <summary>Record visit with optional GPS</summary>
       <form
@@ -30,8 +34,10 @@ export function VisitForm({
               key,
             );
             setKey(crypto.randomUUID());
+            setMessageIsError(false);
             setMessage("Visit recorded.");
           } catch (e) {
+            setMessageIsError(true);
             setMessage((e as Error).message);
           } finally {
             setBusy(false);
@@ -72,6 +78,7 @@ export function VisitForm({
           disabled={!consent}
           onClick={() => {
             if (!navigator.geolocation) {
+              setMessageIsError(false);
               setMessage(
                 "Location unavailable. A visit can be recorded without GPS.",
               );
@@ -79,16 +86,17 @@ export function VisitForm({
             }
             navigator.geolocation.getCurrentPosition(
               (p) => {
+                setMessageIsError(false);
                 setPosition({
                   latitude: p.coords.latitude.toFixed(6),
                   longitude: p.coords.longitude.toFixed(6),
                 });
                 setMessage("Location captured.");
               },
-              () =>
-                setMessage(
-                  "Location unavailable or denied. You can record without GPS.",
-                ),
+              () => {
+                setMessageIsError(false);
+                setMessage("Location unavailable or denied. You can record without GPS.");
+              },
               { timeout: 10000 },
             );
           }}
@@ -96,7 +104,7 @@ export function VisitForm({
           Capture location
         </button>
         <button disabled={busy}>Record visit</button>
-        <p role="status">{message}</p>
+        <p role="status">{messageIsError ? errorText(message) : message}</p>
       </form>
     </details>
   );

@@ -1,9 +1,12 @@
 import React, { useEffect, useState, useRef } from "react";
+import { LanguageSwitch, useLocalize, useTranslate } from "./language";
 type Props = { catalog?: any; token?: string };
 const queueKey = "ota-react-orders-v1";
 
 // Persist request keys before attempting sync; retain failed and other-user orders.
 export function Offline({ catalog, token }: Props) {
+  const localize = useLocalize();
+  const translate = useTranslate();
   const [saved] = useState(
     () =>
       catalog ||
@@ -42,7 +45,7 @@ export function Offline({ catalog, token }: Props) {
           body: JSON.stringify(order),
         });
         if (!response.ok)
-          throw new Error("Sync stopped: " + (await response.text()));
+          throw new Error("Sync stopped. Check your connection and try again.");
         const remaining = JSON.parse(
           localStorage.getItem(queueKey) || "[]",
         ).filter((row: any) => row.request_key !== order.request_key);
@@ -67,15 +70,17 @@ export function Offline({ catalog, token }: Props) {
     return () => window.removeEventListener("online", reconnect);
   }, []);
   if (!saved)
-    return (
+    return localize(
       <main>
+        <LanguageSwitch />
         <h1>Offline orders</h1>
         <p>Sign in online once and open Offline to load your catalogue.</p>
         <a href="/">Sign in</a>
       </main>
     );
-  return (
+  return localize(
     <section>
+      {!token && <LanguageSwitch />}
       <h1>Offline orders</h1>
       <p>
         Customer prices are confirmed by the server at sync. Cached data is for
@@ -156,7 +161,7 @@ export function Offline({ catalog, token }: Props) {
         <button>Save offline order</button>
       </form>
       <p role="status">{message}</p>
-      <p>{queue.length} queued orders</p>
+      <p>{queue.length} {"queued orders"}</p>
       {queue.map((order) => <div className="card" key={order.request_key}>
         <strong>{saved.customers.find((c: any) => String(c.id) === String(order.customer))?.name || order.customer}</strong>
         <p>{order.date}</p>
@@ -172,7 +177,7 @@ export function Offline({ catalog, token }: Props) {
         Confirm and sync orders
       </button>
       <button type="button" className="link" onClick={() => {
-        if (!window.confirm("Remove the cached customer list and all unsynced orders from this device?")) return;
+        if (!window.confirm(translate("Remove the cached customer list and all unsynced orders from this device?"))) return;
         localStorage.removeItem(queueKey);
         localStorage.removeItem("ota-react-catalog");
         setQueue([]);
@@ -180,8 +185,7 @@ export function Offline({ catalog, token }: Props) {
       }}>Clear this device</button>
       {!token && (
         <p>
-          <a href="/">Sign in online to sync</a>. After a browser restart, open
-          /offline to capture from the cached catalogue.
+          <a href="/">Sign in online to sync</a>. {"After a browser restart, open /offline to capture from the cached catalogue."}
         </p>
       )}
     </section>

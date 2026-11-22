@@ -1,70 +1,33 @@
-# Execution status
+# Current handoff
 
-## Operator setup and local security — complete, 21 November
+Updated 23 November 2026. Target submission: 27 November, 14:00 IST.
 
-Done: admin Setup for accounts, customers, suppliers, materials, products and versioned BOMs; first-use and self-service password changes; immediate token invalidation on disable/reset/change; durable sign-in throttling; confirmed offline device clear; grouped operator navigation with implementation labels removed; browser/API security headers. The benchmark seed is untouched and only fictional data is included. Validation: 86 regression/API tests, 10 native tests, all 49 benchmark checks on a clean database, and 360 px browser flows for staff/customer/product/shared BOM plus distinct-SKU offline review/sync/clear pass. Next: user review/commit and demo rehearsal. Suggested commit: `feat: add operator setup and local access hardening`. No Git staging, commits or pushes.
+## Done
 
-## Operational gap workflows — complete, 21 November
+- FastAPI/React runtime with PostgreSQL, native services and Alembic.
+- Sales, production, immutable stock, reports, setup and optional workflows.
+- Shared English/Tamil/Hindi/Marathi interface catalogue.
+- Language preference at sign-in and offline; translated controls, messages, confirmations and accessibility labels.
+- README reorganized into setup, features, verification and documentation links.
+- Dedicated operations, development, localization, security and benchmark guides.
+- Removed obsolete root Django Dockerfile, startup script and dependency file. Regression source and historical evidence retained.
 
-Done: shortage-to-BOM actions, finished-lot quality hold/release, lot-to-customer recall, completed-run loss explanations, reviewed multi-SKU offline queue and collection follow-ups with due dashboard reminders. Additive Alembic revision 0002 and role-scoped FastAPI endpoints preserve benchmark balances. Validation: 83 regression/API tests, 10 native tests, all 49 benchmark checks, React build, offline restart/review browser check and 360 px factory hold/recall/shortage browser check pass on isolated Compose. Next: user commits, records/reviews the eight-minute demo and submits. No Git staging or commits performed.
+## Validation
 
-## FastAPI / React migration — complete
+Previous baseline: 86 regression tests, 10 native tests and all 49 benchmark checks passed.
+Current pass: frontend build, 226 static phrases across three translated languages, all documentation links, browser checks at 360/1280 px across four roles, and all 86 regression tests passed. Browser checks include switching language with an existing login error and the offline-clear confirmation. Only the three main application containers remain running.
 
-Post-migration usability phase done: the stock ledger opens a selected posting's source document and lines directly in the workspace, and factory/accounting roles have a read-only Audit page with the latest 100 actor/time/before/after entries. Salesmen are denied the audit endpoint. React build and all 78 regression/API tests pass; main Compose stack is healthy on port 8000. Next: timed mobile-order trial, source-link review in reports, video rehearsal and final submission. Suggested commit: `feat: expose audit history and direct stock source drilldown`.
+## Remaining submission work
 
-Done: native SQLAlchemy services, all workspace reads/reports/dashboard, PDFs, seed, benchmark/reconciliation CLI and Alembic schema adoption. Runtime image has no Django installed or imported. PostgreSQL schema/data remain intact; earlier Django source is retained only in the separate regression test image.
+- Native-speaker wording review; automated coverage does not certify idiomatic translation.
+- Review documented integration limits, especially Tally import and mocked government formats.
+- Record the nine-step demo in under eight minutes.
+- Confirm organizer task deadline/contact and submit the repository/video links.
 
-Validation complete: 77 regression/API tests and ten Django-free tests pass, including 49 benchmark checks, rollback, seeding, schema adoption, immutability and both mutation checks. React build, nine-step browser scenario and offline restart/reconnect pass. A clean source copy starts with one Compose command and passes all 49 native benchmark checks. Main instance adoption preserved counts/content hashes for all 51 existing tables; reconciliation and read-only smoke checks pass.
+## Commit point
 
-Next: user reviews/commits migration, rehearses the React demo, records the eight-minute video and submits. Main app is live on port 8000 with original data. No Git staging, commits or pushes were performed.
+Suggested message: `fix: unify localization and organize project documentation`.
 
-Commands: `docker compose up --build -d --wait`; `docker compose --profile test run --build --rm tests`; `docker compose exec api python -m api.cli benchmark` (opening-only DB); `docker compose exec api python -m api.cli reconcile`. Native test project `ota-native-final` is on port 8008; browser scenario project `ota-native-check` on port 8007 contains the completed demo.
+Files: React language support and screens, shared catalogue, compatibility translation endpoint, browser/source checks, README, current documentation guides, requirements/decisions and this handoff. Remove the obsolete bootstrap files and former duplicate API catalogue in the same commit.
 
-Migration commit: `feat: complete FastAPI React migration with native ledger services`. Files: `api/`, `frontend/`, `alembic.ini`, `compose.yaml`, `.dockerignore`, `.gitignore`, `.env.example`, `README.md`, `NEXT_STEPS.md`, `docs/migration.md`, `docs/react-demo.md`, `docs/assumptions.md`, `docs/design.md`, `docs/compliance.md`, `scripts/react_benchmark_check.py`, `scripts/react_offline_check.py`, `scripts/migration_snapshot.py`. Earlier template/static/webapp UX edits are separate pre-existing work.
-
-Workspace redesign: role-aware desktop sidebar/mobile navigation; searchable status-filtered order queue; task shortcuts; production register prioritized; secondary correction controls; unsaved-form warning; exact kg/L stock display. Browser checks cover all roles at desktop/360 px, filtering, warnings and full nine-step scenario. Suggested commit: `feat: redesign factory workspace around daily operations`.
-
-UX follow-up: added role-aware home workflow shortcuts, order next-action guidance, run breadcrumb, and Hindi/Marathi navigation and common production labels. Translation coverage is partial with English fallback; native-speaker review is pending. Suggested commit: `feat: guide factory workflows and add Hindi Marathi labels`.
-
-Done: foundation, stock core, production services (26 passing tests).
-Done: phase 1 sales core (31-test suite).
-Done: phase 2 roles/audit (33 tests).
-Done: phase 3 screens (36 tests).
-Done: phase 4 PDF/share (37 tests).
-Done: phase 5 reports/dashboard (41 tests).
-Done: phase 6 benchmark/logins and adjustments/reversals (46 tests).
-Done: phase 7 suggestions/offline (48 tests; browser offline restart/sync verified).
-Done: phase 8 delivery and clean source-copy validation (53 tests; 48 benchmark checks; full browser walkthrough).
-Done: expanded reporting/offline gaps (54 tests), customer pricing/partial dispatch/returns (57 tests), batch/expiry/FEFO/reorder (59 tests).
-Done: all eight stretch categories implemented; 63 tests pass, original benchmark passes 49 checks, migrations/reconciliation pass and the nine-step browser walkthrough passes on an isolated fresh Compose database.
-Done: extension browser validation (Tamil, mock download, consented GPS, active-page automatic reconnect, offline restart followed by online reopen) and expanded delivery documentation.
-Next (applicant): review/commit changes, repeat from the committed clone, timed rehearsal, narrated video/upload, confirm task deadline/contact and submit by 27 Nov 14:00 IST.
-No git staging, commits or pushes authorized. Run full suite after each phase. Target feature complete 25 Nov; submission 27 Nov 14:00 IST.
-
-## Review / commit groups
-
-Shared files span phases; keep dependent migrations, app registrations and services together when batching. No changes were staged, committed or pushed.
-
-| Phase | Files / directories | Suggested message |
-| --- | --- | --- |
-| 1 sales | sales/, inventory dispatch links/migrations, config/settings.py | feat: add atomic sales reservations invoicing dispatch and payments |
-| 2 roles/audit | access/, sales/services.py, production/services.py, config/settings.py | feat: enforce role permissions and audit document edits |
-| 3 screens | webapp/, templates/, static/app.css, config/, compose.yaml | feat: add role-aware order production and ledger screens |
-| 4 invoice PDF/share | webapp/services.py and PDF view/tests, templates/invoice_pdf.html, templates/order.html, static/share.js | feat: render snapshot invoice PDFs and support file sharing |
-| 5 reports | reporting/services.py and tests, report/dashboard templates, webapp/views.py and urls.py | feat: add filtered CSV PDF reports ageing and owner dashboard |
-| 6 benchmark/corrections | reporting/benchmark.py, management commands, access/seed.py, inventory corrections/migrations/tests, production state/report, docker/entrypoint.sh | feat: verify nine-step benchmark and add guarded stock corrections |
-| 7 stretch | production suggestion service/tests, webapp offline service/views/tests, static/offline.js and service-worker.js, offline/order templates | feat: suggest feasible production and sync persistent offline orders |
-| 8 delivery | README.md, docs/, NEXT_STEPS.md, scripts/browser_check.py, .dockerignore, .env.example, compose.yaml, final sales/web regression fixes | chore: validate local delivery and document compliance |
-
-Validation detail: docs/delivery-validation.md. Compliance matrix: docs/compliance.md. Six interview questions and weak spots: docs/demo.md. Full runtime suite passed after restoring both production mutations and rebuilding the final image.
-
-## Expanded-scope commit batches
-
-Shared files now span all optional features. Prefer these two dependency-complete commits rather than staging an incomplete intermediate migration graph:
-
-| Files | Suggested message |
-| --- | --- |
-| config/settings.py; inventory/, production/, sales/, reporting/, extensions/; webapp/; templates/; static/ | feat: complete optional sales and all eight stretch workflows |
-| README.md; NEXT_STEPS.md; docs/vision.md, requirements.md, assumptions.md, compliance.md, design.md, demo.md, delivery-validation.md, extended-features.md; scripts/extended_browser_check.py | docs: record expanded scope evidence and demo boundaries |
-
-All initial demo accounts retain password `DemoPass123!`: admin, production, salesman_a, salesman_b, accountant, owner. Main instance is http://localhost:8000; isolated expanded rehearsal is http://localhost:8002. The rehearsal contains demo workflow transactions and must not be treated as a fresh benchmark seed.
+No staging, commits or pushes performed.
