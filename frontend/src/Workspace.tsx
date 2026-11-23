@@ -63,12 +63,27 @@ export function money(value: unknown): string {
   return `${number < 0n ? "−" : ""}₹${absolute / 100n}.${String(absolute % 100n).padStart(2, "0")}`;
 }
 
-function Table({ rows, onOpen }: { rows: Row[]; onOpen?: (row: Row) => void }) {
+function Table({ rows, onOpen, searchable = false }: { rows: Row[]; onOpen?: (row: Row) => void; searchable?: boolean }) {
   const localize = useLocalize();
+  const translate = useTranslate();
+  const [query, setQuery] = useState("");
+  const [status, setStatus] = useState("");
   if (!rows.length) return localize(<p>No records yet.</p>);
   const columns = Object.keys(rows[0]);
+  const statusKey = columns.includes("status") ? "status" : columns.includes("access") ? "access" : null;
+  const visible = rows.filter(row => (!statusKey || !status || row[statusKey] === status) &&
+    Object.values(row).some(value => [String(value), translate(String(value))].some(text => text.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()))));
   return localize(
     <div className="table-wrap">
+      {searchable && <div className="filters">
+        <label>Search records<input type="search" value={query} onChange={event => setQuery(event.target.value)} /></label>
+        {statusKey && <label>Filter status<select value={status} onChange={event => setStatus(event.target.value)}>
+          <option value="">All statuses</option>
+          {[...new Set(rows.map(row => row[statusKey]))].map(value => <option key={value} value={value}>{translate(value)}</option>)}
+        </select></label>}
+        <button type="button" onClick={() => {setQuery(""); setStatus("");}}>Clear filters</button>
+      </div>}
+      {searchable && !visible.length && <p>No matching records.</p>}
       <table>
         <thead>
           <tr>
@@ -79,7 +94,7 @@ function Table({ rows, onOpen }: { rows: Row[]; onOpen?: (row: Row) => void }) {
           </tr>
         </thead>
         <tbody>
-          {rows.map((row, index) => (
+          {(searchable ? visible : rows).map((row, index) => (
             <tr key={index}>
               {columns.map((key) => (
                 <td key={key}>{display(row[key], key)}</td>
@@ -287,7 +302,15 @@ export function Workspace({
       method: "POST",
       body: JSON.stringify({ action, request_key: key, data: values }),
     });
-    setNotice("Saved successfully.");
+    const messages: Record<string, string> = {
+      "order.create": "Order submitted.", "order.approve": "Order approved and stock reserved.",
+      "order.invoice": "Invoice posted. Stock moves at dispatch.", "order.dispatch": "Dispatch recorded and stock updated.",
+      "order.payment": "Payment recorded and outstanding updated.", "order.reject": "Order rejected and reservation released.",
+      "production.create": "Production run created.", "production.issue": "Materials issued and stock updated.",
+      "production.complete": "Production completed and finished stock received.", "receipt": "Receipt posted and stock updated.",
+      "account.create": "Staff account created. The first sign-in requires a new password.",
+    };
+    setNotice(messages[action] || "Saved successfully.");
     if (action.startsWith("master.")) setCatalog(await load("/catalog"));
     setRevision((r) => r + 1);
   }
@@ -406,6 +429,16 @@ export function Workspace({
       )}
       {error && <p role="alert">{errorText(error)}</p>}
       {notice && <p role="status" className="notice">{notice}</p>}
+      {admin && page === "orders" && !selected && <details className="card">
+        <summary>Factory setup checklist</summary>
+        <p>Review the demo records and prepare your staff before daily work.</p>
+        {[['staff','Staff'], ['parties','Customers & suppliers'], ['items','Materials & products'], ['recipes','Recipes']].map(([tab,label]) =>
+          <p key={tab}><button type="button" onClick={() => {setSetupTab(tab); navigate("setup");}}>{translate(label)}</button>
+          {tab === 'parties' && ` · ${catalog.customers.length} / ${catalog.suppliers.length}`}
+          {tab === 'items' && ` · ${catalog.items.length} / ${catalog.skus.length}`}
+          {tab === 'recipes' && ` · ${catalog.boms.length}`}</p>)}
+        <p>Counts include seeded records; review them before recording transactions.</p>
+      </details>}
       {page === "orders" && !selected && (
         <>
           {sales &&
@@ -433,7 +466,7 @@ export function Workspace({
               }),
             )}
           {Array.isArray(data) && (
-            <Table rows={data} onOpen={(row) => setSelected(row.id)} />
+            <Table searchable rows={data} onOpen={(row) => setSelected(row.id)} />
           )}
         </>
       )}
@@ -902,7 +935,7 @@ export function Workspace({
         {setupTab === "staff" && <>
           <h2>Staff access</h2>
           <p>Give each person their own account. Share temporary passwords privately; they must replace them on first sign-in.</p>
-          <Table rows={data.map((row: Row) => ({username: row.username, name: row.first_name,
+          <Table searchable rows={data.map((row: Row) => ({username: row.username, name: row.first_name,
             role: row.role, access: row.is_active ? 'Active' : 'Disabled',
             password: row.must_change_password ? 'Change required' : 'Set'}))} />
           {form("Create staff account", "account.create", [
@@ -925,7 +958,7 @@ export function Workspace({
           ])}
         </>}
         {setupTab === "parties" && <>
-          <h2>Customers</h2><Table rows={catalog.customers.map((r: Row) =>
+          <h2>Customers</h2><Table searchable rows={catalog.customers.map((r: Row) =>
             ({code:r.code,name:r.name,state:r.state_code,gstin:r.gstin}))} />
           {form("Add customer", "master.customer", [field("code","Short code"),
             field("name","Customer name"),field("state_code","Two-digit GST state code"),

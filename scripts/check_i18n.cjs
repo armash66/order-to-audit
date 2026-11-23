@@ -11,6 +11,11 @@ const labels = new Map([["field", 1], ["choice", 1], ["form", 0],
 const used = new Set();
 
 function collect(source, node) {
+  if (ts.isVariableDeclaration(node) && node.name.getText(source) === "messages" &&
+      node.initializer && ts.isObjectLiteralExpression(node.initializer)) {
+    for (const property of node.initializer.properties)
+      if (ts.isPropertyAssignment(property) && ts.isStringLiteral(property.initializer)) used.add(property.initializer.text);
+  }
   if (ts.isJsxText(node)) {
     const text = node.getText(source).replace(/\s+/g, " ").trim();
     if (/[A-Za-z]/.test(text)) used.add(text);

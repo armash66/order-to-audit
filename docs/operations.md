@@ -6,6 +6,8 @@
 
 Sign in as admin. In **Setup**, create separate staff accounts, customers and suppliers, materials, sellable products and BOM versions. Temporary staff passwords must be replaced on first sign-in. For the internship submission use fictional records only.
 
+The **Factory setup checklist** on the admin Orders page links directly to Staff, Customers & suppliers, Materials & products and Recipes. Counts include demo records and are review prompts, not proof that your factory is configured. Staff, customer and order tables support **Search records**; order status and staff access can be filtered. **Clear filters** restores the list. Search covers records already loaded on that screen; it is not a server-wide index. Successful posting actions state what changed in stock, reservation or receivables.
+
 Materials use integer grams, millilitres or pieces. Products define pack size, list price, HSN and packets per carton. A BOM combines a versioned ingredient recipe with SKU-specific packaging and expected packets. New versions affect future runs.
 
 ## Roles
