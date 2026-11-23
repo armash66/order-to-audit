@@ -14,9 +14,15 @@ All optional sales features and eight section 6 stretch categories were authoriz
 | Routes/GPS | Salesman → Visits; route/customer/note, optional consent then Capture location. Browser permission denial still permits a visit without location. | `extensions/tests.py`: consent, exact coordinates, retry, own visits; browser uses fictional coordinates |
 | Tally export | Reports → Tally ZIP for selected dates. Import masters before vouchers into a separate demo company. | XML parsing, balanced paise amounts, date filters |
 | Mock e-invoice/e-way bill | Invoiced order → Mock government documents; admin generates and downloads explicitly MOCK JSON. | Exact amounts, both formats, retry mismatch, role restrictions |
-| Tamil floor UI | Production → Tamil; session preference applies to receipt/run/variance labels; English toggle restores English. | Session/template checks and browser rendering |
+| Multilingual operator UI | Language chooser at sign-in, workspace and offline: English, Tamil, Hindi and Marathi; preference persists on the device. | Shared catalogue/source checks and React browser checks across roles |
 
-## What each new file does
+## Active implementation
+
+React screens are in `frontend/src/Workspace.tsx`, `Offline.tsx` and `VisitForm.tsx`. Native services are in `api/sales/`, `api/inventory/`, `api/extensions.py` and `api/factory_actions.py`; routes are in `api/workflows.py`. The shared catalogue is `frontend/src/translations.json`. `api/tests.py` and the `scripts/react_*.py` checks exercise these current paths. See [API reference](api.md) and [development](development.md).
+
+## Historical regression implementation
+
+The following files remain only as the independent Django regression oracle; they are not the running HTTP application.
 
 - `sales/test_extended.py` tests prices, partial dispatch and return accounting; sales migrations add those source documents and links.
 - `inventory/test_batches.py` checks lot allocation, expiry and reorder behavior; migration 0011 derives LEGACY allocations from existing movements without rewriting stock.

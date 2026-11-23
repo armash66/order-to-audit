@@ -29,6 +29,8 @@ Offline capture stores customer catalogue data and unsynced orders in browser st
 
 Keep local settings in the ignored `.env`; only `.env.example` belongs in version control. Docker volumes preserve the database across restarts, but a volume is not a backup. Before any deployment or data reset, take and verify a PostgreSQL backup using your deployment's credential handling procedure.
 
+Use the tested [backup/restore rehearsal](backup-restore.md). Archives include credentials as password hashes and business records: `.dump` is excluded from Git and Docker build contexts. CI verifies a disposable test archive but never uploads it.
+
 ## Reporting a security issue
 
 Do not post credentials or private records in a public issue. Contact the repository owner privately with reproduction steps, affected version and impact. This repository does not currently publish a dedicated security contact or response-time commitment.

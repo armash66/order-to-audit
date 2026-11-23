@@ -14,6 +14,9 @@ Start with the [project README](../README.md) to run the application.
 
 - [Design note](design.md): entities, ledger, BOM, valuation and transaction rules.
 - [Development](development.md): repository map, tests and troubleshooting.
+- [API reference](api.md): authentication, roles, payloads, exact numbers, errors and retries.
+- [Backup and restore](backup-restore.md): binary-safe snapshots and isolated recovery verification.
+- [CI and delivery artifacts](ci.md): automatic gates, local equivalents and hosting boundaries.
 - [Vision](vision.md), [requirements](requirements.md) and [decisions](assumptions.md): planning contract.
 - [Golden workbook](benchmark.xlsx): independent benchmark expectations.
 - [Compliance matrix](compliance.md): requirement evidence.

@@ -48,6 +48,8 @@ See the [compliance matrix](docs/compliance.md) for evidence. Tally import has n
 
 ## Verify
 
+[Continuous integration](docs/ci.md) runs builds, correctness tests, browser checks and an isolated backup/restore rehearsal on pushes and pull requests. Passing runs produce downloadable application image archives. No hosted deployment target is configured; the first GitHub run remains pending until this workflow is pushed.
+
 ```sh
 docker compose --profile test run --build --rm tests
 ```
@@ -112,6 +114,9 @@ The [design note](docs/design.md) and its [two-page PDF](output/pdf/design-note.
 | --- | --- |
 | [Operations](docs/operations.md) | Daily workflows, roles, setup and offline use |
 | [Development](docs/development.md) | Code map, commands, isolated tests and troubleshooting |
+| [API](docs/api.md) | Routes, permissions, command payloads, errors and retries |
+| [Backup and restore](docs/backup-restore.md) | Snapshot creation and isolated recovery rehearsal |
+| [CI](docs/ci.md) | Automated acceptance gates and delivery artifacts |
 | [Localization](docs/localization.md) | Language behavior, catalogue maintenance and verification |
 | [Benchmark and boundaries](docs/reference.md) | Expected numbers, assumptions and known limitations |
 | [Security](docs/security.md) | Access controls, local deployment and data handling |

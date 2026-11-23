@@ -1,0 +1,71 @@
+name: Application checks
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      COMPOSE_PROJECT_NAME: ota-ci
+      WEB_PORT: '8000'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Frontend and documentation
+        run: |
+          npm ci --prefix frontend
+          npm run build --prefix frontend
+          node scripts/check_i18n.cjs
+          python scripts/check_docs.py
+      - name: Fresh application startup
+        run: docker compose up --build -d --wait
+      - name: Native correctness and benchmark
+        run: |
+          docker compose exec -T api python -m pytest api/test_api.py api/test_native.py api/test_units.py -q -p no:cacheprovider
+          docker compose exec -T api python -m api.cli benchmark
+          docker compose exec -T api python -m api.cli pdf-smoke
+      - name: Regression suite
+        run: docker compose --profile test run --build --rm tests
+      - name: Browser workflows
+        run: |
+          python -m pip install playwright==1.57.0
+          python -m playwright install --with-deps chromium
+          python scripts/react_benchmark_check.py --url http://localhost:8000
+          python scripts/react_offline_check.py --url http://localhost:8000
+          python scripts/react_language_check.py --width 360
+          python scripts/react_ux_check.py --url http://localhost:8000
+      - name: Backup and isolated restore
+        run: |
+          python scripts/backup.py backup "${RUNNER_TEMP}/factory.dump"
+          python scripts/backup.py verify "${RUNNER_TEMP}/factory.dump"
+      - name: Build delivery artifacts
+        run: |
+          mkdir -p delivery
+          docker image save ota-ci-api ota-ci-frontend | gzip > delivery/application-images.tar.gz
+      - uses: actions/upload-artifact@v4
+        with:
+          name: verified-local-images-${{ github.sha }}
+          path: delivery/
+          retention-days: 7
+      - name: Failure diagnostics
+        if: failure()
+        run: docker compose logs --no-color --tail 150
+      - name: Stop disposable services
+        if: always()
+        run: docker compose down --volumes --remove-orphans
