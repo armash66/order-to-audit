@@ -17,6 +17,8 @@ Start with the [project README](../README.md) to run the application.
 - [Vision](vision.md), [requirements](requirements.md) and [decisions](assumptions.md): planning contract.
 - [Golden workbook](benchmark.xlsx): independent benchmark expectations.
 - [Compliance matrix](compliance.md): requirement evidence.
+- [Submission checklist](submission.md): delivery gates and interview preparation.
+- [Two-page design PDF](../output/pdf/design-note.pdf): paginated version of the design note.
 - [Extended features](extended-features.md): optional workflows and integration limits.
 
 ## Historical evidence

@@ -40,7 +40,7 @@ def main():
         page.locator('summary').filter(has_text='Submit order').click()
         page.get_by_label('Customer', exact=True).select_option(label='Demo Distributor B')
         page.get_by_label('Document date').fill('2026-11-19')
-        page.get_by_label('Murukku 200 g · packets (0 to omit)').fill('120')
+        page.get_by_label('Murukku 200 g · Quantity (0 to omit)').fill('120')
         page.get_by_role('button', name='Submit order').click()
         expect(page.get_by_role('table').first).to_contain_text('Demo Distributor B')
         page.get_by_role('button', name='Sign out').click()

@@ -26,7 +26,7 @@ Use a separate Compose project for native tests. Choose an unused project name s
 
 ```sh
 docker compose -p ota-validation up --build -d --wait db api
-docker compose -p ota-validation exec api python -m pytest api/test_api.py api/test_native.py -q -p no:cacheprovider
+docker compose -p ota-validation exec api python -m pytest api/test_api.py api/test_native.py api/test_units.py -q -p no:cacheprovider
 docker compose -p ota-validation exec api python -m api.cli benchmark
 docker compose -p ota-validation down
 ```
@@ -56,6 +56,7 @@ Language checks use existing demo accounts. Other `scripts/react_*.py` workflows
 | `api/queries.py`, `reporting.py`, `pdf.py` | Reads, reports and exports |
 | `api/native.py`, `database.py` | Exact arithmetic, factory lock and transactions |
 | `api/inventory/`, `production/`, `sales/` | Posting services and document lifecycles |
+| `api/units/services.py` | Exact item/SKU conversions before posting and retry comparison |
 | `api/accounts/`, `masters/`, `security/` | Account setup, masters and login controls |
 | `api/seed.py`, `benchmark.py`, `reconciliation.py` | Fixtures, acceptance scenario and ledger checks |
 | `api/migrations/` | Alembic schema ownership |
@@ -65,6 +66,10 @@ Language checks use existing demo accounts. Other `scripts/react_*.py` workflows
 | Root Django apps and templates | Development regression oracle, excluded from runtime imports |
 
 Business writes belong in service functions. Keep money and quantities exact, enforce roles server-side and append corrections rather than rewriting posted movements. Add service tests for business changes.
+
+## Design PDF
+
+The Markdown design note remains the editable source. With `reportlab` and `pypdf` installed, run `python scripts/render_design.py` to regenerate `output/pdf/design-note.pdf`. The renderer embeds Arial or DejaVu Sans, converts Mermaid relationships to a compact data-model table and asserts exactly two pages plus readable rupee text. Visually review both pages after editing the source.
 
 ## Troubleshooting
 

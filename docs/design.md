@@ -38,7 +38,7 @@ Each posting references exactly one opening, purchase, production event, dispatc
 
 Services enforce permissions, begin a PostgreSQL transaction and lock the singleton FactoryControl row. They validate request keys, state, availability and exact arithmetic before committing source lines, one posting sequence and movements together. Retrying the same payload returns the existing document; changed content fails. The single factory lock serializes writers, including reservations and invoice numbering. It is simple to explain and test, but unsuitable for high-throughput multi-factory operation without redesign.
 
-Orders move submitted → approved → invoiced → dispatched. Rejection releases pre-invoice reservations. Availability subtracts unshipped reservations and expired lots from on-hand. Partial dispatch retains invoiced status until fulfilled. Full cancellation credit is unpaid/undispatched only; resalable returns separately restore stock and credit original tax/value with cumulative rounding. Invoice drafts receive an FY number only at posting.
+Orders move submitted → approved → invoiced → dispatched. Rejection releases pre-invoice reservations. Availability subtracts unshipped reservations and expired or quality-held lots from on-hand. Partial dispatch retains invoiced status until fulfilled. Full cancellation credit is unpaid/undispatched only; resalable returns separately restore stock and credit original tax/value with cumulative rounding. Invoice drafts receive an FY number only at posting.
 
 Lot allocations partition movements, consuming earliest non-expired batches before unknown-expiry stock; valuation remains item-level weighted average. Reconciliation checks lot sums and nonnegative balances. Legacy lots never invent expiry dates. Customer prices snapshot at submission. Visits and mock fiscal responses are independent append-only records.
 
@@ -46,7 +46,7 @@ Runs move draft → issued → completed. Standards and recipe/BOM versions are 
 
 ## Exact valuation and corrections
 
-Money is integer paise; quantity is integer g, ml or pieces. Fraction represents ratios; half-up rounding occurs at issue totals, tax components and display boundaries. Flour's weighted average after receipt is `(100×42 + 60×45)/160 = ₹43.125/kg`; 40 kg costs ₹1,725. An issue of 1 g from 3 g valued at 10 paise costs 3 paise, leaving 2 g/7 paise; the next costs 4, and depletion takes the final 3.
+Money is integer paise; quantity is integer g, ml or pieces. Decimal-string kg/L/carton inputs use item-specific Fraction conversions before posting and retry comparison; fractional base units are rejected. Half-up rounding occurs at issue totals, tax components and display boundaries. Flour's weighted average after receipt is `(100×42 + 60×45)/160 = ₹43.125/kg`; 40 kg costs ₹1,725. An issue of 1 g from 3 g valued at 10 paise costs 3 paise, leaving 2 g/7 paise; the next costs 4, and depletion takes the final 3.
 
 Benchmark materials cost ₹4,055. Append-only overheads of ₹1,800 give ₹5,855/188 per good packet, displayed ₹31.14; margin at ₹50 is ₹18.86. FG receipts carry materials-only value. Unknown opening FG cost propagates to aggregate FG value and dispatch value; COGS is not invented.
 

@@ -95,7 +95,7 @@ class APIWorkflowTests(TransactionTestCase):
                 "supplier": str(Supplier.objects.first().pk),
                 "date": "2026-11-19",
                 "lines": [
-                    {"item": ids["FLOUR"], "quantity": "60000", "value_paise": "270000"}
+                    {"item": ids["FLOUR"], "quantity": "60", "unit": "kg", "value_paise": "270000"}
                 ],
             },
             "production",
@@ -108,7 +108,9 @@ class APIWorkflowTests(TransactionTestCase):
         key = str(uuid4())
         issue = {
             "id": run,
-            "actual": {"FLOUR": "40000", "OIL": "10500", "SPICE": "1200"},
+            "actual": {"FLOUR": {"quantity": "40", "unit": "kg"},
+                       "OIL": {"quantity": "10.5", "unit": "L"},
+                       "SPICE": {"quantity": "1.2", "unit": "kg"}},
         }
         self.command("production.issue", issue, "production", key)
         self.command("production.issue", issue, "production", key)

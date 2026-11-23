@@ -39,9 +39,11 @@ for (const generated of ["Price (₹)", "Amount (₹)", "Total value (₹)",
 const all = new Set([...used, ...languages.flatMap(language => Object.keys(catalog[language]))]);
 const missing = [...all].filter(key => key && !exempt.has(key) &&
   languages.some(language => !catalog[language][key])).sort();
+const damaged = languages.flatMap(language => Object.entries(catalog[language])
+  .filter(([, value]) => /\?\?|\uFFFD/.test(value)).map(([key]) => `${language}: ${key}`));
 const checked = [...used].filter(key => key && !exempt.has(key));
-if (missing.length) {
-  console.error("Missing translations:", missing);
+if (missing.length || damaged.length) {
+  console.error("Missing translations:", missing, "Damaged encoding:", damaged);
   process.exitCode = 1;
 } else {
   console.log(`Translation coverage: ${checked.length} UI strings × ${languages.length} languages`);

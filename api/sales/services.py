@@ -4,6 +4,7 @@ from datetime import date
 from fractions import Fraction
 from sqlalchemy import select, update, text
 from api import database
+from api.units.services import to_base_units
 from api.native import (
     authorize,
     required_integer,
@@ -115,7 +116,11 @@ def next_number(conn, day):
 
 
 def submit(conn, data, user, key, day):
-    quantities = quantity_map(data["quantities"])
+    if not isinstance(data["quantities"], dict):
+        raise ValueError("Positive quantities are required.")
+    quantities = quantity_map({sku_id: to_base_units(
+        conn, get_row(conn, "inventory_sku", sku_id)["item_id"], value
+    ) for sku_id, value in data["quantities"].items()})
     customer = get_row(conn, "inventory_customer", data["customer"])
     orders = table(conn, "sales_order")
     old = (

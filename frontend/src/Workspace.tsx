@@ -17,6 +17,8 @@ type Field = {
   type?: string;
   optional?: boolean;
   money?: boolean;
+  dependsOn?: string;
+  optionsByValue?: Record<string, { value: string; label: string }[]>;
 };
 const asOptions = (rows: Row[], label: string) =>
   rows.map((row) => ({ value: row.id, label: row[label] }));
@@ -42,6 +44,16 @@ const choice = (
   label: string,
   options: Field["options"],
 ): Field => ({ name, label, options });
+
+// Display units are item-specific; conversion stays exact on the server.
+const unitOptions = (base: string, finished = false) =>
+  (finished ? ["packet", "carton"] : base === "g" ? ["g", "kg"] : base === "ml" ? ["ml", "L"] : ["piece"])
+    .map(value => ({ value, label: value }));
+// Keep measured amounts as decimal strings; omit zero order lines without Number coercion.
+const measured = (data: Row, prefix: string, includeZero = false) =>
+  Object.fromEntries(Object.entries(data)
+    .filter(([key, value]) => key.startsWith(prefix) && (includeZero || !/^0*(\.0*)?$/.test(String(value))))
+    .map(([key, quantity]) => [key.slice(prefix.length), { quantity, unit: data["unit_" + key.slice(prefix.length)] }]));
 
 // Paise conversion uses decimal strings and BigInt only, including negative adjustments.
 export function money(value: unknown): string {
@@ -127,6 +139,7 @@ function ActionForm({
   const localize = useLocalize();
   const errorText = useErrorText();
   const [prices,setPrices]=useState<Row[]>([]);
+  const [selections, setSelections] = useState<Record<string, string>>({});
   async function refreshPrices(id:string){if(customerPrices)try{setPrices(await customerPrices(id));}catch{setPrices([]);}}
   useEffect(()=>{const id=fields.find(f=>f.name==='customer')?.options?.[0]?.value;if(id)refreshPrices(id);},[]);
   const [busy, setBusy] = useState(false),
@@ -136,7 +149,7 @@ function ActionForm({
     <details className="card">
       <summary>{translate(title)}</summary>
       <form
-        onChange={event=>{const target=event.target as HTMLInputElement;if(target.name==='customer')refreshPrices(target.value);}}
+        onChange={event=>{const target=event.target as HTMLInputElement;setSelections(old=>({...old,[target.name]:target.value}));if(target.name==='customer')refreshPrices(target.value);}}
         onSubmit={async (event) => {
           event.preventDefault();
           if (busy) return;
@@ -158,6 +171,7 @@ function ActionForm({
             await submit(data, key);
             setKey(crypto.randomUUID());
             form.reset();
+            setSelections({});
             const customerId=fields.find(f=>f.name==='customer')?.options?.[0]?.value;if(customerId)refreshPrices(customerId);
           } catch (err) {
             setError((err as Error).message);
@@ -171,11 +185,12 @@ function ActionForm({
             {translate(f.label)}
             {f.options ? (
               <select
+                key={f.dependsOn ? selections[f.dependsOn] : f.name}
                 aria-label={translate(f.label)}
                 name={f.name}
                 defaultValue={f.value}
               >
-                {f.options.map((o) => (
+                {(f.optionsByValue?.[selections[f.dependsOn!] || fields.find(field => field.name === f.dependsOn)?.options?.[0]?.value || ""] || f.options).map((o) => (
                   <option key={o.value} value={o.value}>
                     {o.label}
                   </option>
@@ -186,7 +201,8 @@ function ActionForm({
                 aria-label={translate(f.label)}
                 name={f.name}
                 defaultValue={f.value}
-                type={f.type || "text"}
+                type={f.type === "decimal" ? "text" : f.type || "text"}
+                inputMode={f.type === "decimal" ? "decimal" : undefined}
                 required={!f.optional}
               />
             )}
@@ -399,20 +415,21 @@ export function Workspace({
               [
                 customer,
                 dateField,
-                ...catalog.skus.map((s: Row) =>
+                ...catalog.skus.flatMap((s: Row) => [
                   field(
                     "qty_" + s.id,
-                    translate(s["item__name"]) + " · " + translate("packets (0 to omit)"),
+                    translate(s["item__name"]) + " · " + translate("Quantity (0 to omit)"),
                     "0",
                     "number",
                   ),
-                ),
+                  choice("unit_" + s.id, translate(s["item__name"]) + " · " + translate("Unit"), unitOptions("piece", true)),
+                ]),
               ],
               {},
               (d) => ({
                 customer: d.customer,
                 date: d.date,
-                quantities: collect(d, "qty_"),
+                quantities: measured(d, "qty_"),
               }),
             )}
           {Array.isArray(data) && (
@@ -464,7 +481,7 @@ export function Workspace({
                       "number",
                     ),
                     field(
-                      "price_" + line.id,
+                      "price_" + line.id + "_paise",
                       "Price in paise",
                       line.price_paise,
                       "number",
@@ -475,7 +492,7 @@ export function Workspace({
                     lines: Object.fromEntries(
                       data.lines.map((line: Row) => [
                         line.id,
-                        [d["qty_" + line.id], d["price_" + line.id]],
+                        [d["qty_" + line.id], d["price_" + line.id + "_paise"]],
                       ]),
                     ),
                   }),
@@ -505,6 +522,12 @@ export function Workspace({
               <button onClick={() => shareInvoice(data.invoice.id)}>
                 Share invoice PDF
               </button>
+              <p>Download the PDF, then attach it to your message. These links open a draft; nothing is sent automatically.</p>
+              <a target="_blank" rel="noopener noreferrer" href={"https://wa.me/?text=" + encodeURIComponent(
+                `${translate("Invoice")} ${data.invoice.number} · ${translate("Total")} ${money(data.invoice.total_paise)}`
+              )}>Share via WhatsApp</a>{" · "}
+              <a href={"mailto:?subject=" + encodeURIComponent(`${translate("Invoice")} ${data.invoice.number}`)
+                + "&body=" + encodeURIComponent(`${translate("Total")} ${money(data.invoice.total_paise)}`)}>Share via email</a>
               {admin && data.invoice.status === "posted" && (
                 <>
                   {data.invoice.outstanding !== "0" && form(
@@ -648,10 +671,12 @@ export function Workspace({
               item,
               field(
                 "quantity",
-                "Quantity in base units (g / ml / piece)",
+                "Quantity",
                 "",
-                "number",
+                "decimal",
               ),
+              { ...choice("unit", "Unit", unitOptions("g")), dependsOn: "item",
+                optionsByValue: Object.fromEntries(catalog.items.map((i: Row) => [i.id, unitOptions(i.base_unit, i.category === "finished")])) },
               field("value_paise", "Total value in paise", "", "number"),
               dateField,
               { ...field("batch", "Supplier batch code"), optional: true },
@@ -665,6 +690,7 @@ export function Workspace({
                 {
                   item: d.item,
                   quantity: d.quantity,
+                  unit: d.unit,
                   value_paise: d.value_paise,
                 },
               ],
@@ -695,16 +721,17 @@ export function Workspace({
               "production.issue",
               data.standards
                 .filter((s: Row) => s.stage === "raw")
-                .map((s: Row) =>
+                .flatMap((s: Row) => [
                   field(
                     "qty_" + s.item__code,
-                    translate(s.item__name) + " (" + s.item__base_unit + ")",
+                    translate(s.item__name) + " · " + translate("Quantity"),
                     s.quantity,
-                    "number",
+                    "decimal",
                   ),
-                ),
+                  choice("unit_" + s.item__code, translate(s.item__name) + " · " + translate("Unit"), unitOptions(s.item__base_unit)),
+                ]),
               { id: selected },
-              (d) => ({ actual: collect(d, "qty_", true) }),
+              (d) => ({ actual: measured(d, "qty_", true) }),
             )}
           {data.state === "issued" &&
             form(

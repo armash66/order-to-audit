@@ -5,6 +5,7 @@ from fractions import Fraction
 from contextlib import nullcontext
 from sqlalchemy import select, update, text
 from api import database
+from api.units.services import to_base_units
 from api.native import (
     authorize,
     required_integer,
@@ -175,8 +176,28 @@ def append_line(conn, run, event_id, posting_id, sequence, item_id, quantity, va
         )
 
 
-# Issue and completion are separate sources; both preserve request-key and payload retry semantics.
+# Convert measured inputs within the posting transaction, keeping snapshots in base units.
 def post_event(kind, data, user, key):
+    authorize(user, ["admin", "production"])
+    with database.transaction() as conn:
+        factory_lock(conn)
+        items = table(conn, "inventory_item")
+        normalized = dict(data)
+        for name in ("actual", "damaged"):
+            values = data.get(name, {})
+            if not isinstance(values, dict):
+                raise ValueError("Actual and damaged inputs must be quantity maps.")
+            normalized[name] = {}
+            for code, value in values.items():
+                item_id = conn.execute(select(items.c.id).where(items.c.code == code)).scalar_one_or_none()
+                if item_id is None:
+                    raise ValueError("Item not found.")
+                normalized[name][code] = to_base_units(conn, item_id, value)
+        return _post_event_base(kind, normalized, user, key)
+
+
+# Issue and completion are separate sources; both preserve request-key and payload retry semantics.
+def _post_event_base(kind, data, user, key):
     authorize(user, ["admin", "production"])
     if kind not in ("issue", "complete") or not key:
         raise ValueError("Invalid production event.")

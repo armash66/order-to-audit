@@ -92,7 +92,8 @@ def run_benchmark(persist=False):
                     "lines": [
                         {
                             "item": items["FLOUR"],
-                            "quantity": 60000,
+                            "quantity": "60",
+                            "unit": "kg",
                             "value_paise": 270000,
                         }
                     ],
@@ -110,7 +111,11 @@ def run_benchmark(persist=False):
             )
             post_event(
                 "issue",
-                {"id": run, "actual": {"FLOUR": 40000, "OIL": 10500, "SPICE": 1200}},
+                {"id": run, "actual": {
+                    "FLOUR": {"quantity": "40", "unit": "kg"},
+                    "OIL": {"quantity": "10.5", "unit": "L"},
+                    "SPICE": {"quantity": "1.2", "unit": "kg"},
+                }},
                 user,
                 "benchmark-issue",
             )

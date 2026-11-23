@@ -38,8 +38,6 @@ def main():
         else:
             expect(page.get_by_text('5 packets',exact=False)).to_be_visible()
         context.set_offline(False)
-        expect(page.get_by_text('1 queued orders',exact=True)).to_be_visible()
-        page.get_by_role('button',name='Confirm and sync orders').click()
         expect(page.get_by_text('0 queued orders',exact=True)).to_be_visible(timeout=15000)
         context.set_offline(True)
         page.get_by_label('Packets',exact=True).fill('1')
@@ -52,8 +50,6 @@ def main():
         expect(page.get_by_text('1 queued orders',exact=True)).to_be_visible()
         context.set_offline(False)
         login()
-        expect(page.get_by_text('1 queued orders',exact=True)).to_be_visible()
-        page.get_by_role('button',name='Confirm and sync orders').click()
         expect(page.get_by_text('0 queued orders',exact=True)).to_be_visible(timeout=15000)
         page.once('dialog',lambda dialog:dialog.accept())
         page.get_by_role('button',name='Clear this device').click()
@@ -61,7 +57,7 @@ def main():
         assert page.evaluate("localStorage.getItem('ota-react-catalog')") is None
         assert page.evaluate("localStorage.getItem('ota-react-orders-v1')") is None
         context.close()
-    print('PASS: React multi-line offline capture, review, restart, sync and device clear')
+    print('PASS: React multi-line offline capture, automatic reconnect/reopen sync and device clear')
 
 
 if __name__=='__main__':main()

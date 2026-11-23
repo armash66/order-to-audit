@@ -14,7 +14,7 @@ Salespeople see their own orders, customer sales and visits. Production staff re
 
 ## Sales
 
-1. **Orders → Submit order**: select customer and quantities. Prices come from the applicable price list.
+1. **Orders → Submit order**: select customer, quantity and packets or cartons for each product. Carton size comes from that SKU; prices are per packet from the applicable price list.
 2. Admin opens the order and reviews stock. Approval reserves available finished goods.
 3. **Post invoice**: creates the numbered GST invoice; it does not move stock.
 4. **Dispatch remaining order** or **Partial dispatch**: moves stock and releases the dispatched reservation.
@@ -24,9 +24,9 @@ Rejecting a pre-invoice order requires a reason and releases its reservation. Fu
 
 ## Production
 
-1. **Receive materials**: select supplier/item, enter integer base-unit quantity and the total amount in rupees. Add batch and expiry details when known.
+1. **Receive materials**: select supplier/item, quantity and its unit (g/kg, ml/L or pieces), then the total amount in rupees. Add batch and expiry details when known. For the benchmark enter 60 kg flour and ₹2,700.
 2. **Create production run**: select BOM version and batch count.
-3. Open the draft and **Issue raw materials** using actual quantities.
+3. Open the draft and **Issue raw materials** using actual quantities and units: 40 kg flour, 10.5 L oil and 1.2 kg spice in the benchmark. Conversion must resolve to a whole gram, millilitre or piece.
 4. **Complete production**: enter good packets and total packaging issued, including damaged packaging. Enter damage separately for reporting.
 5. Review consumption and yield variance, then add labour, power or other overheads.
 
@@ -42,7 +42,7 @@ Select the report and date range in **Reports**, then export CSV or PDF. Report 
 
 ## Offline orders and visits
 
-Open **Offline** once while connected to load the catalogue. Save orders on the private device, review the queue, then explicitly confirm sync while signed in as the original user. The server confirms current prices and prevents duplicate submission.
+Open **Offline** once while connected to load the catalogue. Save orders on the private device. While that page is active and signed in as the original user, saved orders sync automatically on reconnect or page reopen. Failed requests remain queued; **Confirm and sync orders** retries them. The server confirms current prices and prevents duplicate submission. An offline browser restart still requires online sign-in before sync.
 
 After a browser restart, open `/offline` for cached capture. **Clear this device** removes the cached catalogue and all unsynced orders after confirmation. Sign-out alone does not clear them.
 

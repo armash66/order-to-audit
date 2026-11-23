@@ -65,10 +65,11 @@ export function Offline({ catalog, token }: Props) {
       localStorage.setItem("ota-react-catalog", JSON.stringify(catalog));
   }, [catalog]);
   useEffect(() => {
-    const reconnect = () => setMessage("Connection restored. Review queued orders, then sync.");
+    const reconnect = () => { void sync(); };
     window.addEventListener("online", reconnect);
+    void sync();
     return () => window.removeEventListener("online", reconnect);
-  }, []);
+  }, [token, catalog, queue.length]);
   if (!saved)
     return localize(
       <main>
@@ -86,6 +87,7 @@ export function Offline({ catalog, token }: Props) {
         Customer prices are confirmed by the server at sync. Cached data is for
         a private demo device.
       </p>
+      <p>Saved orders sync automatically while this page is open, online and signed in as their creator.</p>
       <form
         className="card"
         onSubmit={(event) => {
@@ -118,7 +120,7 @@ export function Offline({ catalog, token }: Props) {
             setQueue(next);
             setExtraLines([]);
             event.currentTarget.reset();
-            setMessage("Order saved. Review it below before syncing.");
+            setMessage("Order saved on this device.");
           } catch {
             setMessage("Device storage failed; order was not saved.");
           }

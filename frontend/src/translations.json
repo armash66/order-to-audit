@@ -497,7 +497,19 @@
     "actor id": "செய்தவர் எண்",
     "request key": "கோரிக்கைக் குறியீடு",
     "created at": "உருவாக்கிய நேரம்",
-    "posted at": "பதிவு நேரம்"
+    "posted at": "பதிவு நேரம்",
+    "Quantity (0 to omit)": "அளவு (தவிர்க்க 0)",
+    "packet": "பொட்டலம்",
+    "carton": "அட்டைப்பெட்டி",
+    "piece": "எண்ணிக்கை",
+    "Saved orders sync automatically while this page is open, online and signed in as their creator.": "இந்தப் பக்கம் திறந்து, இணைய இணைப்புடன், ஆர்டரைப் பதிவு செய்த பயனர் உள்நுழைந்திருக்கும்போது சேமித்த ஆர்டர்கள் தானாக ஒத்திசைக்கப்படும்.",
+    "Order saved on this device.": "ஆர்டர் இந்தச் சாதனத்தில் சேமிக்கப்பட்டது.",
+    "Download the PDF, then attach it to your message. These links open a draft; nothing is sent automatically.": "PDF-ஐப் பதிவிறக்கி உங்கள் செய்தியுடன் இணைக்கவும். இந்த இணைப்புகள் வரைவைத் திறக்கும்; எதுவும் தானாக அனுப்பப்படாது.",
+    "Share via WhatsApp": "WhatsApp வழியாகப் பகிரவும்",
+    "Share via email": "மின்னஞ்சல் வழியாகப் பகிரவும்",
+    "Unit is not valid for this item.": "இந்தப் பொருளுக்கு இந்த அலகு பொருந்தாது.",
+    "Quantity must resolve to a whole base unit.": "அளவு முழு அடிப்படை அலகாக இருக்க வேண்டும்.",
+    "Enter an exact decimal quantity, not a floating-point number.": "துல்லியமான தசம அளவை உள்ளிடவும்."
   },
   "hi": {
     "Home": "होम",
@@ -996,7 +1008,19 @@
     "actor id": "कार्यकर्ता क्रमांक",
     "request key": "अनुरोध कुंजी",
     "created at": "बनाने का समय",
-    "posted at": "दर्ज करने का समय"
+    "posted at": "दर्ज करने का समय",
+    "Quantity (0 to omit)": "मात्रा (छोड़ने के लिए 0)",
+    "packet": "पैकेट",
+    "carton": "कार्टन",
+    "piece": "नग",
+    "Saved orders sync automatically while this page is open, online and signed in as their creator.": "यह पृष्ठ खुला होने, इंटरनेट से जुड़ने और ऑर्डर बनाने वाले उपयोगकर्ता के साइन इन होने पर सहेजे गए ऑर्डर अपने आप सिंक होते हैं।",
+    "Order saved on this device.": "ऑर्डर इस डिवाइस पर सहेजा गया।",
+    "Download the PDF, then attach it to your message. These links open a draft; nothing is sent automatically.": "PDF डाउनलोड करके अपने संदेश में संलग्न करें। ये लिंक संदेश का मसौदा खोलते हैं; कुछ भी अपने आप नहीं भेजा जाता।",
+    "Share via WhatsApp": "WhatsApp पर साझा करें",
+    "Share via email": "ईमेल से साझा करें",
+    "Unit is not valid for this item.": "इस वस्तु के लिए यह इकाई मान्य नहीं है।",
+    "Quantity must resolve to a whole base unit.": "मात्रा पूरी आधार इकाई में बदलनी चाहिए।",
+    "Enter an exact decimal quantity, not a floating-point number.": "सटीक दशमलव मात्रा दर्ज करें।"
   },
   "mr": {
     "Home": "मुख्यपृष्ठ",
@@ -1495,6 +1519,18 @@
     "actor id": "कृती करणाऱ्याचा क्रमांक",
     "request key": "विनंती कळ",
     "created at": "तयार करण्याची वेळ",
-    "posted at": "नोंदणीची वेळ"
+    "posted at": "नोंदणीची वेळ",
+    "Quantity (0 to omit)": "प्रमाण (वगळण्यासाठी 0)",
+    "packet": "पाकीट",
+    "carton": "खोका",
+    "piece": "नग",
+    "Saved orders sync automatically while this page is open, online and signed in as their creator.": "हे पृष्ठ उघडे असताना, इंटरनेट सुरू असताना आणि ऑर्डर नोंदवणाऱ्या वापरकर्त्याने साइन इन केलेले असताना जतन केलेल्या ऑर्डर आपोआप सिंक होतात.",
+    "Order saved on this device.": "ऑर्डर या उपकरणावर जतन केली.",
+    "Download the PDF, then attach it to your message. These links open a draft; nothing is sent automatically.": "PDF डाउनलोड करून तुमच्या संदेशाला जोडा. या दुव्यांमुळे संदेशाचा मसुदा उघडतो; काहीही आपोआप पाठवले जात नाही.",
+    "Share via WhatsApp": "WhatsApp वर शेअर करा",
+    "Share via email": "ईमेलद्वारे शेअर करा",
+    "Unit is not valid for this item.": "या वस्तूसाठी हे एकक योग्य नाही.",
+    "Quantity must resolve to a whole base unit.": "प्रमाण पूर्ण मूळ एककात रूपांतरित झाले पाहिजे.",
+    "Enter an exact decimal quantity, not a floating-point number.": "अचूक दशांश प्रमाण नोंदवा."
   }
 }

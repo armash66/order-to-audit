@@ -7,7 +7,7 @@ All optional sales features and eight section 6 stretch categories were authoriz
 | Customer prices/schemes | Admin → Prices; set a customer/SKU price and scheme label. New orders snapshot it; existing orders retain their price. | `sales/test_extended.py`: override, snapshot and catalogue |
 | Partial dispatch | On an invoiced order enter quantities in the partial-dispatch form. Unshipped quantities remain reserved. | Partial/retry/over-dispatch and reservation tests |
 | Returns | Admin records resalable sealed goods against dispatched quantities, with reason. Original tax/value is credited cumulatively. | Paid return, over-return, exact rounding residual tests |
-| Offline orders | Salesman opens Offline online once, captures multiple SKU lines without network, reviews the saved queue and explicitly syncs with the original account. | Server retry/ownership/two-SKU tests; `scripts/react_offline_check.py` browser restart/review/sync |
+| Offline orders | Salesman opens Offline online once, captures multiple SKU lines without network, automatically syncs on reconnect/reopen while the Offline page is active and signed in as the original account. | Server retry/ownership/two-SKU tests; `scripts/react_offline_check.py` browser restart/review/sync |
 | Batch/expiry/FEFO | Enter receipt batch/expiry and run output expiry; Batch alerts and ledger show allocations. Expired stock cannot be issued or dispatched. | `inventory/test_batches.py`: FEFO, expired-stock rollback, reconciliation |
 | Reorder alerts | Admin sets raw-material minimum in Batch alerts; owner dashboard shows quantities at/below threshold. | Reorder/available-stock tests |
 | Production planning | Order detail shows aggregate shortage, batches needed and BOM input feasibility. | `SuggestionTests`: 250 uncovered, two needed, one feasible |
@@ -35,4 +35,4 @@ Existing stock has unknown expiry unless supplied at entry. FEFO uses known non-
 
 Schemes mean fixed customer prices with labels, not arbitrary discount rules. Returns may create negative outstanding/customer credit, but cash refunds are not implemented. GPS is a single consented visit position, not tracking or route optimization. Offline synchronization needs the page active/reopened, not a background service.
 
-Tamil covers the floor workflow labels and known demo item names. Validation errors and unknown names fall back to English; native-speaker review remains pending. No external import acceptance, government validity or human language review is claimed.
+English, Tamil, Hindi and Marathi cover the operator interface. Known errors are translated; unknown errors use a localized retry message. New business names remain as entered; native-speaker review remains pending. No external import acceptance, government validity or human language review is claimed.

@@ -6,7 +6,7 @@ from urllib.parse import unquote
 ROOT = Path(__file__).resolve().parents[1]
 FILES = [ROOT / "README.md", *[ROOT / "docs" / name for name in (
     "README.md", "operations.md", "development.md", "localization.md",
-    "security.md", "reference.md", "react-demo.md", "design.md",
+    "security.md", "reference.md", "react-demo.md", "design.md", "compliance.md", "submission.md",
 )]]
 missing = []
 for file in FILES:

@@ -3,6 +3,7 @@
 from datetime import date
 from sqlalchemy import select
 from api import database
+from api.units.services import to_base_units
 from api.native import (
     authorize,
     required_integer,
@@ -14,8 +15,19 @@ from api.native import (
 )
 
 
-# Retry comparison occurs under the same database lock as source creation and posting.
+# Normalize before posting under the same lock; equivalent units have identical retry payloads.
 def post_receipt(data, user, request_key, kind="purchase"):
+    authorize(user, ["admin", "production"] if kind == "purchase" else ["admin"])
+    with database.transaction() as conn:
+        factory_lock(conn)
+        lines = [{**row, "quantity": to_base_units(
+            conn, row["item"], row["quantity"], row.get("unit")
+        )} for row in data["lines"]]
+        return _post_receipt_base({**data, "lines": lines}, user, request_key, kind)
+
+
+# Retry comparison occurs under the same database lock as source creation and posting.
+def _post_receipt_base(data, user, request_key, kind="purchase"):
     if kind not in ("purchase", "opening"):
         raise ValueError("Unknown receipt type.")
     authorize(user, ["admin", "production"] if kind == "purchase" else ["admin"])
