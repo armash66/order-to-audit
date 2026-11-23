@@ -4,6 +4,17 @@ Updated 24 November 2026. Target submission: 27 November, 14:00 IST.
 
 ## Done
 
+- Latest chunk: admin setup checklist, searchable order/customer/staff lists, status/access filters and action-specific posting confirmations. Browser check creates a real fictional staff account in an isolated project.
+- Added API reference, verified binary-safe backup/restore guide and updated historical optional-feature descriptions.
+- Added GitHub Actions CI: frontend/docs checks, fresh Compose, native/regression tests, benchmark, browser checks, restore rehearsal and downloadable tested images. No deployment host configured; hosted Actions status awaits applicant push.
+
+Latest validation: 86 regression tests, 13 native tests, 49 benchmark checks; browser benchmark, UX/account creation, offline reconnect and multilingual mobile checks; 249 translated static phrases and 14 document-link checks. Backup of completed benchmark + created staff restored to a separate PostgreSQL container and passed ledger/source/lot reconciliation; 8 users and Alembic 0003_operator_setup recovered. YAML/permission/cleanup checks passed. Playwright pinned to locally exercised 1.57.0 in CI.
+
+Latest commit points (supersede the earlier file list below):
+
+1. `feat: improve setup discovery and everyday navigation`: `frontend/src/Workspace.tsx`, `frontend/src/translations.json`, `scripts/check_i18n.cjs`, `scripts/react_ux_check.py`, `docs/operations.md`.
+2. `ci: verify application builds and database recovery`: `.github/workflows/ci.yml`, `scripts/backup.py`, `.gitignore`, `.dockerignore`, `scripts/check_docs.py`, `README.md`, `docs/README.md`, `docs/api.md`, `docs/backup-restore.md`, `docs/ci.md`, `docs/security.md`, `docs/extended-features.md`, requirements/assumptions and this handoff.
+
 - FastAPI/React runtime with PostgreSQL, native services and Alembic.
 - Sales, production, immutable stock, reports, setup and optional workflows.
 - Shared English/Tamil/Hindi/Marathi interface catalogue.
