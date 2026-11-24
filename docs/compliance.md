@@ -88,7 +88,7 @@ Known limitations and deliberate PS interpretations are listed in README; no Mus
 
 ## Final contract-gap checks
 
-Additional user-requested delivery improvements: UX-1 is covered by `scripts/react_ux_check.py` (mobile setup discovery, real staff creation, staff/customer search and access filter); OPS-7 by `scripts/backup.py` restoring a completed benchmark and reconciling it; DEV-1 by `.github/workflows/ci.yml`. Local equivalents passed; the hosted Actions run and branch-protection settings remain pending applicant push/configuration. Details are in [CI](ci.md), [backup/restore](backup-restore.md) and [API](api.md).
+Additional user-requested delivery improvements: UX-1 is covered by `scripts/react_ux_check.py` (mobile setup discovery, real staff creation, staff/customer search and access filter); OPS-7 by `scripts/backup.py` restoring a completed benchmark and reconciling it; DEV-1 by `.github/workflows/ci.yml`. Local equivalents previously passed. The first hosted run failed during Playwright installation; the runner fix is in source, but a successful hosted rerun and branch-protection configuration have not been verified in this documentation review. Details are in [CI](ci.md), [backup/restore](backup-restore.md) and [API](api.md).
 
 | Item | Evidence |
 | --- | --- |

@@ -8,7 +8,7 @@ Base URL for local Compose: `http://localhost:8000`. This documents the active F
 
 `GET /api/me` returns the current public user. `POST /api/change-password` accepts `old_password` and `new_password`, returning a fresh session. A temporary-password account must use this route before accessing ordinary workspace endpoints. Passwords are 12–128 characters, unrelated to the username and different from the published demo password.
 
-Business integers in responses are decimal strings, including IDs, paise and base quantities. Ratios are `{"numerator":"146375","denominator":"47"}`; booleans remain JSON booleans. Money inputs are integer paise, never rupee floats. Quantities are base-unit integers or measured objects such as `{"quantity":"10.5","unit":"L"}` where supported. Date inputs use `YYYY-MM-DD`.
+Workspace responses serialize business integers as decimal strings, including IDs, paise and base quantities. The separate `/api/stock` and `/api/stock/{code}/ledger` endpoints return IDs as JSON integers, with quantities and known values as decimal strings; unknown values are null. Workspace ratios are `{"numerator":"146375","denominator":"47"}`; booleans remain JSON booleans. Money inputs are integer paise, never rupee floats. Quantities are base-unit integers or measured objects such as `{"quantity":"10.5","unit":"L"}` where supported. Date inputs use `YYYY-MM-DD`.
 
 ## Reads
 
@@ -130,7 +130,7 @@ Other command actions: `price` (`customer`, `sku`, `price_paise`, `label`, admin
 | 403 | Role/ownership denial, or temporary password change required |
 | 404 | Missing resource on routes that explicitly return 404; some service lookups use 400 |
 | 409 | Database uniqueness/conflict translated by workspace transport; read current record |
-| 422 | FastAPI request shape/date/type validation; `detail` is a list of validation errors |
+| 422 | FastAPI validation of typed request fields and query parameters; `detail` is a list of validation errors. Action-specific command data, including its date, is validated inside the command handler and generally returns 400 instead. |
 
 Example error: `{"detail":"Unit is not valid for this item."}`. Do not assume all failures use 409 or that a network timeout means rollback. Retry only with the original immutable posting payload/key. The service tests in `api/tests.py` contain executable examples for all nine benchmark steps, permissions, tax rounding, edits, retries and optional workflows.
 

@@ -48,7 +48,7 @@ See the [compliance matrix](docs/compliance.md) for evidence. Tally import has n
 
 ## Verify
 
-[Continuous integration](docs/ci.md) runs builds, correctness tests, browser checks and an isolated backup/restore rehearsal on pushes and pull requests. Passing runs produce downloadable application image archives. No hosted deployment target is configured; the first GitHub run remains pending until this workflow is pushed.
+[Continuous integration](docs/ci.md) is configured to run builds, correctness tests, browser checks and an isolated backup/restore rehearsal on pushes and pull requests. Passing runs produce downloadable application image archives. No hosted deployment target is configured. The first hosted run failed during Playwright installation; the runner is now pinned to Ubuntu 24.04. A successful hosted rerun has not been verified in this documentation review.
 
 ```sh
 docker compose --profile test run --build --rm tests
@@ -106,7 +106,7 @@ React/TypeScript provides the screens; FastAPI and SQLAlchemy Core implement exp
 - Posting, reservations and numbering share a factory lock.
 - Corrections append reasoned adjustments or reversals.
 
-The [design note](docs/design.md) and its [two-page PDF](output/pdf/design-note.pdf) explain the model, lifecycle and costing. Earlier Django code remains a development regression oracle; it is absent from the runtime image.
+The [design note](docs/design.md) and its [two-page PDF](output/pdf/design-note.pdf) explain the model, lifecycle and costing. Earlier Django source remains a development regression oracle and is included by the image's source copy. Django itself is installed only in the regression image, not as a runtime dependency.
 
 ## Documentation
 

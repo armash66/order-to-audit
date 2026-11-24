@@ -14,6 +14,6 @@ There is no production target or registry credential configured. Automatically d
 
 Follow [development](development.md) for native/regression tests, then run `scripts/react_benchmark_check.py`, `scripts/react_offline_check.py`, `scripts/react_language_check.py` and `scripts/react_ux_check.py` against an isolated instance. Run the [backup rehearsal](backup-restore.md) after the browser scenario so the restored database includes production and sales documents.
 
-The pipeline is committed as configuration only by the applicant. Local equivalents have been exercised; the actual GitHub-hosted workflow must still run after the applicant pushes it. Do not claim a green Actions run before seeing one.
+The first hosted run failed at browser installation, as described above. The runner fix is present in the current source, and local equivalents were exercised previously. A successful hosted rerun has not been verified in this documentation review. Check Actions for the exact submitted commit before claiming a green run or available delivery artifacts.
 
 GitHub's [workflow syntax](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax) documents triggers and token permissions. CI/CD means continuous integration and continuous delivery/deployment; the supplied internship problem statement evaluates the application, benchmark and engineering quality, not an acronym-based DevOps specialization.

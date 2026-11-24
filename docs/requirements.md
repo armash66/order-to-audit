@@ -1,6 +1,6 @@
-# Requirements baseline — 19 November 2026
+# Requirements — reviewed 24 November 2026
 
-Source: supplied **Problem Statement - Winter Internship Application - 2026 .pdf**, sections 4 and 6; benchmark in section 5. This is a planned acceptance list, not a claim of implementation. Section 6 sets tiers; section 4 supplies detail. `Should` features needed by the mandatory benchmark remain release gates. Additional design constraints are explicitly identified below. All Must rows are committed. Should rows and the single selected stretch STR-4 are planned subject to the explicit cut line below. Optional/deferred rows retain checks for future scope.
+Source: supplied **Problem Statement - Winter Internship Application - 2026 .pdf**, sections 4 and 6; benchmark in section 5. Section 6 sets tiers; section 4 supplies detail. This is the current acceptance contract, originally established on 19 November. All Must/Should application features, optional sales workflows and eight stretch categories are implemented within the documented prototype boundaries; separate WIP inventory is not implemented. Tiers describe priority, not verification status. See [compliance](compliance.md) for recorded evidence, [boundaries](reference.md) for limitations and [submission](submission.md) for unfinished delivery checks. External integration and human usability acceptance are not implied by implementation.
 
 | ID | Requirement | Tier | Acceptance check | PS source |
 | --- | --- | --- | --- | --- |
@@ -17,8 +17,8 @@ Source: supplied **Problem Statement - Winter Internship Application - 2026 .pdf
 | SAL-6 | Invoice share action | Should | A PDF can be shared through a user-triggered email or WhatsApp share action | 4.2 |
 | SAL-7 | Dispatch reduces FG, invoice does not | Must | Step 5a approval: on hand/reserved/available = 238/150/88; 5b invoice: 238/150/88 and receivable ₹7,875; 5c dispatch: 88/0/88; retry cannot deduct twice | 4.2 |
 | SAL-8 | Interstate tax and financial-year sequence | Must | Separate fixture for Karnataka invoice uses 5% IGST and zero CGST/SGST; April 1 starts a new unique FY sequence | 4.2 |
-| SAL-9 | Customer-specific prices or schemes | Optional/deferred | Customer price overrides default and applied scheme is visible | 4.1 |
-| SAL-10 | Partial dispatch and physical returns | Optional/deferred | Partial quantities reconcile to order; accepted return posts a linked positive movement exactly once | 4.2 |
+| SAL-9 | Customer-specific prices or schemes | Optional | Customer price overrides default and applied scheme is visible; schemes are fixed price overrides | 4.1 |
+| SAL-10 | Partial dispatch and physical returns | Optional | Partial quantities reconcile to order; accepted resalable return posts a linked positive movement exactly once | 4.2 |
 | PRD-1 | Run records issues and automatically updates raw and FG stock | Must | Steps 2–3 leave flour 120 kg, oil 19.5 L, spice 3.8 kg, pouches 306, cartons 21 and FG 238 | 4.3, 6 |
 | PRD-2 | Planned/actual consumption and yield | Must | Run displays 188/200 yield (−6%), oil 10.5/10 L (+5%) and each packaging variance | 4.3, 6 |
 | PRD-3 | Run identity, batch scale, expected/actual output and wastage | Must | Run stores product, BOM snapshot, one batch, issued quantities, 188 good packets, 12 unclassified packet-equivalents of yield shortfall and 6 damaged pouches separately; no extra stock deduction for shortfall | 4.3 |
@@ -33,21 +33,21 @@ Source: supplied **Problem Statement - Winter Internship Application - 2026 .pdf
 | PAY-1 | Invoice allocations, collections and customer outstanding | Should; benchmark gate | ₹4,000 payment against A's ₹7,875 invoice leaves ₹3,875; duplicate payment is prevented | 4.2, 4.6, 6 |
 | PAY-2 | Receivables ageing | Should | As-of date groups unpaid amount into current, 1–30, 31–60, 61–90, 91+ days overdue; buckets sum to outstanding; ₹3,875 is current on 19 Nov 2026, 30 days overdue in 1–30 on 19 Dec, and 31 days overdue in 31–60 on 20 Dec (no further payments) | 4.6, 6 |
 | RPT-1 | Sales register and stock report CSV | Must | UTF-8 CSV opens in Excel with headers, units and exact amounts matching the ledger | 4.6, 6 |
-| RPT-2 | Monthly/date-range filtering and CSV/PDF exports | Should; CSV benchmark gate, PDF cuttable | Every section 4.6 report exports CSV for a chosen range; boundary dates included; PDF uses one generic table renderer and may be deferred under the cut line | 4.6 |
+| RPT-2 | Monthly/date-range filtering and CSV/PDF exports | Should; benchmark gate | Every section 4.6 report exports CSV and PDF for a chosen range; boundary dates included; PDF uses one generic table renderer | 4.6 |
 | RPT-3 | Customer-wise and product-wise sales | Should; benchmark gate | A and Murukku show 150 packets, ₹7,500 taxable; unapproved B is excluded | 4.6 |
 | RPT-4 | Outward GST summary mapped to GSTR-1/GSTR-3B fields | Should; benchmark gate | ₹7,500 taxable and ₹375 tax reconcile to invoice register, with documented field mapping; no filing claim | 4.6, 6 |
 | RPT-5 | Purchase register | Should; benchmark gate | Flour purchase appears as 60 kg and ₹2,700; no invented input GST | 4.6 |
 | RPT-6 | Production consumption, yield and wastage report | Should; benchmark gate | Reports expected 200, good 188, −6% yield, +5% oil and unclassified output shortfall separately from packaging damage | 4.6 |
 | RPT-7 | Payments, collections and aged outstanding report | Should; benchmark gate | A shows invoiced ₹7,875, collected ₹4,000 and due ₹3,875 | 4.6 |
 | DASH-1 | Owner dashboard | Should | Today's orders, raw/FG stock, variance alerts, cost and dues reconcile to underlying reports | 6 |
-| STR-1 | Offline capture and sync | Stretch/deferred | Offline order survives restart and sync retries produce one server order | 4.1, 6 |
-| STR-2 | Batch/expiry tracking and FEFO | Stretch/deferred | Dispatch selects earliest non-expired batch with remaining stock | 4.4, 6 |
-| STR-3 | Raw-material reorder thresholds and low-stock alerts | Stretch/deferred | Crossing configured threshold raises item-specific alert | 6 |
+| STR-1 | Offline capture and sync | Stretch | Offline order survives restart; active Offline page syncs on authenticated reconnect/reopen under its creator, and retries produce one server order | 4.1, 6 |
+| STR-2 | Batch/expiry tracking and FEFO | Stretch | Dispatch selects earliest non-expired batch with remaining stock | 4.4, 6 |
+| STR-3 | Raw-material reorder thresholds and low-stock alerts | Stretch | Crossing configured threshold raises item-specific alert | 6 |
 | STR-4 | Production suggestion from pending-order shortages | Stretch/committed | B shortage 32 suggests ceil(32/200) = 1 standard batch. Show BOM needs versus remaining raw/packaging stock and warn if inputs cannot cover required batches. Independent 250-uncovered-packet fixture needs 2 batches, only 1 feasible (oil supports 1.95, pouches 1.53); shortages are 0.5 L oil and 94 pouches. Suggestion never posts stock | 6 |
-| STR-5 | Salesman route/visit log and GPS check-in | Stretch/deferred | Visit records customer, time and consented position | 6 |
-| STR-6 | Tally-compatible export | Stretch/deferred | Sample export imports or validates against a documented format; daily work remains independent | 4.6, 6 |
-| STR-7 | Mock e-Invoice/e-Way Bill data | Stretch/deferred | Dummy payload validates against stated format and mocked response is clearly identified | 6 |
-| STR-8 | Tamil floor interface | Stretch/delivered | Production workflow has Tamil labels with the same quantities and permissions | 6 |
+| STR-5 | Salesman route/visit log and GPS check-in | Stretch | Visit records customer, time and consented position | 6 |
+| STR-6 | Tally-compatible export | Stretch | Sample export passes XML structure and balance checks; real Tally import remains unverified; daily work remains independent | 4.6, 6 |
+| STR-7 | Mock e-Invoice/e-Way Bill data | Stretch | Dummy payload passes local format checks and mocked response is clearly identified; no complete government-schema validation | 6 |
+| STR-8 | Tamil floor interface | Stretch | Production workflow has Tamil labels with the same quantities and permissions; native-speaker review remains pending | 6 |
 | LOC-1 | Consistent English, Tamil, Hindi and Marathi operator text | Applicant addition | Sign-in, setup, daily work, reports and offline capture switch language together; static coverage check and role browser check pass at 360 px | Applicant request |
 
 Additional release constraints from sections 5, 7 and 8 and the requested design:
@@ -61,13 +61,13 @@ Additional release constraints from sections 5, 7 and 8 and the requested design
 | DEL-1 | Seed data and deployability | Must | Fresh instance loads dummy benchmark with one documented command; hosted demo or one-command local run has role logins |
 | DEL-2 | README, design note and demonstrable delivery | Must | README covers setup, stack rationale, tier status, assumptions, gaps and benchmark; design note ≤2 pages; video ≤8 minutes shows mobile/admin; public repo has meaningful history |
 
-Build order: masters/access/ledger → production → sales/invoice/dispatch → benchmark purchases/payments/cost/reports → remaining Should features → STR-4. Django, PostgreSQL and server-rendered pages are accepted; the local foundation is the first implementation chunk. These domain acceptance checks remain the future test list; none is marked passed yet.
+The active stack is FastAPI, SQLAlchemy Core, React/TypeScript and PostgreSQL, with Alembic migrations. Earlier Django services remain a development regression oracle. Current commands are in [development](development.md); recorded acceptance results are in [compliance](compliance.md).
 
-## Cut line if time runs short
+## Historical cut line — superseded on 20 November
 
-Defer in this order: **DASH-1 → AUTH-2 → RPT-2 report PDFs → STR-4**. Record any actual cuts in the README; none are cut yet. Invoice PDF (SAL-2), all Must requirements, all section 4.6 CSV reports and benchmark calculations remain in scope. Report PDFs use one generic table-to-PDF renderer, not seven bespoke layouts. Deferring them is an explicit gap against section 4.6, even though section 6 minimum exports are covered by CSV. SAL-6 is Should because section 6 does not list invoice sharing among the Must features.
+The original fallback order was **DASH-1 → AUTH-2 → RPT-2 report PDFs → STR-4**. None was cut; all are implemented. This historical plan no longer authorizes deferral. SAL-6 remains Should because section 6 does not list invoice sharing among the Must features.
 
-Allowed state transitions and correction limits are defined in [assumptions.md](assumptions.md#allowed-transitions-implementation-contract). Paid/dispatched invoice correction and reversal of runs with subsequent affected-item stock postings are explicitly unsupported; failures must leave no writes. These limits keep AUD-1 implementable without refunds, returns or retroactive valuation.
+Allowed state transitions and correction limits are defined in [assumptions.md](assumptions.md#allowed-transitions-implementation-contract). Full cancellation credit requires an unpaid, undispatched invoice. Resalable returns separately restore stock and credit original value/tax; cash refunds are unsupported. Later affected-item stock postings block run reversal. Failed corrections must leave no writes; retroactive valuation is not implemented.
 
 ## Delivery update — 20 November 2026
 
@@ -83,7 +83,7 @@ These solve operational gaps beyond the PS benchmark without changing its expect
 | OPS-2 | Finished-lot quality hold/release | Additional | Reasoned hold keeps on-hand unchanged, removes lot from available/FEFO stock, blocks approval when necessary and is auditable; release restores availability |
 | OPS-3 | Batch recall lookup | Additional | From a raw lot, show production run, finished lot, dispatch and customer; salesman cannot read it |
 | OPS-4 | Completed-run loss explanation | Additional | Append-only reason and note appear on the run, idempotent retry adds one note, stock/cost/variance stay unchanged |
-| OPS-5 | Multi-SKU offline review | Additional | One offline order contains two SKU quantities, survives restart, shows both lines for review and syncs once on explicit confirmation |
+| OPS-5 | Multi-SKU offline review | Additional | One offline order contains two SKU quantities, survives restart, shows both lines for review and syncs once on authenticated reconnect/reopen of the active Offline page; explicit retry remains available (DEC-69) |
 | OPS-6 | Collection follow-up | Additional | Admin records note and next-contact date for an unpaid invoice; retry is idempotent and outstanding stays unchanged |
 
 ## Operator setup and local-demo hardening — 21 November 2026

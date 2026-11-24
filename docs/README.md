@@ -36,3 +36,11 @@ These documents describe earlier implementation milestones; use the guides above
 - [UX review](ux-review.md)
 
 [Current handoff](../NEXT_STEPS.md) records the remaining submission work.
+
+## Keeping documentation current
+
+Update affected documentation in the same change as behavior, routes, configuration or commands. Keep requirement tiers separate from implementation evidence: requirements.md defines acceptance, compliance.md records verification, and reference.md describes supported boundaries. Mark superseded decisions explicitly rather than leaving conflicting instructions active.
+
+For each change, check the README and relevant operations/API/development guide against the code. Record only checks actually run; distinguish earlier local results from verified hosted CI results for a specific commit. Keep transient status in NEXT_STEPS.md and avoid duplicating counts across guides. Regenerate and visually review the design PDF if its Markdown source changes.
+
+Run `python scripts/check_docs.py` and `git diff --check` for documentation changes, plus relevant application checks for behavior changes. The link checker validates local file targets in selected current guides; it does not validate headings, external links, feature claims or all Markdown files. Manual code-to-document review remains necessary.
