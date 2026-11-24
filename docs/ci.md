@@ -1,5 +1,7 @@
 # Continuous integration and delivery artifacts
 
+The runner is pinned to `ubuntu-24.04` to match Playwright 1.57.0. The first hosted run used `ubuntu-latest`, resolved to Ubuntu 26.04, and failed during browser installation before any browser test ran. Upgrade the runner and Playwright together after checking compatibility; a floating runner label is not a reproducible OS pin.
+
 [Workflow](../.github/workflows/ci.yml) runs on pushes, pull requests and manual dispatch. It grants only repository-content read permission and does not use production credentials. A failed check blocks the delivery-artifact step. Configure the **Application checks / verify** required status check in branch protection after its first successful GitHub run; adding YAML alone does not enforce branch protection.
 
 The workflow builds the frontend, checks translation coverage and documentation links, starts a fresh Compose database, runs native tests and the 49-check benchmark, executes the complete regression suite, runs browser workflows, and rehearses backup/restore. Browser scenarios run after rollback-only benchmark tests because they intentionally create transactions. Cleanup runs even on failure. Logs are printed on failure; database dumps and tokens are never uploaded.

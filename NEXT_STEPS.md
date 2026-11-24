@@ -4,6 +4,8 @@ Updated 24 November 2026. Target submission: 27 November, 14:00 IST.
 
 ## Done
 
+- Hosted CI repair: pinned the runner to Ubuntu 24.04. Uploaded logs show Ubuntu 26.04 was incompatible with Playwright 1.57 at browser installation; application regression checks had passed. Workflow/docs checked locally; the repaired hosted run awaits applicant push.
+
 - Latest chunk: admin setup checklist, searchable order/customer/staff lists, status/access filters and action-specific posting confirmations. Browser check creates a real fictional staff account in an isolated project.
 - Added API reference, verified binary-safe backup/restore guide and updated historical optional-feature descriptions.
 - Added GitHub Actions CI: frontend/docs checks, fresh Compose, native/regression tests, benchmark, browser checks, restore rehearsal and downloadable tested images. No deployment host configured; hosted Actions status awaits applicant push.

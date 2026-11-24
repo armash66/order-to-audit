@@ -10,7 +10,8 @@ concurrency:
   cancel-in-progress: true
 jobs:
   verify:
-    runs-on: ubuntu-latest
+    # Playwright 1.57 supports Noble; ubuntu-latest can advance beyond its supported OS set.
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     env:
       COMPOSE_PROJECT_NAME: ota-ci
