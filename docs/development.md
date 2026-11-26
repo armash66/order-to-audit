@@ -67,6 +67,12 @@ Language checks use existing demo accounts. Other `scripts/react_*.py` workflows
 
 Business writes belong in service functions. Keep money and quantities exact, enforce roles server-side and append corrections rather than rewriting posted movements. Add service tests for business changes.
 
+## Alembic schema cleanup
+
+Revision `0004_drop_unused_django_session` removes only the unused `django_session` table after checking that no table has an incoming foreign key to it. The current installation verified it had no rows. Downgrade recreates the empty table; it cannot restore deleted session data. The initial schema SQL and signature omit this table so fresh installs reach the same schema before applying later revisions.
+
+Do not drop Django auth tables as “boilerplate” without a separate identity migration. Native account, role, seed and security services still use `auth_user`, `auth_group`, and `auth_user_groups`; business/audit actor columns point to `auth_user`. `django_content_type` is referenced by `auth_permission`. The actual database showed 23 foreign keys to `auth_user`. A migration to a native `users` table must preserve user IDs, passwords, roles and every referencing foreign key, update `api/accounts/`, `api/security/`, seed, auth and queries, then pass fresh-install, upgrade, benchmark and native/API tests before legacy auth tables are removed. Never use `CASCADE` for this cleanup.
+
 ## Design PDF
 
 The Markdown design note remains the editable source. With `reportlab` and `pypdf` installed, run `python scripts/render_design.py` to regenerate `output/pdf/design-note.pdf`. The renderer embeds Arial or DejaVu Sans, converts Mermaid relationships to a compact data-model table and asserts exactly two pages plus readable rupee text. Visually review both pages after editing the source.

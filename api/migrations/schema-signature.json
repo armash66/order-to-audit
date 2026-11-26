@@ -329,30 +329,6 @@
       "NO"
     ],
     [
-      "django_session",
-      "session_key",
-      "character varying",
-      "NO",
-      null,
-      "NO"
-    ],
-    [
-      "django_session",
-      "session_data",
-      "text",
-      "NO",
-      null,
-      "NO"
-    ],
-    [
-      "django_session",
-      "expire_date",
-      "timestamp with time zone",
-      "NO",
-      null,
-      "NO"
-    ],
-    [
       "extensions_mocksubmission",
       "id",
       "bigint",
@@ -2504,11 +2480,6 @@
       "PRIMARY KEY (id)"
     ],
     [
-      "django_session",
-      "django_session_pkey",
-      "PRIMARY KEY (session_key)"
-    ],
-    [
       "extensions_mocksubmission",
       "extensions_mocksubmi_invoice_id_ca72f8f0_fk_sales_inv",
       "FOREIGN KEY (invoice_id) REFERENCES sales_invoice(id) DEFERRABLE INITIALLY DEFERRED"
@@ -3759,21 +3730,6 @@
       "django_migrations",
       "django_migrations_pkey",
       "CREATE UNIQUE INDEX django_migrations_pkey ON public.django_migrations USING btree (id)"
-    ],
-    [
-      "django_session",
-      "django_session_expire_date_a5c62663",
-      "CREATE INDEX django_session_expire_date_a5c62663 ON public.django_session USING btree (expire_date)"
-    ],
-    [
-      "django_session",
-      "django_session_pkey",
-      "CREATE UNIQUE INDEX django_session_pkey ON public.django_session USING btree (session_key)"
-    ],
-    [
-      "django_session",
-      "django_session_session_key_c0390e0f_like",
-      "CREATE INDEX django_session_session_key_c0390e0f_like ON public.django_session USING btree (session_key varchar_pattern_ops)"
     ],
     [
       "extensions_mocksubmission",
