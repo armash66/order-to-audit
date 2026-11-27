@@ -54,6 +54,8 @@ Language checks use existing demo accounts. Other `scripts/react_*.py` workflows
 
 ## Code map
 
+`python scripts/react_detail_check.py --url http://localhost:8000` verifies production detail sections, exact percentage/currency display, tolerance badges, missing output and mobile layout using mocked reads. It does not write business records.
+
 | Path | Responsibility |
 | --- | --- |
 | `api/main.py`, `workflows.py` | Authentication and HTTP routes |

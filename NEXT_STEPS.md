@@ -4,6 +4,8 @@ Updated 27 November 2026. Target submission: 27 November, 14:00 IST.
 
 ## Current interface update
 
+Production detail follow-up: replaced the nested report dump with output metrics, planned/issued consumption table, explicit variance badges, itemized costing and separate packaging damage. Invoice totals now have labelled metrics; stock/recall source fields use aligned label/value rows. New read-only `react_detail_check.py` covers benchmark display figures, pending output and desktop/mobile layout; included in CI. No business logic or valuation rules changed. Validation: frontend build, detail/layout/guidance browser checks and 360 px language checks passed; 290 static strings have translations in all three languages. Screenshot review caught and fixed a legacy grid rule clipping costing rows. Documentation link checking fails because the pre-existing local deletion of output/pdf/design-note.pdf leaves three broken links; that unrelated deletion was left untouched.
+
 Implemented sidebar navigation and profile controls, searchable/sortable paginated tables, visible report choices and contextual account actions. Business action accordions are now focused task dialogs across orders, production, setup, quality, prices and visits. Small choices use visible radio buttons; larger catalogues use searchable lists, including offline capture. Orders and production show a Next step guide. Dashboard/stock/ledger have independent g/kg and ml/L column-header switches, displaying exactly one value per cell. Setup shortcuts, account controls and language buttons are always visible; no select dropdowns or details accordions remain. A shared product stylesheet replaces the dark green shell with light navigation, restrained blue accents, compact tables and consistent controls.
 
 Validation: frontend build, 269 static phrases across three languages, documentation links, nine-step browser benchmark, mobile setup/account flow, offline reconnect/reopen, layout checks, and guidance tests for search, item-specific units, signed/fractional quantity display and keyboard focus. Language checks pass at 360 and 1280 px across four roles. Browser keyboard tests caught focus escaping the task dialog; the focus loop was fixed and the test passed. Mobile screenshot review also removed a submit button that overlapped inputs while scrolling.
@@ -71,3 +73,5 @@ Files:
 - `scripts/render_design.py`, `output/pdf/design-note.pdf`: reproducible, visually verified two-page submission note.
 
 No staging, commits or pushes performed.
+
+Recording handoff: docs/react-demo.md now includes isolated PowerShell setup, pre-recording benchmark check, exact narration and upload/cleanup steps. Broken PDF links now use the existing Markdown design note; the unrelated local PDF deletion remains uncommitted. Numeric columns align and absent monetary values are labelled Unknown.

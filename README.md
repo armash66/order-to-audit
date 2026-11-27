@@ -106,7 +106,7 @@ React/TypeScript provides the screens; FastAPI and SQLAlchemy Core implement exp
 - Posting, reservations and numbering share a factory lock.
 - Corrections append reasoned adjustments or reversals.
 
-The [design note](docs/design.md) and its [two-page PDF](output/pdf/design-note.pdf) explain the model, lifecycle and costing. Earlier Django source remains a development regression oracle and is included by the image's source copy. Django itself is installed only in the regression image, not as a runtime dependency.
+The [design note](docs/design.md) explains the model, lifecycle and costing. Earlier Django source remains a development regression oracle and is included by the image's source copy. Django itself is installed only in the regression image, not as a runtime dependency.
 
 ## Documentation
 

@@ -7,7 +7,7 @@ const catalog = require(path.join(root, "translations.json"));
 const languages = ["ta", "hi", "mr"];
 const exempt = new Set(["Order-to-Audit", "ORDER-TO-AUDIT"]);
 const labels = new Map([["field", 1], ["choice", 1], ["form", 0],
-  ["setMessage", 0], ["setError", 0], ["Error", 0], ["translate", 0]]);
+  ["setMessage", 0], ["setError", 0], ["Error", 0], ["translate", 0], ["metric", 0]]);
 const used = new Set();
 
 function collect(source, node) {

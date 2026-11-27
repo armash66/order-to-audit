@@ -116,7 +116,7 @@ function Table({ rows, onOpen, searchable = false, unitFor }: { rows: Row[]; onO
     </>}
     {!rows.length ? <p className="empty-state">No records yet.</p> : !filtered.length ? <p className="empty-state">No matching records.</p> :
       <div className="table-wrap"><table><thead><tr>{columns.map(key =>
-        <th key={key} scope="col" aria-sort={sort.key === key ? sort.descending ? "descending" : "ascending" : "none"}>
+        <th key={key} scope="col" className={key.endsWith("paise") || /quantity|packets/.test(key) ? "numeric" : undefined} aria-sort={sort.key === key ? sort.descending ? "descending" : "ascending" : "none"}>
           <button className="sort-button" onClick={() => setSort({key, descending: sort.key === key && !sort.descending})}>
             {translate(labels[key] || key.replaceAll("_", " "))}<span aria-hidden="true">{sort.key === key ? sort.descending ? " ↓" : " ↑" : " ↕"}</span>
           </button>
@@ -141,7 +141,57 @@ function Table({ rows, onOpen, searchable = false, unitFor }: { rows: Row[]; onO
   </section>);
 }
 
+// Show ratios as percentages, rounded half-up to two decimals using integers only.
+function percentage(ratio: Row | null): string {
+  if (!ratio) return "—";
+  const numerator = BigInt(ratio.numerator), denominator = BigInt(ratio.denominator);
+  const absolute = numerator < 0n ? -numerator : numerator;
+  const scaled = (absolute * 20000n + denominator) / (2n * denominator);
+  return `${numerator < 0n ? "−" : numerator > 0n ? "+" : ""}${scaled / 100n}${scaled % 100n ? "." + String(scaled % 100n).padStart(2, "0").replace(/0$/, "") : ""}%`;
+}
+
+// Separate output, consumption and costing so each figure has a business meaning.
+function ProductionSummary({report, standards}: {report: Row; standards: Row[]}) {
+  const translate = useTranslate(), localize = useLocalize();
+  const status = (ratio: Row | null, flagged: boolean) => !ratio ? translate("Not recorded") : translate(flagged ? "Flagged" : "Within tolerance");
+  const metric = (label: string, value: React.ReactNode) => <div><dt>{translate(label)}</dt><dd>{value ?? "—"}</dd></div>;
+  return localize(<section className="production-summary" aria-label="Variance and costing">
+    <section className="card">
+      <h2>Production output</h2>
+      <dl className="detail-metrics">
+        {metric("Expected packets", report.expected_packets)}{metric("Good packets", report.good_packets)}
+        {metric("Yield variance", <><strong>{percentage(report.yield.ratio)}</strong><span className={"variance-state " + (report.yield.flagged ? "flagged" : "")}>{status(report.yield.ratio, report.yield.flagged)}</span></>)}
+        {metric("Unclassified shortfall", report.unclassified_shortfall)}
+      </dl>
+    </section>
+    <section className="card consumption-card">
+      <div className="section-heading"><h2>Material consumption</h2><span>{translate("Tolerance")}: {percentage({numerator: report.tolerance_bps, denominator: "10000"}).replace("+", "")}</span></div>
+      <p>Flags use the current tolerance. Packaging damage is included in issued quantities.</p>
+      <div className="table-wrap"><table><thead><tr><th>Item</th><th>Planned</th><th>Issued</th><th>Variance</th><th>Status</th></tr></thead>
+        <tbody>{Object.entries(report.consumption).map(([code, entry]) => {
+          const row = entry as Row, item = standards.find(s => s.item__code === code);
+          const quantity = (value: unknown) => value == null ? "—" : quantityText(value, item?.item__base_unit || "piece");
+          return <tr key={code}><td>{translate(item?.item__name || code)}</td><td className="numeric">{quantity(row.planned)}</td><td className="numeric">{quantity(row.actual)}</td><td className="numeric">{percentage(row.ratio)}</td><td><span className={"variance-state " + (row.flagged ? "flagged" : "")}>{status(row.ratio, row.flagged)}</span></td></tr>;
+        })}</tbody></table></div>
+    </section>
+    <div className="detail-columns">
+      <section className="card"><h2>Run costing</h2><dl className="cost-breakdown">
+        {metric("Materials and packaging", money(report.materials_paise))}{metric("Overheads", money(report.overhead_paise))}
+        {metric("Total run cost", money(report.total_paise))}{metric("Cost per good packet", report.display_cost_paise == null ? "—" : money(report.display_cost_paise))}
+        {metric("Margin per packet", display(report.margin_paise, "margin"))}
+      </dl><p>Total run cost divided by good packets. Amounts are rounded only for display.</p>
+      <p>Finished-goods stock value includes materials only; overheads are included in run costing.</p></section>
+      <section className="card"><h2>Packaging damage</h2>
+        <dl className="cost-breakdown">{Object.entries(report.damaged_packaging).map(([code, value]) => <React.Fragment key={code}>{metric(standards.find(s => s.item__code === code)?.item__name || code, quantityText(value, "piece"))}</React.Fragment>)}</dl>
+        {!Object.keys(report.damaged_packaging).length && <p>Not recorded</p>}
+        <p>Packaging damage and unclassified output shortfall are separate measures.</p>
+      </section>
+    </div>
+  </section>);
+}
+
 function display(value: any, key = ""): React.ReactNode {
+  if (key.endsWith("paise") && value == null) return "Unknown";
   if (value === null || value === undefined) return "—";
   if (key.endsWith("paise") && typeof value === "string") return money(value);
   // Cost ratios stay exact until half-up rounding for the currency display.
@@ -163,7 +213,7 @@ function display(value: any, key = ""): React.ReactNode {
     );
   if (typeof value === "object")
     return (
-      <dl>
+      <dl className="document-facts">
         {Object.entries(value).map(([k, v]) => (
           <React.Fragment key={k}>
             <dt>{k.replaceAll("_", " ")}</dt>
@@ -602,16 +652,14 @@ export function Workspace({
           {data.invoice && (
             <section className="card">
               <h2>Invoice {data.invoice.number}</h2>
-              <p>
-                Taxable {money(data.invoice.taxable_paise)} · CGST{" "}
-                {money(data.invoice.cgst_paise)} · SGST{" "}
-                {money(data.invoice.sgst_paise)} · IGST{" "}
-                {money(data.invoice.igst_paise)}
-              </p>
-              <h3>
-                Total {money(data.invoice.total_paise)} · Outstanding{" "}
-                {money(data.invoice.outstanding)}
-              </h3>
+              <dl className="detail-metrics invoice-totals">
+                <div><dt>Taxable</dt><dd>{money(data.invoice.taxable_paise)}</dd></div>
+                <div><dt>CGST</dt><dd>{money(data.invoice.cgst_paise)}</dd></div>
+                <div><dt>SGST</dt><dd>{money(data.invoice.sgst_paise)}</dd></div>
+                <div><dt>IGST</dt><dd>{money(data.invoice.igst_paise)}</dd></div>
+                <div><dt>Total</dt><dd>{money(data.invoice.total_paise)}</dd></div>
+                <div><dt>Outstanding</dt><dd>{money(data.invoice.outstanding)}</dd></div>
+              </dl>
               <button
                 onClick={() =>
                   download(`/invoices/${data.invoice.id}/pdf`, "invoice.pdf")
@@ -816,6 +864,7 @@ export function Workspace({
           <h2>
             {data.name} · {translate(data.state)}
           </h2>
+          <ProductionSummary report={data.report} standards={data.standards} />
           {data.state === "draft" &&
             form(
               "Issue raw materials",
@@ -905,10 +954,6 @@ export function Workspace({
               [dateField, field("reason", "Reason")],
               { id: selected },
             )}
-          <section className="card">
-            <h2>Variance and costing</h2>
-            {display(data.report)}
-          </section>
         </>
       )}
       {page === "stock" && Array.isArray(data) && (

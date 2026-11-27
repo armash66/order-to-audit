@@ -8,7 +8,7 @@ Target: **27 November 2026, 14:00 IST**. The reported application close is 17:00
 | --- | --- | --- |
 | Public source repository and clear history | GitHub's unauthenticated API confirms [armash66/order-to-audit](https://github.com/armash66/order-to-audit) is public; the old leading-hyphen URL redirects there. | Applicant commits/pushes these changes and checks the final branch/history. No agent commit or push. |
 | README | Setup, logins, rationale, tiers, benchmark numbers, assumptions and gaps are inline. | Check the published README after pushing. |
-| Design note, maximum two pages | [Markdown](design.md) and [two-page PDF](../output/pdf/design-note.pdf). | Include the PDF in the submitted repository. |
+| Design note, maximum two pages | [Markdown design note](design.md). | Markdown is accepted; verify the final two-page limit. |
 | Video, maximum eight minutes | [Timed guide](react-demo.md) is ready. **No uploaded video link verified.** | Record the nine steps in order with mobile and admin views, upload and add the link to README. |
 | Live link or one-command run | `docker compose up --build -d --wait`; five role groups and six demo accounts. Hosted demo is not required. | Recheck the final submitted checkout after any further changes. |
 

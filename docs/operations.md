@@ -34,9 +34,11 @@ Rejecting a pre-invoice order requires a reason and releases its reservation. Fu
 
 The service posts stock automatically at issue and completion. A variance flags only when its absolute value exceeds the configured tolerance. Changing tolerance also changes alerts shown on past reports.
 
+Open a production run to review four sections: **Production output**, **Material consumption**, **Run costing** and **Packaging damage**. Planned and issued quantities appear side by side with their units, percentage variance and a text flag. Missing actual output is shown as not recorded, rather than zero. Costing separates materials, overheads, total cost, cost per good packet and margin. Packaging damage remains separate from the unclassified output shortfall. Actions appear after this summary.
+
 ## Stock and quality
 
-**Stock** shows ledger-derived quantities. Dashboard stock, stock summary and item ledger quantities show one value per cell. Use the g/kg and ml/L buttons in the Quantity column header to select the display units independently; pieces and packets retain their units. Each table starts in kg/L. Conversion is display-only; exports retain their existing base-unit columns. Open an item and then a movement to inspect its source document. **Batches** shows expiry and quality status, recall links and reorder alerts. Held or expired stock is unavailable for new fulfilment even though it remains physically on hand.
+**Stock** shows ledger-derived quantities. Dashboard stock, stock summary and item ledger quantities show one value per cell. Use the g/kg and ml/L buttons in the Quantity column header to select the display units independently; pieces and packets retain their units. Each table starts in kg/L. Numeric headers and cells align right. Unknown valuation means a source cost is missing, not zero; the benchmark opening finished goods have no supplied cost. Conversion is display-only; exports retain their existing base-unit columns. Open an item and then a movement to inspect its source document. **Batches** shows expiry and quality status, recall links and reorder alerts. Held or expired stock is unavailable for new fulfilment even though it remains physically on hand.
 
 ## Reports
 
