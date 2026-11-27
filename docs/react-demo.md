@@ -28,19 +28,7 @@ Use your screen recorder with screen capture and microphone enabled. Capture the
 
 For the salesman segment, use Chrome/Edge developer tools, toggle device emulation and set the viewport to 390×844. Return to desktop mode for admin work. This demonstrates the mobile layout; do not claim it is a physical-phone recording.
 
-Use the nine numbered steps below for exact entries. Narrate in your own words using this script:
-
-1. **Opening (0:00–0:25):** “Order-to-Audit connects field orders, production, stock and collections for a small snack factory. Each stock movement links to its source document.” Open Stock and show opening flour 100 kg and finished goods 50 packets.
-2. **Purchase (0:25–0:55):** “I receive 60 kg of flour for ₹2,700. Flour is now 160 kg. Weighted-average valuation combines the opening and purchase costs.” Enter the receipt once.
-3. **Issue (0:55–1:35):** “One batch expects 200 packets. Actual oil is 10.5 litres against a 10-litre standard.” Create and issue the run using the values below.
-4. **Complete (1:35–2:35):** “The run produces 188 good packets. I issue 194 pouches, including six damaged, and nine cartons.” Show output, consumption and damage sections. “Yield is −6%, oil is +5%, and cartons are −10%. Pouches are exactly −3%, so they do not exceed the 3% tolerance. The 12-packet shortfall remains unclassified; packaging damage is separate.” Show FG 238 and raw balances.
-5. **Mobile order (2:35–3:10):** Sign out, sign in as salesman_a in mobile mode. “The salesman submits 150 packets for Retailer A directly to the factory.” Submit once.
-6. **Billing (3:10–4:20):** Sign in as admin on desktop, open A's order. “Approval reserves 150 packets but leaves 238 on hand; available stock is 88. Invoicing also leaves physical stock unchanged.” Show PDF: ₹7,500 + ₹187.50 CGST + ₹187.50 SGST = ₹7,875. Dispatch. “Dispatch now reduces on-hand stock to 88 and clears the reservation.”
-7. **Shortage (4:20–4:55):** Sign in as salesman_b, submit 120 packets for Distributor B. Switch to admin and open it. “Only 88 are available, so the shortage is 32. The order stays submitted rather than overselling. Karnataka would use IGST if invoiced.”
-8. **Payment (4:55–5:20):** Open Retailer A's order and record ₹4,000. “The outstanding balance is now ₹3,875.”
-9. **Cost (5:20–6:05):** Open the production run, add Labour ₹1,200 and Gas/power ₹600. “Materials and packaging cost ₹4,055; overheads bring the total to ₹5,855. Dividing by 188 good packets gives ₹31.14 displayed, with the exact fraction retained. Money is stored in integer paise. Finished-goods valuation excludes overheads.”
-10. **Reports (6:05–7:20):** Sign in as accountant, select November 2026, show sales, GST, purchase, stock/ledger, production and collections/ageing reports. Export a CSV and PDF, open at least one. “Reports reuse the posted transactions; the accountant has read-only access.” Briefly show the owner dashboard.
-11. **Close (7:20–7:50):** Show the saved successful benchmark terminal output and README/design note. “These 49 automated checks exercise the scenario through the real services. The README documents assumptions and limitations, and Docker Compose runs the application locally.”
+Use the [full conversational narration](demo-narration.md) while following the nine numbered entry steps below. It explains the business decisions as they appear on screen, with pauses for actions. Rehearse and adjust the wording to your own voice rather than memorizing it.
 
 Rehearse once. A rehearsal creates transactions: start a NEW project name using the preparation commands for the actual recording. Do not rerun the manual scenario on the same database. The existing `scripts/record_demo.py` still targets old dropdowns/accordions and is not a supported recording route for this UI.
 

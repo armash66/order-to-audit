@@ -1,5 +1,7 @@
 # Current handoff
 
+CI follow-up: hosted run 45995332725 passed build, native benchmark and regression stages, then failed in Browser workflows. Detailed hosted logs require authentication. A fresh local reproduction failed at the old combined invoice-total text locator; the redesigned screen separates labels and values. Updated total/outstanding assertions to check their labelled entries. All seven browser scripts then passed sequentially on an isolated instance, plus documentation and translation checks. Hosted rerun still needs verification after pushing this fix. Recording guides now include a phone cue sheet with actions, exact entries and narration.
+
 Updated 27 November 2026. Target submission: 27 November, 14:00 IST.
 
 ## Current interface update
