@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { ChoiceField } from "./ChoiceField";
+import { TaskPanel } from "./TaskPanel";
 import { useErrorText, useLocalize } from "./language";
 
 export function VisitForm({
@@ -20,9 +22,8 @@ export function VisitForm({
     [busy, setBusy] = useState(false),
     [key, setKey] = useState(crypto.randomUUID());
   return localize(
-    <details className="card">
-      <summary>Record visit with optional GPS</summary>
-      <form
+    <TaskPanel title="Record visit with optional GPS" completedKey={key}>
+      <form className="action-fields"
         onSubmit={async (event) => {
           event.preventDefault();
           if (busy) return;
@@ -44,16 +45,8 @@ export function VisitForm({
           }
         }}
       >
-        <label>
-          Customer
-          <select name="customer">
-            {customers.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-        </label>
+        <ChoiceField field={{name:"customer",label:"Customer"}} resetKey={key}
+          options={customers.map(c => ({value:String(c.id),label:c.name}))} />
         <label>
           Route / area
           <input name="route" required />
@@ -106,6 +99,6 @@ export function VisitForm({
         <button disabled={busy}>Record visit</button>
         <p role="status">{messageIsError ? errorText(message) : message}</p>
       </form>
-    </details>
+    </TaskPanel>
   );
 }

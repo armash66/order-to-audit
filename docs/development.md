@@ -48,6 +48,10 @@ python scripts/react_language_check.py --width 1280
 
 Language checks use existing demo accounts. Other `scripts/react_*.py` workflows can create records and must run against an isolated demo instance; pass its URL with `--url`.
 
+`python scripts/react_layout_check.py --url http://localhost:8000` checks sidebar profile controls, contextual staff actions, report selection, responsive widths, filtering, pagination and exact ID sorting. It mocks only the order-list read response to exercise 45 rows without creating orders; it does not submit staff access or password changes. Screenshots are written to the operating system's temporary directory.
+
+`python scripts/react_guidance_check.py --url http://localhost:8000` checks focused task dialogs, keyboard focus and Escape, searchable customer choices, item-specific units and column-header unit switching with one exact value per cell (including fractional and negative quantities). It mocks catalogue, dashboard and ledger reads and does not post business transactions.
+
 ## Code map
 
 | Path | Responsibility |

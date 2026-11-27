@@ -18,12 +18,12 @@ def main():
             page.get_by_label('Username',exact=True).fill(user)
             page.get_by_label('Password',exact=True).fill('DemoPass123!')
             page.get_by_role('button',name='Sign in',exact=True).click()
-            expect(page.get_by_role('button',name='Sign out')).to_be_visible()
+            expect(page.locator('.profile-identity')).to_be_visible()
         def nav(name):
             page.get_by_role('navigation').get_by_role('button',name=name,exact=True).click()
         def form(title):
-            panel=page.locator('details').filter(has=page.locator('summary',has_text=title)).first
-            if panel.get_attribute('open') is None:panel.locator('summary').click()
+            panel=page.get_by_role('dialog',name=title,exact=True)
+            if not panel.is_visible():page.locator('button[data-action-title]').filter(has_text=title).first.click()
             return panel
         def save(panel,title):
             panel.get_by_role('button',name=title,exact=True).click()
@@ -31,8 +31,8 @@ def main():
             expect(page.locator('[role=alert]')).to_have_count(0)
         login('production')
         p=form('Receive materials')
-        p.get_by_label('Item',exact=True).select_option(label='Flour')
-        p.get_by_label('Unit',exact=True).select_option('kg')
+        p.get_by_role('group',name='Item',exact=True).get_by_role('radio',name='Flour',exact=True).check()
+        p.locator('input[name=unit][value=kg]').check()
         p.get_by_label('Quantity',exact=True).fill('60')
         p.get_by_label('Total value (₹)').fill('2700')
         save(p,'Receive materials')
@@ -40,7 +40,7 @@ def main():
         page.get_by_role('button',name='Open',exact=True).first.click()
         p=form('Issue raw materials')
         for code,value,unit in [('FLOUR','40','kg'),('OIL','10.5','L'),('SPICE','1.2','kg')]:
-            p.locator(f'select[name="unit_{code}"]').select_option(unit)
+            p.locator(f'input[name="unit_{code}"][value="{unit}"]').check()
             p.locator(f'input[name="qty_{code}"]').fill(value)
         save(p,'Issue raw materials')
         p=form('Complete production')
@@ -50,7 +50,7 @@ def main():
         save(p,'Complete production')
         login('salesman_a');page.set_viewport_size({'width':360,'height':900})
         started=monotonic()
-        p=form('Submit order');p.get_by_label('Customer',exact=True).select_option(label='Demo Retailer A')
+        p=form('Submit order');p.get_by_role('group',name='Customer',exact=True).get_by_role('radio',name='Demo Retailer A',exact=True).check()
         p.locator('input[name^="qty_"]').first.fill('150');save(p,'Submit order')
         print(f'Automated mobile order entry: {monotonic()-started:.1f}s (human trial still required)')
         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
@@ -73,7 +73,7 @@ def main():
         p=form('Dispatch remaining order');save(p,'Dispatch remaining order')
         p=form('Record payment');p.get_by_label('Amount (₹)').fill('4000');save(p,'Record payment')
         expect(page.get_by_text('Outstanding ₹3875.00',exact=False)).to_be_visible()
-        login('salesman_b');p=form('Submit order');p.get_by_label('Customer',exact=True).select_option(label='Demo Distributor B')
+        login('salesman_b');p=form('Submit order');p.get_by_role('group',name='Customer',exact=True).get_by_role('radio',name='Demo Distributor B',exact=True).check()
         p.locator('input[name^="qty_"]').first.fill('120');save(p,'Submit order')
         page.get_by_role('button',name='Open',exact=True).first.click()
         expect(page.get_by_role('cell',name='32',exact=True)).to_be_visible()

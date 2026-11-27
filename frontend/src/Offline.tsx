@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { LanguageSwitch, useLocalize, useTranslate } from "./language";
+import { ChoiceField } from "./ChoiceField";
 type Props = { catalog?: any; token?: string };
 const queueKey = "ota-react-orders-v1";
 
@@ -20,6 +21,7 @@ export function Offline({ catalog, token }: Props) {
   );
   const [busy, setBusy] = useState(false);
   const [extraLines, setExtraLines] = useState<number[]>([]);
+  const [formKey, setFormKey] = useState("initial");
   const syncing = useRef(false);
   async function sync() {
     if (
@@ -120,41 +122,24 @@ export function Offline({ catalog, token }: Props) {
             setQueue(next);
             setExtraLines([]);
             event.currentTarget.reset();
+            setFormKey(crypto.randomUUID());
             setMessage("Order saved on this device.");
           } catch {
             setMessage("Device storage failed; order was not saved.");
           }
         }}
       >
-        <label>
-          Customer
-          <select name="customer">
-            {saved.customers.map((c: any) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Product
-          <select name="sku">
-            {saved.skus.map((s: any) => (
-              <option key={s.id} value={s.id}>
-                {s.item__name}
-              </option>
-            ))}
-          </select>
-        </label>
+        <ChoiceField field={{name:"customer",label:"Customer"}} resetKey={formKey}
+          options={saved.customers.map((c:any) => ({value:String(c.id),label:c.name}))} />
+        <ChoiceField field={{name:"sku",label:"Product"}} resetKey={formKey}
+          options={saved.skus.map((s:any) => ({value:String(s.id),label:s.item__name}))} />
         <label>
           Packets
           <input name="quantity" type="number" min="1" step="1" required />
         </label>
         {extraLines.map((line) => <React.Fragment key={line}>
-          <label>Another product
-            <select name={"sku" + line}>{saved.skus.map((s: any) =>
-              <option key={s.id} value={s.id}>{s.item__name}</option>)}</select>
-          </label>
+          <ChoiceField field={{name:"sku" + line,label:"Another product"}} resetKey={formKey}
+            options={saved.skus.map((s:any) => ({value:String(s.id),label:s.item__name}))} />
           <label>Packets
             <input name={"quantity" + line} type="number" min="1" step="1" required />
           </label>

@@ -44,15 +44,11 @@ export function useErrorText() {
 export function LanguageSwitch() {
   const { language, setLanguage } = useLanguage();
   const translate = useTranslate();
-  return <label>{translate("Language")}
-    <select data-testid="language-switch" aria-label={translate("Language")} value={language}
-      onChange={event => setLanguage(event.target.value as Language)}>
-      <option value="en">English</option>
-      <option value="ta">தமிழ்</option>
-      <option value="hi">हिन्दी</option>
-      <option value="mr">मराठी</option>
-    </select>
-  </label>;
+  return <fieldset className="language-picker" data-testid="language-switch">
+    <legend>{translate("Language")}</legend>
+    {([ ["en", "English"], ["ta", "தமிழ்"], ["hi", "हिन्दी"], ["mr", "मराठी"] ] as const).map(([code, label]) =>
+      <button key={code} type="button" data-language={code} aria-pressed={language === code} onClick={() => setLanguage(code)}>{label}</button>)}
+  </fieldset>;
 }
 
 // Translate known screen copy and seed names, leaving unknown data values intact.

@@ -32,7 +32,7 @@ function collect(source, node) {
   ts.forEachChild(node, child => collect(source, child));
 }
 
-for (const name of ["main", "Workspace", "Offline", "VisitForm"]) {
+for (const name of ["main", "Workspace", "Offline", "VisitForm", "ChoiceField", "TaskPanel"]) {
   const file = path.join(root, name + ".tsx");
   const source = ts.createSourceFile(file, fs.readFileSync(file, "utf8"),
     ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);

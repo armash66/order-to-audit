@@ -1,6 +1,18 @@
 # Current handoff
 
-Updated 24 November 2026. Target submission: 27 November, 14:00 IST.
+Updated 27 November 2026. Target submission: 27 November, 14:00 IST.
+
+## Current interface update
+
+Implemented sidebar navigation and profile controls, searchable/sortable paginated tables, visible report choices and contextual account actions. Business action accordions are now focused task dialogs across orders, production, setup, quality, prices and visits. Small choices use visible radio buttons; larger catalogues use searchable lists, including offline capture. Orders and production show a Next step guide. Dashboard/stock/ledger have independent g/kg and ml/L column-header switches, displaying exactly one value per cell. Setup shortcuts, account controls and language buttons are always visible; no select dropdowns or details accordions remain. A shared product stylesheet replaces the dark green shell with light navigation, restrained blue accents, compact tables and consistent controls.
+
+Validation: frontend build, 269 static phrases across three languages, documentation links, nine-step browser benchmark, mobile setup/account flow, offline reconnect/reopen, layout checks, and guidance tests for search, item-specific units, signed/fractional quantity display and keyboard focus. Language checks pass at 360 and 1280 px across four roles. Browser keyboard tests caught focus escaping the task dialog; the focus loop was fixed and the test passed. Mobile screenshot review also removed a submit button that overlapped inputs while scrolling.
+
+New `scripts/react_layout_check.py` and `scripts/react_guidance_check.py` are included in CI. They mock read responses and do not submit business transactions. Write-based browser checks use an isolated database. Backend services and posting rules were not changed; backend suites were not rerun for this interface change. Automated checks do not certify native-speaker wording or human under-one-minute usability.
+
+Follow-up verification: the corrected single-value unit switches, permanently visible account/language controls and light product theme pass browser guidance/layout checks and 360/1280 px multilingual checks. The nine-step browser benchmark and mobile setup/account checks passed again on a fresh isolated database. Translation coverage initially flagged the new unit-group labels; explicit unchanged unit labels were added to each catalogue.
+
+Commit point: `feat: redesign workspace and add column unit switches`. Files: frontend components/styles/catalogue; React browser checks and translation checker; CI workflow; operations/development guides and this handoff. Existing Compose and video-recording work belongs to the applicant and is outside this change.
 
 ## Done
 

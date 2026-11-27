@@ -4,9 +4,9 @@
 
 ## Set up the factory
 
-Sign in as admin. In **Setup**, create separate staff accounts, customers and suppliers, materials, sellable products and BOM versions. Temporary staff passwords must be replaced on first sign-in. For the internship submission use fictional records only.
+Sign in as admin. Use the sidebar for daily work and setup; on a phone, scroll the navigation horizontally. The always-visible profile section beneath the language buttons contains **Change password** and **Sign out**. In **Setup**, create separate staff accounts, customers and suppliers, materials, sellable products and BOM versions. Open a staff row to enable/disable that account or reset its temporary password. Temporary staff passwords must be replaced on first sign-in. For the internship submission use fictional records only.
 
-The **Factory setup checklist** on the admin Orders page links directly to Staff, Customers & suppliers, Materials & products and Recipes. Counts include demo records and are review prompts, not proof that your factory is configured. Staff, customer and order tables support **Search records**; order status and staff access can be filtered. **Clear filters** restores the list. Search covers records already loaded on that screen; it is not a server-wide index. Successful posting actions state what changed in stock, reservation or receivables.
+The compact **Factory setup checklist** shortcuts on the admin Orders page links directly to Staff, Customers & suppliers, Materials & products and Recipes. Counts include demo records and are review prompts, not proof that your factory is configured. Staff, customer, order, production and stock lists support **Search records**. Visible status/access/category tabs filter applicable lists. Click a column heading to sort; lists show 20 rows per page. **Clear filters** restores the list. Search and sorting cover records already loaded on that screen, not a server-wide index. Orders and production show their record lists before creation tools. The Next step panel suggests an action for the selected record. Click an action button to open its focused form; choose visible options or search a longer list, review the values, then submit. Close or Escape dismisses the form without posting. Successful posting actions state what changed in stock, reservation or receivables.
 
 Materials use integer grams, millilitres or pieces. Products define pack size, list price, HSN and packets per carton. A BOM combines a versioned ingredient recipe with SKU-specific packaging and expected packets. New versions affect future runs.
 
@@ -36,11 +36,11 @@ The service posts stock automatically at issue and completion. A variance flags 
 
 ## Stock and quality
 
-**Stock** shows ledger-derived quantities. Open an item and then a movement to inspect its source document. **Batches** shows expiry and quality status, recall links and reorder alerts. Held or expired stock is unavailable for new fulfilment even though it remains physically on hand.
+**Stock** shows ledger-derived quantities. Dashboard stock, stock summary and item ledger quantities show one value per cell. Use the g/kg and ml/L buttons in the Quantity column header to select the display units independently; pieces and packets retain their units. Each table starts in kg/L. Conversion is display-only; exports retain their existing base-unit columns. Open an item and then a movement to inspect its source document. **Batches** shows expiry and quality status, recall links and reorder alerts. Held or expired stock is unavailable for new fulfilment even though it remains physically on hand.
 
 ## Reports
 
-Select the report and date range in **Reports**, then export CSV or PDF. Report families cover sales, customer/product sales, GST, purchases, stock, production, collections and ageing. Ageing uses the selected end date as its as-of date. Stock uses posting dates; commercial registers use document dates.
+Choose a visible report button and date range in **Reports**, then export CSV or PDF. Report families cover sales, customer/product sales, GST, purchases, stock, production, collections and ageing. Ageing uses the selected end date as its as-of date. Stock uses posting dates; commercial registers use document dates. Table pagination affects the screen only; exports include the full selected report.
 
 ## Offline orders and visits
 
@@ -52,4 +52,4 @@ After a browser restart, open `/offline` for cached capture. **Clear this device
 
 ## Language
 
-Use the language selector at sign-in or in the workspace. It changes operator text and persists on that browser. Brand names, codes, newly entered business names and exported documents are not automatically translated.
+Use the visible language buttons at sign-in or in the workspace. It changes operator text and persists on that browser. Brand names, codes, newly entered business names and exported documents are not automatically translated.

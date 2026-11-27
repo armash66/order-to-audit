@@ -5,6 +5,7 @@ import { Offline } from "./Offline";
 import { LanguageProvider, LanguageSwitch, useErrorText, useLocalize, useTranslate } from "./language";
 import "./style.css";
 import "./workspace.css";
+import "./product.css";
 
 type Session = {
   access_token: string;
@@ -146,23 +147,21 @@ function App() {
     </main>);
   return localize(
     <div className="workspace">
-      <aside>
+      <aside className="sidebar">
         <strong>Order-to-Audit</strong>
         <p>Factory operations</p>
+        <div id="workspace-navigation" />
+        <div className="sidebar-preferences"><LanguageSwitch /></div>
+        <section className="profile-menu">
+          <div className="profile-identity"><span className="avatar" aria-hidden="true">{session.user.username.slice(0, 2).toUpperCase()}</span><span>{session.user.username}<small>{session.user.roles.map(translate).join(", ")}</small></span></div>
+          <button onClick={() => {setPasswordOpen(true); setError("");}}>Change password</button>
+          <button onClick={() => setSession(null)}>Sign out</button>
+        </section>
       </aside>
       <section className="body">
-        <header>
-          <span>
-            {session.user.username} · {session.user.roles.map(translate).join(", ")}
-          </span>
-          <div>
-            <button onClick={() => {setPasswordOpen(!passwordOpen); setError("");}}>Change password</button>
-            <button onClick={() => setSession(null)}>Sign out</button>
-          </div>
-        </header>
         <main>
           {passwordOpen && <section className="card">
-            <h2>Change password</h2>
+            <div className="section-heading"><h2>Change password</h2><button className="secondary" onClick={() => setPasswordOpen(false)}>Close</button></div>
             {error && <p role="alert">{errorText(error)}</p>}
             <form onSubmit={async (event) => {
               event.preventDefault(); setBusy(true); setError("");

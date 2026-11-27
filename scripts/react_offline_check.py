@@ -25,10 +25,10 @@ def main():
         context.set_offline(True)
         page.get_by_label('Packets',exact=True).fill('2')
         page.get_by_role('button',name='Add another product').click()
-        second_product = page.get_by_label('Another product')
-        has_second_sku = second_product.locator('option').count() > 1
+        second_product = page.get_by_role('group',name='Another product',exact=True)
+        has_second_sku = second_product.get_by_role('radio').count() > 1
         if has_second_sku:
-            second_product.select_option(index=1)
+            second_product.get_by_role('radio').nth(1).check()
         page.get_by_label('Packets',exact=True).nth(1).fill('3')
         page.get_by_role('button',name='Save offline order').click()
         expect(page.get_by_text('1 queued orders',exact=True)).to_be_visible()

@@ -1,4 +1,7 @@
 import React, { useEffect, useState } from "react";
+import { ChoiceField } from "./ChoiceField";
+import { TaskPanel } from "./TaskPanel";
+import { createPortal } from "react-dom";
 import { Offline } from "./Offline";
 import { VisitForm } from "./VisitForm";
 import { LanguageSwitch, useErrorText, useLocalize, useTranslate } from "./language";
@@ -63,58 +66,91 @@ export function money(value: unknown): string {
   return `${number < 0n ? "−" : ""}₹${absolute / 100n}.${String(absolute % 100n).padStart(2, "0")}`;
 }
 
-function Table({ rows, onOpen, searchable = false }: { rows: Row[]; onOpen?: (row: Row) => void; searchable?: boolean }) {
-  const localize = useLocalize();
-  const translate = useTranslate();
+// Display base quantities exactly: divide by 1000 with integer arithmetic, never floats.
+function quantityText(value: unknown, unit: string): string {
+  const quantity = BigInt(String(value));
+  if (unit !== "g" && unit !== "ml") return `${quantity} ${unit}`;
+  const absolute = quantity < 0n ? -quantity : quantity;
+  const fraction = String(absolute % 1000n).padStart(3, "0").replace(/0+$/, "");
+  return `${quantity < 0n ? "−" : ""}${absolute / 1000n}${fraction ? "." + fraction : ""} ${unit === "g" ? "kg" : "L"}`;
+}
+
+// Shared record lists keep exact values intact while sorting, filtering and paging locally.
+function Table({ rows, onOpen, searchable = false, unitFor }: { rows: Row[]; onOpen?: (row: Row) => void; searchable?: boolean; unitFor?: (row: Row) => string | undefined }) {
+  const localize = useLocalize(), translate = useTranslate();
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("");
-  if (!rows.length) return localize(<p>No records yet.</p>);
-  const columns = Object.keys(rows[0]);
-  const statusKey = columns.includes("status") ? "status" : columns.includes("access") ? "access" : null;
-  const visible = rows.filter(row => (!statusKey || !status || row[statusKey] === status) &&
-    Object.values(row).some(value => [String(value), translate(String(value))].some(text => text.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()))));
-  return localize(
-    <div className="table-wrap">
-      {searchable && <div className="filters">
-        <label>Search records<input type="search" value={query} onChange={event => setQuery(event.target.value)} /></label>
-        {statusKey && <label>Filter status<select value={status} onChange={event => setStatus(event.target.value)}>
-          <option value="">All statuses</option>
-          {[...new Set(rows.map(row => row[statusKey]))].map(value => <option key={value} value={value}>{translate(value)}</option>)}
-        </select></label>}
-        <button type="button" onClick={() => {setQuery(""); setStatus("");}}>Clear filters</button>
+  const [sort, setSort] = useState({key: "", descending: false});
+  const [pageNumber, setPageNumber] = useState(0);
+  const [massUnit, setMassUnit] = useState("kg"), [volumeUnit, setVolumeUnit] = useState("L");
+  const columns = rows.length ? Object.keys(rows[0]) : [];
+  const statusKey = ["status", "state", "access", "category"].find(key => columns.includes(key));
+  const labels: Record<string, string> = {id: "Reference", customer__name: "Customer", output_item__name: "Product",
+    document_date: "Document date", expected_packets: "Expected packets", good_packets: "Good packets",
+    base_unit: "Unit", value_paise: "Value (₹)", price_paise: "Price (₹)", state: "Status", status: "Status"};
+  const filtered = rows.filter(row => (!searchable || !statusKey || !status || row[statusKey] === status) &&
+    (!searchable || Object.values(row).some(value => [String(value), translate(String(value))]
+      .some(text => text.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase())))));
+  const ordered = [...filtered].sort((a,b) => {
+    if (!sort.key) return 0;
+    const left = String(a[sort.key] ?? ""), right = String(b[sort.key] ?? "");
+    const comparison = /^-?\d+$/.test(left) && /^-?\d+$/.test(right)
+      ? (BigInt(left) < BigInt(right) ? -1 : BigInt(left) > BigInt(right) ? 1 : 0)
+      : left.localeCompare(right, undefined, {numeric: true});
+    return sort.descending ? -comparison : comparison;
+  });
+  const pages = Math.max(1, Math.ceil(ordered.length / 20)), current = Math.min(pageNumber, pages - 1);
+  return localize(<section className="record-list">
+    {searchable && <>
+      {statusKey && <div className="status-tabs" role="group" aria-label="Filter status">
+        {["", ...new Set(rows.map(row => String(row[statusKey])))].map(value =>
+          <button key={value} aria-pressed={status === value} onClick={() => {setStatus(value); setPageNumber(0);}}>
+            {value ? translate(value) : translate("All statuses")} <span>{value ? rows.filter(row => String(row[statusKey]) === value).length : rows.length}</span>
+          </button>)}
       </div>}
-      {searchable && !visible.length && <p>No matching records.</p>}
-      <table>
-        <thead>
-          <tr>
-            {columns.map((key) => (
-              <th key={key}>{key.replaceAll("_", " ")}</th>
-            ))}
-            {onOpen && <th>Action</th>}
-          </tr>
-        </thead>
-        <tbody>
-          {(searchable ? visible : rows).map((row, index) => (
-            <tr key={index}>
-              {columns.map((key) => (
-                <td key={key}>{display(row[key], key)}</td>
-              ))}
-              {onOpen && (
-                <td>
-                  <button onClick={() => onOpen(row)}>Open</button>
-                </td>
-              )}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
+      <div className="table-toolbar">
+        <label>Search records<input type="search" value={query} onChange={event => {setQuery(event.target.value); setPageNumber(0);}} /></label>
+        <button className="secondary" type="button" onClick={() => {setQuery(""); setStatus(""); setPageNumber(0);}}>Clear filters</button>
+        <span className="record-count">{filtered.length} {translate("Records")}</span>
+      </div>
+    </>}
+    {!rows.length ? <p className="empty-state">No records yet.</p> : !filtered.length ? <p className="empty-state">No matching records.</p> :
+      <div className="table-wrap"><table><thead><tr>{columns.map(key =>
+        <th key={key} scope="col" aria-sort={sort.key === key ? sort.descending ? "descending" : "ascending" : "none"}>
+          <button className="sort-button" onClick={() => setSort({key, descending: sort.key === key && !sort.descending})}>
+            {translate(labels[key] || key.replaceAll("_", " "))}<span aria-hidden="true">{sort.key === key ? sort.descending ? " ↓" : " ↑" : " ↕"}</span>
+          </button>
+          {key === "quantity" && unitFor && <div className="column-units">
+            {rows.some(row => unitFor(row) === "g") && <div role="group" aria-label="g / kg">
+              {["g", "kg"].map(unit => <button key={unit} aria-pressed={massUnit === unit} onClick={() => setMassUnit(unit)}>{unit}</button>)}
+            </div>}
+            {rows.some(row => unitFor(row) === "ml") && <div role="group" aria-label="ml / L">
+              {["ml", "L"].map(unit => <button key={unit} aria-pressed={volumeUnit === unit} onClick={() => setVolumeUnit(unit)}>{unit}</button>)}
+            </div>}
+          </div>}</th>)}{onOpen && <th scope="col">Action</th>}</tr></thead>
+        <tbody>{ordered.slice(current * 20, current * 20 + 20).map((row,index) => <tr key={row.id || row.code || index}>
+          {columns.map(key => <td key={key} className={key.endsWith("paise") || /quantity|packets/.test(key) ? "numeric" : undefined}>
+            {key === "quantity" && unitFor?.(row) ? <>
+              <span className="stock-quantity">{(unitFor(row) === "g" && massUnit === "g") || (unitFor(row) === "ml" && volumeUnit === "ml")
+                ? `${row[key]} ${unitFor(row)}` : quantityText(row[key], unitFor(row)!)}</span>
+            </> : ["status","state","access"].includes(key) ? <span className={"status-badge status-" + String(row[key]).toLowerCase()}>{translate(String(row[key]))}</span> : display(row[key],key)}
+          </td>)}{onOpen && <td className="row-action"><button className="link" onClick={() => onOpen(row)}>Open</button></td>}
+        </tr>)}</tbody></table></div>}
+    {pages > 1 && <div className="pagination"><button className="secondary" disabled={current === 0} onClick={() => setPageNumber(current - 1)}>Previous</button>
+      <span>{current + 1} / {pages}</span><button className="secondary" disabled={current + 1 === pages} onClick={() => setPageNumber(current + 1)}>Next</button></div>}
+  </section>);
 }
 
 function display(value: any, key = ""): React.ReactNode {
   if (value === null || value === undefined) return "—";
   if (key.endsWith("paise") && typeof value === "string") return money(value);
+  // Cost ratios stay exact until half-up rounding for the currency display.
+  if (["unit_cost", "margin"].includes(key) && typeof value === "object" && "numerator" in value) {
+    const numerator = BigInt(value.numerator), denominator = BigInt(value.denominator);
+    const absolute = numerator < 0n ? -numerator : numerator;
+    const rounded = (2n * absolute + denominator) / (2n * denominator);
+    return money(numerator < 0n ? -rounded : rounded);
+  }
   if (typeof value === "object" && "numerator" in value)
     return <>{value.numerator}/{value.denominator} {"(exact)"}</>;
   if (Array.isArray(value))
@@ -139,16 +175,19 @@ function display(value: any, key = ""): React.ReactNode {
   return String(value);
 }
 
+
 function ActionForm({
   title,
   fields,
   submit,
   customerPrices,
+  primary = false,
 }: {
   title: string;
   fields: Field[];
   submit: (data: Row, key: string) => Promise<void>;
   customerPrices?: (id: string) => Promise<Row[]>;
+  primary?: boolean;
 }) {
   const translate = useTranslate();
   const localize = useLocalize();
@@ -161,9 +200,8 @@ function ActionForm({
     [error, setError] = useState(""),
     [key, setKey] = useState(crypto.randomUUID());
   return localize(
-    <details className="card">
-      <summary>{translate(title)}</summary>
-      <form
+    <TaskPanel title={title} completedKey={key} primary={primary}>
+      <form className="action-fields"
         onChange={event=>{const target=event.target as HTMLInputElement;setSelections(old=>({...old,[target.name]:target.value}));if(target.name==='customer')refreshPrices(target.value);}}
         onSubmit={async (event) => {
           event.preventDefault();
@@ -195,23 +233,11 @@ function ActionForm({
           }
         }}
       >
-        {fields.map((f) => (
+        {fields.map((f) => f.options ? <ChoiceField key={f.name + (f.dependsOn ? selections[f.dependsOn] || "" : "")}
+          field={f} resetKey={key}
+          options={f.optionsByValue?.[selections[f.dependsOn!] || fields.find(field => field.name === f.dependsOn)?.options?.[0]?.value || ""] || f.options} /> : (
           <label key={f.name}>
             {translate(f.label)}
-            {f.options ? (
-              <select
-                key={f.dependsOn ? selections[f.dependsOn] : f.name}
-                aria-label={translate(f.label)}
-                name={f.name}
-                defaultValue={f.value}
-              >
-                {(f.optionsByValue?.[selections[f.dependsOn!] || fields.find(field => field.name === f.dependsOn)?.options?.[0]?.value || ""] || f.options).map((o) => (
-                  <option key={o.value} value={o.value}>
-                    {o.label}
-                  </option>
-                ))}
-              </select>
-            ) : (
               <input
                 aria-label={translate(f.label)}
                 name={f.name}
@@ -220,14 +246,13 @@ function ActionForm({
                 inputMode={f.type === "decimal" ? "decimal" : undefined}
                 required={!f.optional}
               />
-            )}
           </label>
         ))}
         {error && <p role="alert">{errorText(error)}</p>}
         {prices.length>0&&<div className="notice">Prices before GST:{prices.map(price=><p key={price.sku_id}>{price.name}: {money(price.price_paise)} · {price.label}</p>)}</div>}
         <button disabled={busy}>{busy ? "Saving…" : translate(title)}</button>
       </form>
-    </details>
+    </TaskPanel>
   );
 }
 
@@ -250,6 +275,7 @@ export function Workspace({
     [sourceDetail, setSourceDetail] = useState<Row | null>(null),
     [recallDetail, setRecallDetail] = useState<Row | null>(null),
     [setupTab, setSetupTab] = useState("staff"),
+    [accountName, setAccountName] = useState<string | null>(null),
     [revision, setRevision] = useState(0);
   const [kind, setKind] = useState("sales"),
     [start, setStart] = useState("2026-11-01"),
@@ -369,6 +395,23 @@ export function Workspace({
   );
   const sku = choice("sku", "Product", asOptions(catalog.skus, "item__name"));
   const item = choice("item", "Item", asOptions(catalog.items, "name"));
+  const stockUnit = (row: Row) => {
+    const item = catalog.items.find((item: Row) => item.code === row.code);
+    return item?.category === "finished" ? translate("packets") : item?.base_unit === "piece" ? translate("piece") : item?.base_unit;
+  };
+  const shortage = page === "orders" && data?.status === "submitted" && data.stock?.some((row: Row) => BigInt(row.shortage) > 0n);
+  const nextTitle = selected && data && !Array.isArray(data)
+    ? page === "orders" && admin
+      ? shortage ? "" : data.status === "submitted" ? "Approve and reserve" : data.status === "approved" ? "Post invoice"
+        : data.status === "invoiced" ? "Dispatch remaining order" : data.status === "dispatched" && data.invoice?.status === "posted" && BigInt(data.invoice.outstanding) > 0n ? "Record payment" : ""
+      : page === "production" && production ? data.state === "draft" ? "Issue raw materials" : data.state === "issued" ? "Complete production" : "" : ""
+    : "";
+  // Reveal a task without posting anything; the operator still reviews and submits its form.
+  function openTask(title: string) {
+    const trigger = Array.from(document.querySelectorAll<HTMLButtonElement>("button[data-action-title]"))
+      .find(button => button.dataset.actionTitle === title);
+    trigger?.click();
+  }
   const form = (
     title: string,
     action: string,
@@ -379,6 +422,7 @@ export function Workspace({
     <ActionForm
       key={title + selected}
       title={title}
+      primary={title === nextTitle}
       fields={fields}
       customerPrices={action==='order.create'?id=>load('/prices/'+id):undefined}
       submit={(d, key) =>
@@ -409,8 +453,7 @@ export function Workspace({
   const toolsMenu = menu.filter((name) => !dailyMenu.includes(name));
   return localize(
     <>
-      <LanguageSwitch />
-      <nav className="tabs" aria-label="Workspace">
+      {createPortal(localize(<nav className="sidebar-nav" aria-label="Workspace">
         {[{heading:'Daily work',names:dailyMenu},{heading:'Tools & setup',names:toolsMenu}].map((group) =>
           <div className="nav-group" key={group.heading}>
             <span>{translate(group.heading)}</span>
@@ -419,18 +462,35 @@ export function Workspace({
               onClick={() => navigate(name)}>
               {translate(name[0].toUpperCase() + name.slice(1))}</button>)}
           </div>)}
-      </nav>
-      <h1>
+      </nav>), document.getElementById("workspace-navigation")!)}
+      <div className="page-heading"><h1>
         {translate(page[0].toUpperCase() + page.slice(1))}
         {selected && " #" + selected}
-      </h1>
+      </h1><span className="page-date">{catalog.today}</span></div>
       {selected && (
         <button onClick={() => setSelected(null)}>← Back to list</button>
       )}
       {error && <p role="alert">{errorText(error)}</p>}
       {notice && <p role="status" className="notice">{notice}</p>}
-      {admin && page === "orders" && !selected && <details className="card">
-        <summary>Factory setup checklist</summary>
+      {data && ["orders", "production"].includes(page) && <section className="task-guide" aria-label="Next step">
+        <div><strong>Next step</strong>
+          {!selected && page === "orders" && <p>Open an order to review stock and continue billing, or start a new order.</p>}
+          {!selected && page === "production" && <p>Receive purchased materials, then create a run. Open a run to issue materials and record output.</p>}
+          {selected && shortage && <p>Stock is short. Review the shortage below and replenish before approving.</p>}
+          {selected && !shortage && nextTitle && <p>{translate(nextTitle)}</p>}
+          {selected && !shortage && !nextTitle && <p>Review this record below. Available actions depend on its status and your role.</p>}
+        </div>
+        <div className="task-buttons">
+          {!selected && page === "orders" && sales && <button onClick={() => openTask("Submit order")}>New order</button>}
+          {!selected && page === "production" && production && <>
+            <button onClick={() => openTask("Receive materials")}>Receive materials</button>
+            <button className="secondary" onClick={() => openTask("Create production run")}>Create production run</button>
+          </>}
+          {nextTitle && <button onClick={() => openTask(nextTitle)}>Continue</button>}
+        </div>
+      </section>}
+      {admin && page === "orders" && !selected && <section className="setup-shortcuts" aria-label="Factory setup checklist">
+        <h2>Factory setup checklist</h2>
         <p>Review the demo records and prepare your staff before daily work.</p>
         {[['staff','Staff'], ['parties','Customers & suppliers'], ['items','Materials & products'], ['recipes','Recipes']].map(([tab,label]) =>
           <p key={tab}><button type="button" onClick={() => {setSetupTab(tab); navigate("setup");}}>{translate(label)}</button>
@@ -438,9 +498,12 @@ export function Workspace({
           {tab === 'items' && ` · ${catalog.items.length} / ${catalog.skus.length}`}
           {tab === 'recipes' && ` · ${catalog.boms.length}`}</p>)}
         <p>Counts include seeded records; review them before recording transactions.</p>
-      </details>}
+      </section>}
       {page === "orders" && !selected && (
         <>
+          {Array.isArray(data) && (
+            <Table searchable rows={data} onOpen={(row) => setSelected(row.id)} />
+          )}
           {sales &&
             form(
               "Submit order",
@@ -465,9 +528,7 @@ export function Workspace({
                 quantities: measured(d, "qty_"),
               }),
             )}
-          {Array.isArray(data) && (
-            <Table searchable rows={data} onOpen={(row) => setSelected(row.id)} />
-          )}
+
         </>
       )}
       {page === "orders" && selected && data && !Array.isArray(data) && (
@@ -475,6 +536,12 @@ export function Workspace({
           <h2>
             {data.customer} · {translate(data.status)}
           </h2>
+          <ol className="workflow-steps" aria-label="Order status">
+            {["submitted", "approved", "invoiced", "dispatched"].map((stage,index) => <li key={stage}
+              aria-current={data.status === stage ? "step" : undefined}
+              className={index <= ["submitted", "approved", "invoiced", "dispatched"].indexOf(data.status) ? "reached" : ""}>
+              <span aria-hidden="true">{index + 1}</span>{translate(stage)}</li>)}
+          </ol>
           <Table rows={data.lines} />
           <h3>Stock check</h3>
           <Table rows={data.stock} />
@@ -679,6 +746,9 @@ export function Workspace({
       )}
       {page === "production" && !selected && (
         <>
+          {Array.isArray(data) && (
+            <Table searchable rows={data} onOpen={(row) => setSelected(row.id)} />
+          )}
           {form("Create production run", "production.create", [
             choice(
               "bom",
@@ -738,9 +808,7 @@ export function Workspace({
                   : undefined,
             }),
           )}
-          {Array.isArray(data) && (
-            <Table rows={data} onOpen={(row) => setSelected(row.id)} />
-          )}
+
         </>
       )}
       {page === "production" && selected && data && !Array.isArray(data) && (
@@ -844,12 +912,12 @@ export function Workspace({
         </>
       )}
       {page === "stock" && Array.isArray(data) && (
-        <Table rows={data} onOpen={(row) => setSelected(row.code)} />
+        <Table searchable unitFor={stockUnit} rows={data.map(({id, base_unit, ...row}: Row) => row)} onOpen={(row) => setSelected(row.code)} />
       )}
       {page === "stock" && selected && data && !Array.isArray(data) && (
         <>
           <h2>{data.item.name}</h2>
-          <Table rows={data.movements} onOpen={async (row) => {
+          <Table rows={data.movements} unitFor={() => stockUnit({code: selected})} onOpen={async (row) => {
             try {
               setSourceDetail(await load("/sources/" + row.posting_id));
               setError("");
@@ -937,7 +1005,8 @@ export function Workspace({
           <p>Give each person their own account. Share temporary passwords privately; they must replace them on first sign-in.</p>
           <Table searchable rows={data.map((row: Row) => ({username: row.username, name: row.first_name,
             role: row.role, access: row.is_active ? 'Active' : 'Disabled',
-            password: row.must_change_password ? 'Change required' : 'Set'}))} />
+            password: row.must_change_password ? 'Change required' : 'Set'}))}
+            onOpen={row => {setAccountName(row.username); requestAnimationFrame(() => document.getElementById('staff-actions')?.scrollIntoView({block:'center', behavior:'smooth'}));}} />
           {form("Create staff account", "account.create", [
             field("name", "Full name"), field("username", "Username"),
             choice("role", "Role", [
@@ -946,16 +1015,17 @@ export function Workspace({
               {value:"owner",label:"Owner"}]),
             field("temporary_password", "Temporary password (12+ characters)", "", "password"),
           ])}
-          {form("Enable or disable account", "account.active", [
-            choice("id", "Account", data.filter((r: Row) => r.id !== catalog.user_id)
-              .map((r: Row) => ({value:r.id,label:r.username + " · " + translate(r.role)}))),
-            choice("active", "Access", [{value:"true",label:"Enable"},{value:"false",label:"Disable"}]),
-          ], {}, (d) => ({id:d.id,active:d.active === "true"}))}
-          {form("Reset temporary password", "account.reset", [
-            choice("id", "Account", data.filter((r: Row) => r.id !== catalog.user_id)
-              .map((r: Row) => ({value:r.id,label:r.username}))),
-            field("temporary_password", "New temporary password", "", "password"),
-          ])}
+          {accountName && <section className="card" id="staff-actions" key={accountName}>
+            <div className="section-heading"><h3>{accountName}</h3><button className="secondary" onClick={() => setAccountName(null)}>Close</button></div>
+            {data.filter((row: Row) => row.username === accountName && row.id !== catalog.user_id).map((account: Row) => <React.Fragment key={account.id}>
+              {form("Enable or disable account", "account.active", [
+                choice("active", "Access", [{value:"true",label:"Enable"},{value:"false",label:"Disable"}]),
+              ], {id:account.id}, d => ({active:d.active === "true"}))}
+              {form("Reset temporary password", "account.reset", [
+                field("temporary_password", "New temporary password", "", "password"),
+              ], {id:account.id})}
+            </React.Fragment>)}
+          </section>}
         </>}
         {setupTab === "parties" && <>
           <h2>Customers</h2><Table searchable rows={catalog.customers.map((r: Row) =>
@@ -1027,18 +1097,10 @@ export function Workspace({
       {page === "reports" && (
         <>
           <div className="filters">
-            <label>
-              Report
-              <select value={kind} onChange={(e) => setKind(e.target.value)}>
-                {Object.entries(catalog.reports)
-                  .filter(([k]) => reports || k === "customers")
-                  .map(([k, v]) => (
-                    <option key={k} value={k}>
-                      {String(v)}
-                    </option>
-                  ))}
-              </select>
-            </label>
+            <div className="report-picker" role="group" aria-label="Report">
+              {Object.entries(catalog.reports).filter(([k]) => reports || k === "customers").map(([k,v]) =>
+                <button className="secondary" key={k} aria-pressed={kind === k} onClick={() => setKind(k)}>{translate(String(v))}</button>)}
+            </div>
             <label>
               From
               <input
@@ -1105,7 +1167,19 @@ export function Workspace({
           )}
         </>
       )}
-      {page === "dashboard" && data && display(data)}
+      {page === "dashboard" && data && <>
+        <div className="metric-grid">
+          <article><span>{translate("Orders today")}</span><strong>{data.orders_today}</strong></article>
+          <article><span>{translate("Outstanding")}</span><strong>{money(data.outstanding)}</strong></article>
+          <article><span>{translate("Variance alerts")}</span><strong>{data.flagged_runs}</strong></article>
+          <article><span>{translate("Production cost")}</span><strong>{money(data.run_cost)}</strong></article>
+        </div>
+        <h2>Stock</h2><Table rows={Object.entries(data.stock).map(([code,value]) => ({code, name: catalog.items.find((item: Row) => item.code === code)?.name || code,...value as Row}))} searchable unitFor={stockUnit} />
+        <h2>Products</h2><Table rows={data.products.map((product: Row) => ({name:product.name, good_packets:product.good,
+          total_paise:product.cost, unit_cost:product.unit_cost, margin:product.margin}))} />
+        <h2>Reorder alerts</h2><Table rows={data.reorder_alerts} />
+        <h2>Collection follow-ups</h2><Table rows={data.due_followups} />
+      </>}
       {page === "offline" && <Offline catalog={catalog} token={token} />}
       {!data && !error && <p role="status">Loading…</p>}
     </>
