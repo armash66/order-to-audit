@@ -45,7 +45,7 @@ Remove-Item Env:WEB_PORT
 
 Use a fresh isolated Compose project, never reset the working database. All accounts retain `DemoPass123!`. The public application is React on port 8000; FastAPI is available through `/api/`, including `/api/docs` only if explicitly routed (the default API documentation itself lives at `/docs` inside the API container).
 
-1. Production → Receive materials: supplier, Flour, quantity **60**, unit **kg**, total **2700** rupees. Optional batch/expiry fields are available.
+1. Production → Receive materials: supplier, Flour, quantity **60**, unit **kg**, unit rate **45** rupees per kg; confirm the calculated total is **2700.00** rupees. Open Flour in Stock to show the opening ₹42/kg, purchase ₹45/kg and weighted average ₹43.125/kg. Optional batch/expiry fields are available.
 2. Create production run: Murukku BOM, one batch. Open it; Issue raw materials: flour **40 kg**, oil **10.5 L**, spice **1.2 kg**.
 3. Complete production: **188** good, pouch total **194**, pouch damage **6**, carton total **9**, carton damage **0**. Review variance/cost.
 4. Salesman A → Orders → Submit order: Retailer A, **150** packets. Customer prices appear before GST.

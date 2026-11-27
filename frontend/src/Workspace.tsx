@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { ChoiceField } from "./ChoiceField";
 import { TaskPanel } from "./TaskPanel";
+import { ReceiptPricing } from "./ReceiptPricing";
 import { createPortal } from "react-dom";
 import { Offline } from "./Offline";
 import { VisitForm } from "./VisitForm";
@@ -75,6 +76,37 @@ function quantityText(value: unknown, unit: string): string {
   return `${quantity < 0n ? "−" : ""}${absolute / 1000n}${fraction ? "." + fraction : ""} ${unit === "g" ? "kg" : "L"}`;
 }
 
+// Unit rates come from ledger paise/base quantities; repeating decimals are marked approximate.
+function ledgerRate(value: unknown, quantity: unknown, unit: string): string {
+  if (value == null) return "Unknown";
+  let numerator = BigInt(String(value)) * (["g", "ml"].includes(unit) ? 1000n : 1n);
+  let denominator = BigInt(String(quantity)) * 100n;
+  if (!denominator) return "—";
+  const negative = (numerator < 0n) !== (denominator < 0n);
+  numerator = numerator < 0n ? -numerator : numerator;
+  denominator = denominator < 0n ? -denominator : denominator;
+  const scaled = (numerator * 2000000n + denominator) / (2n * denominator);
+  const fraction = String(scaled % 1000000n).padStart(6, "0").replace(/0+$/, "");
+  return `${numerator * 1000000n % denominator ? "≈ " : ""}${negative ? "−" : ""}₹${scaled / 1000000n}${fraction ? "." + fraction : ""}/${unit === "g" ? "kg" : unit === "ml" ? "L" : unit}`;
+}
+
+function StockValuation({data}: {data: Row}) {
+  const translate = useTranslate();
+  const quantity = data.movements.reduce((sum: bigint, row: Row) => sum + BigInt(row.quantity), 0n);
+  const value = data.movements.some((row: Row) => row.value_paise == null) ? null : data.movements.reduce((sum: bigint, row: Row) => sum + BigInt(row.value_paise), 0n);
+  return <section className="card" aria-label={translate("Stock valuation")}>
+    <h2>{translate("Stock valuation")}</h2>
+    <dl className="detail-metrics">
+      <div><dt>{translate("Quantity")}</dt><dd>{quantityText(quantity, data.item.base_unit)}</dd></div>
+      <div><dt>{translate("Value (₹)")}</dt><dd>{value == null ? translate("Unknown") : money(value)}</dd></div>
+      <div><dt>{translate("Weighted-average rate")}</dt><dd>{translate(ledgerRate(value, quantity, data.item.base_unit))}</dd></div>
+    </dl>
+    <p>{translate("Stock value ÷ quantity on hand = weighted-average rate")}</p>
+    <p>{value == null ? translate("Unknown") : money(value)} ÷ {quantityText(quantity, data.item.base_unit)} = {translate(ledgerRate(value, quantity, data.item.base_unit))}</p>
+    <p>{translate("Movement rates below show each receipt or issue. Open a row to inspect its source document.")}</p>
+  </section>;
+}
+
 // Shared record lists keep exact values intact while sorting, filtering and paging locally.
 function Table({ rows, onOpen, searchable = false, unitFor }: { rows: Row[]; onOpen?: (row: Row) => void; searchable?: boolean; unitFor?: (row: Row) => string | undefined }) {
   const localize = useLocalize(), translate = useTranslate();
@@ -87,7 +119,7 @@ function Table({ rows, onOpen, searchable = false, unitFor }: { rows: Row[]; onO
   const statusKey = ["status", "state", "access", "category"].find(key => columns.includes(key));
   const labels: Record<string, string> = {id: "Reference", customer__name: "Customer", output_item__name: "Product",
     document_date: "Document date", expected_packets: "Expected packets", good_packets: "Good packets",
-    base_unit: "Unit", value_paise: "Value (₹)", price_paise: "Price (₹)", state: "Status", status: "Status"};
+    base_unit: "Unit", value_paise: "Value (₹)", price_paise: "Price (₹)", state: "Status", status: "Status", movement_rate: "Movement rate"};
   const filtered = rows.filter(row => (!searchable || !statusKey || !status || row[statusKey] === status) &&
     (!searchable || Object.values(row).some(value => [String(value), translate(String(value))]
       .some(text => text.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase())))));
@@ -252,7 +284,7 @@ function ActionForm({
   return localize(
     <TaskPanel title={title} completedKey={key} primary={primary}>
       <form className="action-fields"
-        onChange={event=>{const target=event.target as HTMLInputElement;setSelections(old=>({...old,[target.name]:target.value}));if(target.name==='customer')refreshPrices(target.value);}}
+        onChange={event=>{const target=event.target as HTMLInputElement;setSelections(old=>({...old,[target.name]:target.value,...(target.name === "item" ? {unit: ""} : {})}));if(target.name==='customer')refreshPrices(target.value);}}
         onSubmit={async (event) => {
           event.preventDefault();
           if (busy) return;
@@ -283,7 +315,9 @@ function ActionForm({
           }
         }}
       >
-        {fields.map((f) => f.options ? <ChoiceField key={f.name + (f.dependsOn ? selections[f.dependsOn] || "" : "")}
+        {fields.map((f) => title === "Receive materials" && f.name === "value_paise" ?
+          <ReceiptPricing key={key + (selections.unit || "g") + (selections.item || "")} quantity={selections.quantity || ""}
+            unit={selections.unit || fields.find(field => field.name === "unit")?.optionsByValue?.[selections.item || fields.find(field => field.name === "item")?.options?.[0]?.value || ""]?.[0]?.value || "g"} /> : f.options ? <ChoiceField key={f.name + (f.dependsOn ? selections[f.dependsOn] || "" : "")}
           field={f} resetKey={key}
           options={f.optionsByValue?.[selections[f.dependsOn!] || fields.find(field => field.name === f.dependsOn)?.options?.[0]?.value || ""] || f.options} /> : (
           <label key={f.name}>
@@ -962,7 +996,8 @@ export function Workspace({
       {page === "stock" && selected && data && !Array.isArray(data) && (
         <>
           <h2>{data.item.name}</h2>
-          <Table rows={data.movements} unitFor={() => stockUnit({code: selected})} onOpen={async (row) => {
+          <StockValuation data={data} />
+          <Table rows={data.movements.map((row: Row) => ({...row, movement_rate: translate(ledgerRate(row.value_paise, row.quantity, data.item.base_unit))}))} unitFor={() => stockUnit({code: selected})} onOpen={async (row) => {
             try {
               setSourceDetail(await load("/sources/" + row.posting_id));
               setError("");

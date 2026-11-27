@@ -26,7 +26,7 @@ Rejecting a pre-invoice order requires a reason and releases its reservation. Fu
 
 ## Production
 
-1. **Receive materials**: select supplier/item, quantity and its unit (g/kg, ml/L or pieces), then the total amount in rupees. Add batch and expiry details when known. For the benchmark enter 60 kg flour and ₹2,700.
+1. **Receive materials**: select supplier/item, quantity and its unit (g/kg, ml/L or pieces), then the rate in rupees per selected unit. The total is calculated with exact decimal arithmetic and half-up rounding to paise. **Invoice total** allows a supplier total to be entered directly. Changing the item or unit clears the rate. Add batch and expiry details when known. For the benchmark enter 60 kg flour at ₹45/kg; the calculated total is ₹2,700.
 2. **Create production run**: select BOM version and batch count.
 3. Open the draft and **Issue raw materials** using actual quantities and units: 40 kg flour, 10.5 L oil and 1.2 kg spice in the benchmark. Conversion must resolve to a whole gram, millilitre or piece.
 4. **Complete production**: enter good packets and total packaging issued, including damaged packaging. Enter damage separately for reporting.
@@ -38,7 +38,7 @@ Open a production run to review four sections: **Production output**, **Material
 
 ## Stock and quality
 
-**Stock** shows ledger-derived quantities. Dashboard stock, stock summary and item ledger quantities show one value per cell. Use the g/kg and ml/L buttons in the Quantity column header to select the display units independently; pieces and packets retain their units. Each table starts in kg/L. Numeric headers and cells align right. Unknown valuation means a source cost is missing, not zero; the benchmark opening finished goods have no supplied cost. Conversion is display-only; exports retain their existing base-unit columns. Open an item and then a movement to inspect its source document. **Batches** shows expiry and quality status, recall links and reorder alerts. Held or expired stock is unavailable for new fulfilment even though it remains physically on hand.
+**Stock** shows ledger-derived quantities. Dashboard stock, stock summary and item ledger quantities show one value per cell. Use the g/kg and ml/L buttons in the Quantity column header to select the display units independently; pieces and packets retain their units. Each table starts in kg/L. Numeric headers and cells align right. Unknown valuation means a source cost is missing, not zero; the benchmark opening finished goods have no supplied cost. Conversion is display-only; exports retain their existing base-unit columns. Open an item to see its stock value divided by quantity on hand, the weighted-average rate, and the rate of each movement. Rates use up to six decimal places; repeating results carry an approximation mark. Open a movement to inspect its source document. **Batches** shows expiry and quality status, recall links and reorder alerts. Held or expired stock is unavailable for new fulfilment even though it remains physically on hand.
 
 ## Reports
 

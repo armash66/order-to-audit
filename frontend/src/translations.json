@@ -571,7 +571,17 @@
     "Packaging damage and unclassified output shortfall are separate measures.": "பொதிப் பொருள் சேதமும் வகைப்படுத்தப்படாத உற்பத்திக் குறைவும் தனித்தனி அளவுகள்.",
     "CGST": "CGST",
     "SGST": "SGST",
-    "IGST": "IGST"
+    "IGST": "IGST",
+    "Receipt pricing": "கொள்முதல் விலை",
+    "Unit rate": "அலகு விலை",
+    "Invoice total": "விலைப்பட்டியல் மொத்தம்",
+    "Rate (₹ per selected unit)": "விலை (தேர்ந்தெடுத்த அலகிற்கு ₹)",
+    "Quantity × rate = receipt total": "அளவு × விலை = கொள்முதல் மொத்தம்",
+    "Stock valuation": "இருப்பு மதிப்பீடு",
+    "Weighted-average rate": "எடையிட்ட சராசரி விலை",
+    "Stock value ÷ quantity on hand = weighted-average rate": "இருப்பு மதிப்பு ÷ கையிருப்பு அளவு = எடையிட்ட சராசரி விலை",
+    "Movement rates below show each receipt or issue. Open a row to inspect its source document.": "கீழே ஒவ்வொரு வரவு அல்லது வழங்கலின் விலை உள்ளது. மூல ஆவணத்தைக் காண வரிசையைத் திறக்கவும்.",
+    "Movement rate": "பரிவர்த்தனை விலை"
   },
   "hi": {
     "Continue": "आगे बढ़ें",
@@ -1144,7 +1154,17 @@
     "Packaging damage and unclassified output shortfall are separate measures.": "पैकेजिंग क्षति और अवर्गीकृत उत्पादन कमी अलग-अलग माप हैं।",
     "CGST": "CGST",
     "SGST": "SGST",
-    "IGST": "IGST"
+    "IGST": "IGST",
+    "Receipt pricing": "खरीद मूल्य",
+    "Unit rate": "प्रति इकाई दर",
+    "Invoice total": "बिल की कुल राशि",
+    "Rate (₹ per selected unit)": "दर (₹ प्रति चुनी गई इकाई)",
+    "Quantity × rate = receipt total": "मात्रा × दर = खरीद की कुल राशि",
+    "Stock valuation": "स्टॉक मूल्यांकन",
+    "Weighted-average rate": "भारित औसत दर",
+    "Stock value ÷ quantity on hand = weighted-average rate": "स्टॉक मूल्य ÷ उपलब्ध मात्रा = भारित औसत दर",
+    "Movement rates below show each receipt or issue. Open a row to inspect its source document.": "नीचे हर प्राप्ति या जारी सामग्री की दर है। मूल दस्तावेज़ देखने के लिए पंक्ति खोलें।",
+    "Movement rate": "लेनदेन दर"
   },
   "mr": {
     "Continue": "पुढे जा",
@@ -1630,7 +1650,7 @@
     "· Outstanding": "· थकबाकी",
     "Price (₹)": "किंमत (₹)",
     "Amount (₹)": "रक्कम (₹)",
-    "Total value (₹)": "एकूण किंमत (₹)",
+    "Total value (₹)": "एकूण मूल्य (₹)",
     "Positive adjustment value (₹)": "धन समायोजन मूल्य (₹)",
     "Selling price (₹)": "विक्री किंमत (₹)",
     "Value (₹)": "मूल्य (₹)",
@@ -1717,6 +1737,16 @@
     "Packaging damage and unclassified output shortfall are separate measures.": "पॅकेजिंगचे नुकसान आणि अवर्गीकृत उत्पादन तूट हे स्वतंत्र मोजमाप आहेत.",
     "CGST": "CGST",
     "SGST": "SGST",
-    "IGST": "IGST"
+    "IGST": "IGST",
+    "Receipt pricing": "खरेदी मूल्य",
+    "Unit rate": "प्रति एकक दर",
+    "Invoice total": "बिलाची एकूण रक्कम",
+    "Rate (₹ per selected unit)": "दर (₹ प्रति निवडलेले एकक)",
+    "Quantity × rate = receipt total": "प्रमाण × दर = खरेदीची एकूण रक्कम",
+    "Stock valuation": "साठा मूल्यांकन",
+    "Weighted-average rate": "भारित सरासरी दर",
+    "Stock value ÷ quantity on hand = weighted-average rate": "साठामूल्य ÷ शिल्लक प्रमाण = भारित सरासरी दर",
+    "Movement rates below show each receipt or issue. Open a row to inspect its source document.": "खाली प्रत्येक प्राप्ती किंवा दिलेल्या साहित्याचा दर आहे. मूळ दस्तऐवज पाहण्यासाठी ओळ उघडा.",
+    "Movement rate": "व्यवहार दर"
   }
 }

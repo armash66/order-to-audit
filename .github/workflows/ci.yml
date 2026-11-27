@@ -54,6 +54,7 @@ jobs:
           python scripts/react_layout_check.py --url http://localhost:8000
           python scripts/react_guidance_check.py --url http://localhost:8000
           python scripts/react_detail_check.py --url http://localhost:8000
+          python scripts/react_receipt_check.py --url http://localhost:8000
       - name: Backup and isolated restore
         run: |
           python scripts/backup.py backup "${RUNNER_TEMP}/factory.dump"

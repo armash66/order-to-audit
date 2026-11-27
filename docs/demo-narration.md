@@ -13,27 +13,33 @@ Keep this document open on your phone while you operate the laptop. Read only th
 7. Current amount inputs accept **rupees**. Enter 2700, 4000, 1200 and 600 as specified. Do not multiply them by 100.
 8. Record a ten-second microphone test and play it back. Silence notifications and close private windows. If capturing only Chrome, deliberately switch the recording source when showing VS Code at the end; changing windows alone does not change a window-only capture.
 
-## Opening — 0:00–0:30
+## Introduction — 0:00–0:20
 
 **Account: production. Screen: Stock.**
 
-**Do:** Keep Flour and Murukku visible. Point to 100 kg and 50 packets. Start recording here.
+**Do:** Start recording with the application name and Stock page visible. Keep the cursor still during the introduction. You can speak off camera; a separate title slide is optional.
 
-“Let me take you through one day's work at this factory. We’ll buy flour, make a batch of murukku, take two customer orders and collect a payment. By the end, we should be able to explain both the stock left in the factory and the money a customer still owes us.
+“Hi, I’m Armash. I built Order-to-Audit for the CDI internship task. The idea is to help a small food factory keep orders, production and stock connected, without entering the same information again. I’ll show you how it works using the murukku scenario from the problem statement.”
 
-This is the starting stock from the problem statement: 100 kilos of flour and 50 finished packets. I’m using a fresh demo database, so we can follow every change from here.”
+## Opening stock — 0:20–0:30
+
+**Do:** Point to Flour and Murukku in the stock table.
+
+“I’m starting with a fresh demo database. Here we have 100 kilos of flour and 50 finished packets. Let’s record the flour purchase first.”
 
 ## Receive the flour — 0:30–1:00
 
 **Account: production. Screen: Production → Receive materials.**
 
-**Do:** Select Demo Flour Supplier and Flour. Enter quantity **60**, unit **kg**, total value **2700**. Leave batch/expiry blank and date unchanged. Speak while filling; submit once after the first paragraph. Open Stock and show flour **160 kg** before the next paragraph.
+**Do:** Select Demo Flour Supplier and Flour. Enter quantity **60**, unit **kg**, then **Rate (₹ per selected unit): 45**. Confirm the calculated total is **2700.00**. Leave batch/expiry blank and date unchanged. Speak while filling; submit once after the first paragraph. Open Stock and show flour **160 kg**, then open the Flour row. Show **Stock valuation: ₹6,900 ÷ 160 kg = ₹43.125/kg** and the movement rates **₹42/kg** and **₹45/kg** before the next paragraph.
 
-“The supplier delivers another 60 kilos of flour at 45 rupees a kilo. I enter the receipt here, including the total purchase value.
+“The supplier delivers 60 kilos of flour at ₹45 a kilo. I enter the quantity and rate, and the form calculates ₹2,700 for me.
 
-Once I save it, flour goes from 100 to 160 kilos. There isn’t a separate stock balance for someone to update manually. The receipt creates a stock movement, and the balance comes from those movements.
+After saving, I can open Flour and see where the valuation comes from. The opening stock was ₹42 a kilo, and this purchase was ₹45.
 
-For costing, I use weighted average. The opening flour was bought at 42 rupees, so after this purchase the average is 43 rupees and 12.5 paise per kilo.”
+Together, that’s ₹6,900 worth of flour across 160 kilos. Dividing gives ₹43.125 per kilo. That’s the weighted average used for production issues.”
+
+**Your cue, not narration:** Stay in **Unit rate** mode for this demo. **Invoice total** is available when a supplier gives only a total amount. Changing the item or unit clears the rate, so choose **kg before entering 45**. Rate calculation uses integer arithmetic and rounds the final total half-up to paise. The ledger shows rates derived from posted values; it does not store the typed rate as a separate quote.
 
 ## Start production — 1:00–1:40
 

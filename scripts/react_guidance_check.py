@@ -91,7 +91,7 @@ def main():
         page.route("**/api/stock/FLOUR/ledger", ledger)
         nav.get_by_role("button", name="Stock", exact=True).click()
         page.get_by_role("row").filter(has=page.get_by_role("cell", name="FLOUR", exact=True)).get_by_role("button", name="Open", exact=True).click()
-        expect(page.get_by_text("−0.001 kg", exact=True)).to_be_visible()
+        expect(page.locator(".record-list").get_by_text("−0.001 kg", exact=True)).to_be_visible()
         expect(page.get_by_text("-1 g", exact=True)).to_have_count(0)
         page.get_by_role("group", name="g / kg", exact=True).get_by_role("button", name="g", exact=True).click()
         expect(page.get_by_text("-1 g", exact=True)).to_be_visible()

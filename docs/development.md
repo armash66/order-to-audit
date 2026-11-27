@@ -91,3 +91,5 @@ The Markdown design note remains the editable source. With `reportlab` and `pypd
 - **Old screen after an update:** rebuild and reload while online. Offline mode may still show its cached application shell.
 - **Login fails:** initial demo passwords are not reset on restart; use the account's current password.
 - **Translation check fails:** add the missing key in all three non-English catalogues, then rerun the browser checks.
+
+`python scripts/react_receipt_check.py --url http://localhost:8000` checks calculated purchase totals, half-up rounding, large integers, invalid inputs, unit changes and manual-total mode without posting data. The browser benchmark also verifies opening and purchase rates and the resulting weighted-average calculation.

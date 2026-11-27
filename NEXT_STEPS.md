@@ -77,3 +77,7 @@ Files:
 No staging, commits or pushes performed.
 
 Recording handoff: docs/react-demo.md now includes isolated PowerShell setup, pre-recording benchmark check, exact narration and upload/cleanup steps. Broken PDF links now use the existing Markdown design note; the unrelated local PDF deletion remains uncommitted. Numeric columns align and absent monetary values are labelled Unknown.
+
+Receipt usability: quantity and unit rate now calculate receipt totals with BigInt and half-up paise rounding; manual invoice-total mode remains available. Item/unit changes clear the rate. Stock item details show ledger-derived value, quantity, weighted-average formula and individual movement rates. Fresh browser benchmark verifies 42/kg opening, 45/kg purchase and 43.125/kg after purchase. Receipt arithmetic and guidance checks passed; demo narration and operating guide updated.
+
+Receipt completion validation: all 49 automated benchmark checks passed on a separate fresh database and rolled back. Full nine-step browser benchmark passed using rate-based purchase entry and visible valuation evidence. The latest frontend is running on ports 8000 and 8020; demo records were not posted by validation. Receipt read-only checks passed on 8020. Temporary verification stacks stopped without deleting volumes.
