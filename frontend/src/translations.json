@@ -581,7 +581,10 @@
     "Weighted-average rate": "எடையிட்ட சராசரி விலை",
     "Stock value ÷ quantity on hand = weighted-average rate": "இருப்பு மதிப்பு ÷ கையிருப்பு அளவு = எடையிட்ட சராசரி விலை",
     "Movement rates below show each receipt or issue. Open a row to inspect its source document.": "கீழே ஒவ்வொரு வரவு அல்லது வழங்கலின் விலை உள்ளது. மூல ஆவணத்தைக் காண வரிசையைத் திறக்கவும்.",
-    "Movement rate": "பரிவர்த்தனை விலை"
+    "Movement rate": "பரிவர்த்தனை விலை",
+    "Production records": "உற்பத்திப் பதிவுகள்",
+    "Material receipts": "மூலப்பொருள் வரவுகள்",
+    "Posted purchases are listed here. Create a production run when you are ready to make finished goods.": "பதிவுசெய்த கொள்முதல்கள் இங்கே உள்ளன. உற்பத்திக்குத் தயாரானதும் உற்பத்தி ஓட்டத்தை உருவாக்கவும்."
   },
   "hi": {
     "Continue": "आगे बढ़ें",
@@ -1164,7 +1167,10 @@
     "Weighted-average rate": "भारित औसत दर",
     "Stock value ÷ quantity on hand = weighted-average rate": "स्टॉक मूल्य ÷ उपलब्ध मात्रा = भारित औसत दर",
     "Movement rates below show each receipt or issue. Open a row to inspect its source document.": "नीचे हर प्राप्ति या जारी सामग्री की दर है। मूल दस्तावेज़ देखने के लिए पंक्ति खोलें।",
-    "Movement rate": "लेनदेन दर"
+    "Movement rate": "लेनदेन दर",
+    "Production records": "उत्पादन रिकॉर्ड",
+    "Material receipts": "सामग्री प्राप्तियाँ",
+    "Posted purchases are listed here. Create a production run when you are ready to make finished goods.": "दर्ज की गई खरीद यहाँ दिखाई जाती है। तैयार माल बनाने के लिए उत्पादन रन बनाएँ।"
   },
   "mr": {
     "Continue": "पुढे जा",
@@ -1747,6 +1753,9 @@
     "Weighted-average rate": "भारित सरासरी दर",
     "Stock value ÷ quantity on hand = weighted-average rate": "साठामूल्य ÷ शिल्लक प्रमाण = भारित सरासरी दर",
     "Movement rates below show each receipt or issue. Open a row to inspect its source document.": "खाली प्रत्येक प्राप्ती किंवा दिलेल्या साहित्याचा दर आहे. मूळ दस्तऐवज पाहण्यासाठी ओळ उघडा.",
-    "Movement rate": "व्यवहार दर"
+    "Movement rate": "व्यवहार दर",
+    "Production records": "उत्पादन नोंदी",
+    "Material receipts": "साहित्य प्राप्ती",
+    "Posted purchases are listed here. Create a production run when you are ready to make finished goods.": "नोंदवलेल्या खरेदी येथे दिसतात. तयार माल बनवण्यासाठी उत्पादन रन तयार करा."
   }
 }

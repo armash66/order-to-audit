@@ -234,7 +234,7 @@ def read(kind, user, identifier=None):
                 if kind == "prices"
                 else (
                     ["admin", "production", "accountant", "owner"]
-                    if kind in ("batches", "source", "audit")
+                    if kind in ("batches", "source", "audit", "receipts")
                     else ["admin", "salesman", "accountant", "owner"]
                 )
             )
@@ -242,6 +242,16 @@ def read(kind, user, identifier=None):
     )
     authorize(user, roles)
     with database.transaction() as conn:
+        if kind == "receipts":
+            # Only posted receipt lines appear; each row retains its source posting and item.
+            return rows(conn, """SELECT l.id,p.id AS receipt_id,p.document_date,s.name AS supplier,
+                i.code AS item_code,i.name AS item,i.base_unit,l.quantity,l.value_paise,
+                posting.id AS posting_id
+                FROM inventory_purchasereceipt p JOIN inventory_purchaseline l ON l.document_id=p.id
+                JOIN inventory_supplier s ON s.id=p.supplier_id
+                JOIN inventory_item i ON i.id=l.item_id
+                JOIN inventory_posting posting ON posting.purchase_id=p.id
+                ORDER BY posting.id DESC,l.id""")
         if kind == "audit":
             # Recent entries show who changed a document and its recorded before/after values.
             return rows(

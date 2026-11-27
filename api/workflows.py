@@ -114,6 +114,12 @@ def runs(user=Depends(current_user)):
     return wire(queries.read("runs", user))
 
 
+@router.get("/receipts")
+@domain
+def receipts(user=Depends(current_user)):
+    return wire(queries.read("receipts", user))
+
+
 @router.get("/production/{pk}")
 @domain
 def run(pk: int, user=Depends(current_user)):

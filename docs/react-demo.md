@@ -13,12 +13,16 @@ services:
     ports: !reset []
 '@ | Set-Content -LiteralPath $demoOverride -Encoding utf8
 $env:WEB_PORT = '8020'
-docker compose -p $demoProject -f compose.yaml -f $demoOverride up --build -d
+docker compose -p $demoProject -f compose.yaml -f $demoOverride up --build -d --wait
+if ($LASTEXITCODE -ne 0) { throw "Startup failed. Fix the error before running the benchmark." }
 docker compose -p $demoProject -f compose.yaml -f $demoOverride ps
 docker compose -p $demoProject -f compose.yaml -f $demoOverride exec -T api python -m api.cli benchmark
+if ($LASTEXITCODE -ne 0) { throw "Benchmark failed. Do not start recording." }
 ```
 
 Wait for healthy services. The last command must print **49 checks passed** and **Scenario rolled back**. Run it BEFORE manual transactions; it requires opening-only data. Save its terminal output for the end of the video. Open http://localhost:8020. If that port is occupied, choose another unused port before starting.
+
+For another take, first stop the previous demo with its original project variables using the cleanup command below, then create a new timestamped project. Existing volumes retain their records: restarting an old project does not restore opening stock. After recording the flour receipt once, verify it under **Material receipts** before continuing to production.
 
 Demo logins: `production`, `salesman_a`, `salesman_b`, `admin`, `accountant`, `owner`. Password for each: `DemoPass123!`. Use these only for the local fictional demo.
 
@@ -45,7 +49,7 @@ Remove-Item Env:WEB_PORT
 
 Use a fresh isolated Compose project, never reset the working database. All accounts retain `DemoPass123!`. The public application is React on port 8000; FastAPI is available through `/api/`, including `/api/docs` only if explicitly routed (the default API documentation itself lives at `/docs` inside the API container).
 
-1. Production → Receive materials: supplier, Flour, quantity **60**, unit **kg**, unit rate **45** rupees per kg; confirm the calculated total is **2700.00** rupees. Open Flour in Stock to show the opening ₹42/kg, purchase ₹45/kg and weighted average ₹43.125/kg. Optional batch/expiry fields are available.
+1. Production → Receive materials: supplier, Flour, quantity **60**, unit **kg**, unit rate **45** rupees per kg; confirm the calculated total is **2700.00** rupees. Submit once; the Material receipts view shows the saved purchase. Open that row to show the Flour ledger: opening ₹42/kg, purchase ₹45/kg and weighted average ₹43.125/kg. Optional batch/expiry fields are available.
 2. Create production run: Murukku BOM, one batch. Open it; Issue raw materials: flour **40 kg**, oil **10.5 L**, spice **1.2 kg**.
 3. Complete production: **188** good, pouch total **194**, pouch damage **6**, carton total **9**, carton damage **0**. Review variance/cost.
 4. Salesman A → Orders → Submit order: Retailer A, **150** packets. Customer prices appear before GST.

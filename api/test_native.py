@@ -22,6 +22,31 @@ def test_runtime_has_no_django_dependency():
     assert app.title == "Order-to-Audit API"
 
 
+def test_posted_receipt_list_matches_source_and_retry():
+    from uuid import uuid4
+    from api.inventory.services import post_receipt
+    from api.services import user_by_name
+    from api.native import now
+    from api.queries import read
+
+    with pytest.raises(RuntimeError, match="rollback receipt listing test"):
+        with database.transaction() as conn:
+            user = user_by_name(conn, "production")
+            item = conn.execute(text("SELECT id FROM inventory_item WHERE code='FLOUR'")).scalar_one()
+            supplier = conn.execute(text("SELECT id FROM inventory_supplier WHERE code='FLOUR-SUPPLIER'")).scalar_one()
+            payload = {"supplier": supplier, "date": now().date().isoformat(), "lines": [{"item": item, "quantity": "60", "unit": "kg", "value_paise": "270000"}]}
+            key = str(uuid4())
+            posting = post_receipt(payload, user, key)
+            assert post_receipt(payload, user, key) == posting
+            rows = [row for row in read("receipts", user) if row["posting_id"] == posting]
+            assert len(rows) == 1
+            assert rows[0]["item_code"] == "FLOUR"
+            assert rows[0]["quantity"] == 60000
+            assert rows[0]["value_paise"] == 270000
+            assert rows[0]["receipt_id"] == conn.execute(text("SELECT purchase_id FROM inventory_posting WHERE id=:id"), {"id":posting}).scalar_one()
+            raise RuntimeError("rollback receipt listing test")
+
+
 def test_native_benchmark_and_rollback():
     before = reconcile()
     results = run_benchmark()

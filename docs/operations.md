@@ -26,6 +26,8 @@ Rejecting a pre-invoice order requires a reason and releases its reservation. Fu
 
 ## Production
 
+The Production page separates **Production runs** from **Material receipts**. Saving a receipt switches to Material receipts and shows the posted item, quantity and value. Each row represents a receipt line; Open leads to that item's stock ledger and source documents. A new receipt does not create a production run. Create a run separately when manufacturing begins. Check this list or the stock ledger before re-entering a receipt after an uncertain response.
+
 1. **Receive materials**: select supplier/item, quantity and its unit (g/kg, ml/L or pieces), then the rate in rupees per selected unit. The total is calculated with exact decimal arithmetic and half-up rounding to paise. **Invoice total** allows a supplier total to be entered directly. Changing the item or unit clears the rate. Add batch and expiry details when known. For the benchmark enter 60 kg flour at ₹45/kg; the calculated total is ₹2,700.
 2. **Create production run**: select BOM version and batch count.
 3. Open the draft and **Issue raw materials** using actual quantities and units: 40 kg flour, 10.5 L oil and 1.2 kg spice in the benchmark. Conversion must resolve to a whole gram, millilitre or piece.

@@ -30,7 +30,7 @@ def main():
         panel.locator('input[name=role][value=salesman]').check()
         panel.get_by_label('Temporary password (12+ characters)').fill('PrivateDemo!2026')
         panel.get_by_role('button', name='Create staff account', exact=True).click()
-        expect(page.get_by_role('status')).to_contain_text('Staff account created.')
+        expect(page.locator('.notice[role="status"]')).to_contain_text('Staff account created.')
         page.get_by_label('Search records').fill(username)
         expect(page.get_by_role('cell', name=username, exact=True)).to_be_visible()
         page.get_by_role('navigation', name='Setup areas').get_by_role('button', name='Customers & suppliers').click()

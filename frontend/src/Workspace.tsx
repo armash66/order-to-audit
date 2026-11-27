@@ -364,6 +364,7 @@ export function Workspace({
   const [kind, setKind] = useState("sales"),
     [start, setStart] = useState("2026-11-01"),
     [end, setEnd] = useState("2026-11-30");
+  const [productionView, setProductionView] = useState("runs"), [receipts, setReceipts] = useState<Row[] | null>(null);
   const admin = user.is_staff || user.roles.includes("admin");
   const production = admin || user.roles.includes("production");
   const sales = admin || user.roles.includes("salesman");
@@ -407,6 +408,13 @@ export function Workspace({
       active = false;
     };
   }, [page, selected, revision, catalog, kind, start, end]);
+  useEffect(() => {
+    if (page !== "production" || selected || !catalog) return;
+    let active = true;
+    setReceipts(null);
+    load("/receipts").then(rows => {if (active) setReceipts(rows);}).catch(e => {if (active) setError(e.message);});
+    return () => {active = false;};
+  }, [page, selected, revision, catalog]);
   async function command(action: string, values: Row, key: string) {
     await load("/commands", {
       method: "POST",
@@ -421,6 +429,8 @@ export function Workspace({
       "account.create": "Staff account created. The first sign-in requires a new password.",
     };
     setNotice(messages[action] || "Saved successfully.");
+    if (action === "receipt") setProductionView("receipts");
+    if (action === "production.create") setProductionView("runs");
     if (action.startsWith("master.")) setCatalog(await load("/catalog"));
     setRevision((r) => r + 1);
   }
@@ -828,9 +838,19 @@ export function Workspace({
       )}
       {page === "production" && !selected && (
         <>
-          {Array.isArray(data) && (
-            <Table searchable rows={data} onOpen={(row) => setSelected(row.id)} />
-          )}
+          <div className="setup-tabs tabs" role="group" aria-label="Production records">
+            <button aria-current={productionView === "runs" ? "page" : undefined} onClick={() => setProductionView("runs")}>Production runs</button>
+            <button aria-current={productionView === "receipts" ? "page" : undefined} onClick={() => setProductionView("receipts")}>Material receipts</button>
+          </div>
+          {productionView === "runs" ? <section aria-label="Production runs"><h2>Production runs</h2>
+            {Array.isArray(data) && <Table searchable rows={data} onOpen={(row) => setSelected(row.id)} />}
+          </section> : <section aria-label="Material receipts"><h2>Material receipts</h2>
+            <p>Posted purchases are listed here. Create a production run when you are ready to make finished goods.</p>
+            {receipts === null ? <p role="status">Loading…</p> : <Table searchable
+              rows={receipts.map(row => ({id:row.id, receipt:row.receipt_id, document_date:row.document_date, supplier:row.supplier, item:row.item, quantity:row.quantity, value_paise:row.value_paise}))}
+              unitFor={row => receipts.find(receipt => receipt.id === row.id)?.base_unit}
+              onOpen={row => {const receipt = receipts.find(r => r.id === row.id)!; setPage("stock"); setSelected(receipt.item_code); setNotice("");}} />}
+          </section>}
           {form("Create production run", "production.create", [
             choice(
               "bom",

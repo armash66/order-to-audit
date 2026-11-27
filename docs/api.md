@@ -23,6 +23,7 @@ All paths below start with `/api`.
 | `GET /workspace/accounts` | Admin only; staff, role, active and must-change-password state |
 | `GET /workspace/orders` and `/orders/{id}` | Admin, salesman, accountant, owner; salesman restricted to own orders |
 | `GET /workspace/production` and `/production/{id}` | Admin/production; runs, standards, consumption, yield and cost |
+| `GET /workspace/receipts` | Admin, production, accountant, owner; posted purchase lines, supplier, date, item, quantity, value and source posting ID |
 | `GET /workspace/batches`, `/recall/{lot_id}`, `/sources/{posting_id}`, `/audit` | Factory/reviewer roles; lot balances/trace, posting source or latest audit entries |
 | `GET /workspace/prices/{customer_id}` | Admin/salesman; effective SKU prices |
 | `GET /workspace/visits` | Sales/reviewer roles; salesman sees own visits |

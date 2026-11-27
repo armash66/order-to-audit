@@ -31,7 +31,7 @@ Keep this document open on your phone while you operate the laptop. Read only th
 
 **Account: production. Screen: Production → Receive materials.**
 
-**Do:** Select Demo Flour Supplier and Flour. Enter quantity **60**, unit **kg**, then **Rate (₹ per selected unit): 45**. Confirm the calculated total is **2700.00**. Leave batch/expiry blank and date unchanged. Speak while filling; submit once after the first paragraph. Open Stock and show flour **160 kg**, then open the Flour row. Show **Stock valuation: ₹6,900 ÷ 160 kg = ₹43.125/kg** and the movement rates **₹42/kg** and **₹45/kg** before the next paragraph.
+**Do:** Select Demo Flour Supplier and Flour. Enter quantity **60**, unit **kg**, then **Rate (₹ per selected unit): 45**. Confirm the calculated total is **2700.00**. Leave batch/expiry blank and date unchanged. Speak while filling; submit once after the first paragraph. The page switches to **Material receipts**: show the Flour row with **60 kg / ₹2,700**. Do not submit a second receipt. Click **Open** on that receipt row to view the Flour ledger. Show **Stock valuation: ₹6,900 ÷ 160 kg = ₹43.125/kg** and the movement rates **₹42/kg** and **₹45/kg** before the next paragraph.
 
 “The supplier delivers 60 kilos of flour at ₹45 a kilo. I enter the quantity and rate, and the form calculates ₹2,700 for me.
 

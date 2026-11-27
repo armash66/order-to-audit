@@ -37,6 +37,9 @@ def test_login_and_permissions():
     assert client.get("/api/stock", headers=token("salesman_a")).status_code == 403
     for role in ("admin", "production", "accountant", "owner"):
         assert client.get("/api/stock", headers=token(role)).status_code == 200
+        assert client.get("/api/workspace/receipts", headers=token(role)).status_code == 200
+    assert client.get("/api/workspace/receipts").status_code == 401
+    assert client.get("/api/workspace/receipts", headers=token("salesman_a")).status_code == 403
 
 
 def test_summary_and_ledger_reconcile_to_database():
